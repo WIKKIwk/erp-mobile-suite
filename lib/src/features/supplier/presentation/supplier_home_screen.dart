@@ -17,23 +17,55 @@ class SupplierHomeScreen extends StatelessWidget {
     return AppShell(
       title: 'Supplier',
       subtitle: 'Jo‘natish va statuslarni shu yerdan boshqarasiz.',
-      actions: [
-        AppShellIconAction(
-          icon: Icons.person_outline_rounded,
-          onTap: () => Navigator.of(context).pushNamed(
-            AppRoutes.profile,
-            arguments: ProfileArgs(
-              role: UserRole.supplier,
-              name: profile?.displayName ?? 'Supplier',
-              subtitle: 'Jo‘natish va statuslarni boshqaradi',
+      bottom: ActionDock(
+        children: [
+          DockButton(
+            icon: Icons.home_rounded,
+            active: true,
+            onTap: () {
+              Navigator.of(context).pushNamedAndRemoveUntil(
+                AppRoutes.supplierHome,
+                (route) => false,
+              );
+            },
+          ),
+          DockButton(
+            icon: Icons.notifications_none_rounded,
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content:
+                        Text('Bildirishnomalar keyingi bosqichda ochiladi')),
+              );
+            },
+          ),
+          DockButton(
+            icon: Icons.add_rounded,
+            primary: true,
+            onTap: () =>
+                Navigator.of(context).pushNamed(AppRoutes.supplierItemPicker),
+          ),
+          DockButton(
+            icon: Icons.history_rounded,
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                    content: Text('Recent view keyingi bosqichda ochiladi')),
+              );
+            },
+          ),
+          DockButton(
+            icon: Icons.person_outline_rounded,
+            onTap: () => Navigator.of(context).pushNamed(
+              AppRoutes.profile,
+              arguments: ProfileArgs(
+                role: UserRole.supplier,
+                name: profile?.displayName ?? 'Supplier',
+                subtitle: 'Jo‘natish va statuslarni boshqaradi',
+              ),
             ),
           ),
-        ),
-      ],
-      bottom: ElevatedButton(
-        onPressed: () =>
-            Navigator.of(context).pushNamed(AppRoutes.supplierItemPicker),
-        child: const Text('Yangi jo‘natish'),
+        ],
       ),
       child: Column(
         children: [

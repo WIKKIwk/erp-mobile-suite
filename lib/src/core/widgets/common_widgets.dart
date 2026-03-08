@@ -130,3 +130,79 @@ class MetricBadge extends StatelessWidget {
     );
   }
 }
+
+class ActionDock extends StatelessWidget {
+  const ActionDock({
+    super.key,
+    required this.children,
+  });
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFF090909),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: const Color(0xFF2A2A2A), width: 1.35),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x24000000),
+            blurRadius: 18,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: children,
+      ),
+    );
+  }
+}
+
+class DockButton extends StatelessWidget {
+  const DockButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    this.active = false,
+    this.primary = false,
+  });
+
+  final IconData icon;
+  final VoidCallback onTap;
+  final bool active;
+  final bool primary;
+
+  @override
+  Widget build(BuildContext context) {
+    final Color background = primary
+        ? Colors.white
+        : active
+            ? const Color(0xFF181818)
+            : const Color(0xFF101010);
+    final Color foreground = primary ? Colors.black : Colors.white;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: AppMotion.medium,
+        curve: AppMotion.smooth,
+        height: primary ? 54 : 46,
+        width: primary ? 54 : 46,
+        decoration: BoxDecoration(
+          color: background,
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: primary ? Colors.white : const Color(0xFF2A2A2A),
+            width: primary ? 1.5 : 1.2,
+          ),
+        ),
+        child: Icon(icon, color: foreground, size: primary ? 24 : 20),
+      ),
+    );
+  }
+}
