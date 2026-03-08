@@ -152,7 +152,7 @@ class ActionDock extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 4),
+      padding: const EdgeInsets.only(top: 26, bottom: 0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
