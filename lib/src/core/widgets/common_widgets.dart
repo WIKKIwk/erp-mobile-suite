@@ -152,11 +152,11 @@ class ActionDock extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.only(top: 6, bottom: 0),
+      padding: const EdgeInsets.only(top: 6, bottom: 6),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFF090909),
+          color: const Color(0xCC090909),
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: const Color(0xFF2A2A2A), width: 1.35),
           boxShadow: const [
@@ -172,7 +172,7 @@ class ActionDock extends StatelessWidget {
           children: buttons
               .map(
                 (button) => SizedBox(
-                  width: 58,
+                  width: 54,
                   child: Center(child: button),
                 ),
               )

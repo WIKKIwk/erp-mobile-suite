@@ -39,55 +39,67 @@ class SupplierRecentScreen extends StatelessWidget {
           }
 
           return ListView.separated(
-            itemCount: items.length + 1,
-            separatorBuilder: (_, __) => const SizedBox(height: 10),
+            padding: const EdgeInsets.only(bottom: 12),
+            itemCount: items.length,
+            separatorBuilder: (_, __) => const Divider(
+              height: 1,
+              color: Color(0xFF1D1D1D),
+            ),
             itemBuilder: (context, index) {
-              if (index == 0) {
-                return const SoftCard(
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  child: Row(
-                    children: [
-                      Expanded(flex: 3, child: Text('Mahsulot')),
-                      Expanded(flex: 2, child: Text('Miqdor')),
-                      Expanded(flex: 2, child: Text('Holat')),
-                    ],
-                  ),
-                );
-              }
-
-              final record = items[index - 1];
+              final record = items[index];
               return SmoothAppear(
-                delay: Duration(milliseconds: 40 + (index * 40)),
-                child: SoftCard(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                delay: Duration(milliseconds: 40 + (index * 35)),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      Container(
+                        height: 44,
+                        width: 44,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFF111111),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.inventory_2_outlined,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 14),
                       Expanded(
-                        flex: 3,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(record.itemCode,
-                                style: Theme.of(context).textTheme.titleMedium),
-                            const SizedBox(height: 4),
-                            Text(record.itemName,
-                                style: Theme.of(context).textTheme.bodySmall),
+                            Text(
+                              record.itemCode,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                            const SizedBox(height: 3),
+                            Text(
+                              record.itemName,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
+                              style: Theme.of(context).textTheme.bodyLarge,
+                            ),
                           ],
                         ),
                       ),
-                      Expanded(
-                        flex: 2,
-                        child: Text(
-                            '${record.sentQty.toStringAsFixed(0)} ${record.uom}'),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: Align(
-                          alignment: Alignment.centerLeft,
-                          child: StatusPill(status: record.status),
-                        ),
+                      const SizedBox(width: 10),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          StatusPill(status: record.status),
+                          const SizedBox(height: 8),
+                          Text(
+                            record.createdLabel,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                       ),
                     ],
                   ),
