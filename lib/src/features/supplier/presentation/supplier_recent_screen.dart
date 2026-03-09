@@ -37,7 +37,7 @@ class SupplierRecentScreen extends StatelessWidget {
           }
 
           return ListView.separated(
-            padding: const EdgeInsets.only(bottom: 12),
+            padding: EdgeInsets.zero,
             itemCount: items.length,
             separatorBuilder: (_, __) => const Divider(
               height: 1,

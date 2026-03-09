@@ -29,7 +29,7 @@ class AppShell extends StatelessWidget {
     final double dockLeft = largeDock ? 36 : 20;
     final double dockRight = largeDock ? 40 : 24;
     final double bottomInset = bottom == null
-        ? 20
+        ? 0
         : bottom is BottomInsetWidget
             ? (bottom as BottomInsetWidget).bottomInsetForWidth(width)
             : 88;
