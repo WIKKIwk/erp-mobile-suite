@@ -168,13 +168,7 @@ class ActionDock extends StatelessWidget implements BottomInsetWidget {
   }
 
   double _panelHeightForWidth(double width) {
-    if (width <= 375) {
-      return 80;
-    }
-    if (width <= 430) {
-      return 88;
-    }
-    return 56;
+    return 10;
   }
 
   double _visibleBandHeight() {
@@ -198,6 +192,7 @@ class ActionDock extends StatelessWidget implements BottomInsetWidget {
     return SizedBox(
       height: _panelHeightForWidth(width),
       child: Stack(
+        clipBehavior: Clip.none,
         children: [
           Positioned(
             left: 0,
