@@ -88,25 +88,35 @@ class AppRouter {
     return PageRouteBuilder<dynamic>(
       settings: settings,
       pageBuilder: (context, animation, secondaryAnimation) => child,
-      transitionDuration: AppMotion.medium,
-      reverseTransitionDuration: AppMotion.medium,
+      transitionDuration: AppMotion.pageEnter,
+      reverseTransitionDuration: AppMotion.pageExit,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final CurvedAnimation curved = CurvedAnimation(
+        final CurvedAnimation primary = CurvedAnimation(
           parent: animation,
-          curve: AppMotion.settle,
-          reverseCurve: AppMotion.emphasized,
+          curve: AppMotion.pageIn,
+          reverseCurve: AppMotion.pageOut,
+        );
+        final Animation<double> opacity = Tween<double>(
+          begin: 0,
+          end: 1,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: const Interval(0.08, 1, curve: AppMotion.pageIn),
+            reverseCurve: const Interval(0, 0.82, curve: AppMotion.pageOut),
+          ),
         );
         final Animation<Offset> offset = Tween<Offset>(
-          begin: const Offset(0.0, 0.018),
+          begin: const Offset(0.0, 0.03),
           end: Offset.zero,
-        ).animate(curved);
+        ).animate(primary);
         final Animation<double> scale = Tween<double>(
-          begin: 0.996,
+          begin: 0.988,
           end: 1,
-        ).animate(curved);
+        ).animate(primary);
 
         return FadeTransition(
-          opacity: curved,
+          opacity: opacity,
           child: ScaleTransition(
             scale: scale,
             child: SlideTransition(
