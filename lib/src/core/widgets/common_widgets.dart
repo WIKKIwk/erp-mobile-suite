@@ -199,7 +199,7 @@ class ActionDock extends StatelessWidget {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: 8,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: buttons
