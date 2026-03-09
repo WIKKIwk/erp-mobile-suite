@@ -7,6 +7,7 @@ import '../models/app_models.dart';
 import '../../supplier/presentation/widgets/supplier_dock.dart';
 import '../../werka/presentation/widgets/werka_dock.dart';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -21,9 +22,11 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController nicknameController = TextEditingController();
   bool savingNickname = false;
-  bool uploadingAvatar = false;
+  bool savingAvatar = false;
   String? errorMessage;
   File? cachedAvatar;
+  Uint8List? pendingAvatarBytes;
+  String? pendingAvatarName;
 
   SessionProfile get profile => AppSession.instance.profile!;
 
@@ -57,7 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         return;
       }
       setState(() {});
-    } catch (error) {
+    } catch (_) {
       if (!mounted) {
         return;
       }
@@ -74,10 +77,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _pickAvatar() async {
-    setState(() {
-      uploadingAvatar = true;
-      errorMessage = null;
-    });
     try {
       final result = await FilePicker.platform.pickFiles(
         type: FileType.image,
@@ -91,33 +90,67 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (bytes == null || bytes.isEmpty) {
         throw Exception('empty avatar');
       }
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        errorMessage = null;
+        pendingAvatarBytes = bytes;
+        pendingAvatarName = picked.name;
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        errorMessage = 'Rasm tanlanmadi';
+      });
+    }
+  }
 
+  Future<void> _saveAvatar() async {
+    final bytes = pendingAvatarBytes;
+    final filename = pendingAvatarName;
+    if (bytes == null ||
+        bytes.isEmpty ||
+        filename == null ||
+        filename.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      savingAvatar = true;
+      errorMessage = null;
+    });
+    try {
       final updated = await MobileApi.instance.uploadAvatar(
         bytes: bytes,
-        filename: picked.name,
+        filename: filename,
       );
       final file = await ProfileAvatarCache.cacheFromBytes(
         updated,
         bytes,
-        picked.name,
+        filename,
       );
       if (!mounted) {
         return;
       }
       setState(() {
         cachedAvatar = file;
+        pendingAvatarBytes = null;
+        pendingAvatarName = null;
       });
-    } catch (error) {
+    } catch (_) {
       if (!mounted) {
         return;
       }
       setState(() {
-        errorMessage = 'Rasm yuklanmadi';
+        errorMessage = 'Rasm saqlanmadi';
       });
     } finally {
       if (mounted) {
         setState(() {
-          uploadingAvatar = false;
+          savingAvatar = false;
         });
       }
     }
@@ -157,34 +190,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _AvatarPreview(
                           displayName: current.displayName,
                           cachedAvatar: cachedAvatar,
+                          pendingAvatarBytes: pendingAvatarBytes,
                         ),
                         Positioned(
                           right: 0,
                           bottom: 0,
                           child: GestureDetector(
-                            onTap: uploadingAvatar ? null : _pickAvatar,
+                            onTap: savingAvatar ? null : _pickAvatar,
                             child: Container(
                               height: 30,
                               width: 30,
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
-                                border:
-                                    Border.all(color: Colors.black, width: 2),
+                                border: Border.all(
+                                  color: Colors.black,
+                                  width: 2,
+                                ),
                               ),
-                              child: uploadingAvatar
-                                  ? const Padding(
-                                      padding: EdgeInsets.all(7),
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
-                                        color: Colors.black,
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.camera_alt_rounded,
-                                      size: 16,
-                                      color: Colors.black,
-                                    ),
+                              child: const Icon(
+                                Icons.camera_alt_rounded,
+                                size: 16,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
                         ),
@@ -208,6 +236,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : 'Werka account',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
+                  if (pendingAvatarBytes != null) ...[
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: savingAvatar ? null : _saveAvatar,
+                        child: savingAvatar
+                            ? const SizedBox(
+                                height: 18,
+                                width: 18,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.black,
+                                ),
+                              )
+                            : const Text('Rasm saqlash'),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -216,8 +263,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Nickname',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Nickname',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 10),
                   TextField(
                     controller: nicknameController,
@@ -251,8 +300,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Telefon',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Telefon',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 10),
                   SelectableText(
                     current.phone,
@@ -271,8 +322,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Asl ism',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Asl ism',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     current.legalName.isEmpty
@@ -280,8 +333,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         : current.legalName,
                   ),
                   const SizedBox(height: 18),
-                  Text('Session',
-                      style: Theme.of(context).textTheme.titleLarge),
+                  Text(
+                    'Session',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     'Bu yerdan hisobdan chiqishingiz mumkin. Keyingi login bilan role qayta tanlanadi.',
@@ -325,10 +380,12 @@ class _AvatarPreview extends StatelessWidget {
   const _AvatarPreview({
     required this.displayName,
     required this.cachedAvatar,
+    required this.pendingAvatarBytes,
   });
 
   final String displayName;
   final File? cachedAvatar;
+  final Uint8List? pendingAvatarBytes;
 
   @override
   Widget build(BuildContext context) {
@@ -345,6 +402,18 @@ class _AvatarPreview extends StatelessWidget {
         style: Theme.of(context).textTheme.headlineMedium,
       ),
     );
+
+    if (pendingAvatarBytes != null && pendingAvatarBytes!.isNotEmpty) {
+      return ClipOval(
+        child: Image.memory(
+          pendingAvatarBytes!,
+          height: 84,
+          width: 84,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => fallback,
+        ),
+      );
+    }
 
     if (cachedAvatar == null) {
       return fallback;
