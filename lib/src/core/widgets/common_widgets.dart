@@ -152,13 +152,13 @@ class ActionDock extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.only(top: 34, bottom: 0),
+      padding: const EdgeInsets.only(top: 18, bottom: 0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             height: 1.2,
-            margin: const EdgeInsets.only(bottom: 16),
+            margin: const EdgeInsets.only(bottom: 10),
             decoration: BoxDecoration(
               color: AppTheme.dockDivider(context),
               borderRadius: BorderRadius.circular(999),

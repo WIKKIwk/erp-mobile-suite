@@ -70,9 +70,9 @@ class AppTheme {
 
   static ThemeData light() {
     const ink = Color(0xFF141414);
-    const canvas = Color(0xFFF6F2EA);
-    const card = Color(0xFFFFFCF7);
-    const muted = Color(0xFF6F6A62);
+    const canvas = Color(0xFFF6EFD9);
+    const card = Color(0xFFFFF8E8);
+    const muted = Color(0xFF6F6658);
 
     final textTheme = _textTheme(ink: ink, muted: muted);
     final colorScheme = ColorScheme.fromSeed(
@@ -127,7 +127,7 @@ class AppTheme {
         ),
       ),
       inputDecorationTheme: _inputDecorationTheme(
-        fillColor: const Color(0xFFF0E9DE),
+        fillColor: const Color(0xFFF1E8D0),
         hintColor: muted,
         focusColor: const Color(0xFF7A4A26),
       ),
@@ -211,28 +211,28 @@ class AppTheme {
       Theme.of(context).brightness == Brightness.dark;
 
   static Color shellStart(BuildContext context) =>
-      isDark(context) ? const Color(0xFF000000) : const Color(0xFFF6F2EA);
+      isDark(context) ? const Color(0xFF000000) : const Color(0xFFF6EFD9);
 
   static Color shellEnd(BuildContext context) =>
-      isDark(context) ? const Color(0xFF070707) : const Color(0xFFEAE1D4);
+      isDark(context) ? const Color(0xFF070707) : const Color(0xFFEBDDB9);
 
   static Color cardBackground(BuildContext context) =>
-      isDark(context) ? const Color(0xFF050505) : const Color(0xFFFFFCF7);
+      isDark(context) ? const Color(0xFF050505) : const Color(0xFFFFF8E8);
 
   static Color cardBorder(BuildContext context) =>
-      isDark(context) ? const Color(0xFF2A2A2A) : const Color(0xFFD8CCBE);
+      isDark(context) ? const Color(0xFF2A2A2A) : const Color(0xFFD2C29F);
 
   static Color actionSurface(BuildContext context) =>
-      isDark(context) ? const Color(0xFF0B0B0B) : const Color(0xFFF0E9DE);
+      isDark(context) ? const Color(0xFF0B0B0B) : const Color(0xFFF2E7CB);
 
   static Color dockDivider(BuildContext context) =>
-      isDark(context) ? const Color(0xFF1F1F1F) : const Color(0xFFD9CCBE);
+      isDark(context) ? const Color(0xFF1F1F1F) : const Color(0xFFD6C5A4);
 
   static Color dockInactive(BuildContext context) =>
-      isDark(context) ? const Color(0xFF101010) : const Color(0xFFF3ECE2);
+      isDark(context) ? const Color(0xFF101010) : const Color(0xFFF6ECD4);
 
   static Color dockActive(BuildContext context) =>
-      isDark(context) ? const Color(0xFF181818) : const Color(0xFFE9DDCD);
+      isDark(context) ? const Color(0xFF181818) : const Color(0xFFE8D9B5);
 
   static Color primaryButton(BuildContext context) =>
       isDark(context) ? Colors.white : const Color(0xFF1F1A17);
