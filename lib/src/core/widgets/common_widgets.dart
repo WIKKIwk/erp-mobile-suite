@@ -152,7 +152,7 @@ class ActionDock extends StatelessWidget {
     ];
 
     return Container(
-      padding: const EdgeInsets.only(top: 3),
+      padding: EdgeInsets.zero,
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(
@@ -161,16 +161,19 @@ class ActionDock extends StatelessWidget {
           ),
         ),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: buttons
-            .map(
-              (button) => Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: button,
-              ),
-            )
-            .toList(),
+      child: Transform.translate(
+        offset: const Offset(0, -2),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: buttons
+              .map(
+                (button) => Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 3),
+                  child: button,
+                ),
+              )
+              .toList(),
+        ),
       ),
     );
   }
