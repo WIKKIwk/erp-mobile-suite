@@ -175,6 +175,7 @@ class ActionDock extends StatelessWidget {
     return Container(
       padding: EdgeInsets.zero,
       decoration: BoxDecoration(
+        color: AppTheme.cardBackground(context),
         border: Border(
           top: BorderSide(
             color: AppTheme.dockDivider(context),

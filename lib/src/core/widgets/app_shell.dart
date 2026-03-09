@@ -131,10 +131,7 @@ class AppShell extends StatelessWidget {
                         left: 20,
                         right: 24,
                         bottom: dockOffset,
-                        child: Container(
-                          color: theme.scaffoldBackgroundColor,
-                          child: bottom!,
-                        ),
+                        child: bottom!,
                       ),
                   ],
                 ),
