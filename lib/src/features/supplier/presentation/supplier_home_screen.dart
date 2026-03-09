@@ -79,28 +79,6 @@ class SupplierHomeScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Dispatch Volume',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'So‘nggi jo‘natishlar bo‘yicha hajm ko‘rinishi.',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 18),
-                      _VolumeChart(records: history),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              SmoothAppear(
-                delay: const Duration(milliseconds: 180),
-                child: SoftCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
                         'Status Mix',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
@@ -171,7 +149,7 @@ class SupplierHomeScreen extends StatelessWidget {
                         final index = entry.key;
                         final record = entry.value;
                         return SmoothAppear(
-                          delay: Duration(milliseconds: 220 + (index * 45)),
+                          delay: Duration(milliseconds: 180 + (index * 45)),
                           offset: const Offset(0, 16),
                           child: Column(
                             children: [
@@ -461,113 +439,6 @@ class _EnterpriseMetricTile extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _VolumeChart extends StatelessWidget {
-  const _VolumeChart({required this.records});
-
-  final List<DispatchRecord> records;
-
-  @override
-  Widget build(BuildContext context) {
-    final chartItems = records.take(6).toList().reversed.toList();
-    return SizedBox(
-      height: 190,
-      child: chartItems.isEmpty
-          ? Center(
-              child: Text(
-                'Chart uchun data yo‘q',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            )
-          : CustomPaint(
-              painter: _VolumeChartPainter(
-                values: chartItems.map((item) => item.sentQty).toList(),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(10, 10, 10, 14),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: chartItems.map((item) {
-                    return Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Text(
-                          (item.itemName.isEmpty
-                                  ? item.itemCode
-                                  : item.itemName)
-                              .split(' ')
-                              .first,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-    );
-  }
-}
-
-class _VolumeChartPainter extends CustomPainter {
-  _VolumeChartPainter({required this.values});
-
-  final List<double> values;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final gridPaint = Paint()
-      ..color = const Color(0xFF1C1C1C)
-      ..strokeWidth = 1;
-    final barPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [
-          Color(0xFF7A4A26),
-          Color(0xFFB1733B),
-        ],
-        begin: Alignment.bottomCenter,
-        end: Alignment.topCenter,
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    const chartTop = 10.0;
-    const chartBottom = 36.0;
-    final chartHeight = size.height - chartBottom - chartTop;
-    final maxValue =
-        values.fold<double>(0, (best, value) => value > best ? value : best);
-    final safeMax = maxValue <= 0 ? 1.0 : maxValue;
-
-    for (int i = 0; i < 4; i++) {
-      final y = chartTop + (chartHeight / 3) * i;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), gridPaint);
-    }
-
-    final segmentWidth = size.width / values.length;
-    for (int index = 0; index < values.length; index++) {
-      final value = values[index];
-      final barHeight = (value / safeMax) * (chartHeight - 18);
-      final left = segmentWidth * index + (segmentWidth * 0.34);
-      final width = segmentWidth * 0.32;
-      final rect = RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          left,
-          chartTop + chartHeight - barHeight,
-          width,
-          barHeight,
-        ),
-        const Radius.circular(8),
-      );
-      canvas.drawRRect(rect, barPaint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _VolumeChartPainter oldDelegate) {
-    return oldDelegate.values != values;
   }
 }
 
