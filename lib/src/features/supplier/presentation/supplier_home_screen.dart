@@ -79,163 +79,68 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.zero,
               children: [
-              SmoothAppear(
-                child: _EnterpriseHero(
-                  pendingCount: pendingCount,
-                  acceptedCount: acceptedCount,
-                  totalQty: totalQty,
-                  uniqueItems: uniqueItems,
-                ),
-              ),
-              const SizedBox(height: 18),
-              SmoothAppear(
-                delay: const Duration(milliseconds: 80),
-                child: _MetricGrid(
-                  pendingCount: pendingCount,
-                  acceptedCount: acceptedCount,
-                  partialCount: partialCount,
-                  uniqueItems: uniqueItems,
-                  compact: compact,
-                ),
-              ),
-              const SizedBox(height: 18),
-              SmoothAppear(
-                delay: const Duration(milliseconds: 130),
-                child: SoftCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Status Mix',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Jarayonlarning real taqsimoti.',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                      const SizedBox(height: 18),
-                      _StatusMixBar(
-                        pending: pendingCount,
-                        accepted: acceptedCount,
-                        partial: partialCount,
-                        rejected: rejectedCount,
-                      ),
-                    ],
+                SmoothAppear(
+                  child: _EnterpriseHero(
+                    pendingCount: pendingCount,
+                    acceptedCount: acceptedCount,
+                    totalQty: totalQty,
+                    uniqueItems: uniqueItems,
                   ),
                 ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Recent Activity',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 12),
-              if (history.isEmpty)
-                const SoftCard(
-                  child: Text('Hali jo‘natishlar yo‘q.'),
-                )
-              else if (compact)
-                SoftCard(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Column(
-                    children: history.asMap().entries.map((entry) {
-                      final index = entry.key;
-                      final record = entry.value;
-                      return SmoothAppear(
-                        delay: Duration(milliseconds: 180 + (index * 45)),
-                        offset: const Offset(0, 16),
-                        child: Column(
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          record.itemName.isEmpty
-                                              ? record.itemCode
-                                              : record.itemName,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Text(
-                                          record.createdLabel,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(width: 10),
-                                  StatusPill(status: record.status),
-                                ],
-                              ),
-                            ),
-                            if (index != history.length - 1)
-                              Divider(
-                                  height: 1,
-                                  color: AppTheme.dockDivider(context)),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                const SizedBox(height: 18),
+                SmoothAppear(
+                  delay: const Duration(milliseconds: 80),
+                  child: _MetricGrid(
+                    pendingCount: pendingCount,
+                    acceptedCount: acceptedCount,
+                    partialCount: partialCount,
+                    uniqueItems: uniqueItems,
+                    compact: compact,
                   ),
-                )
-              else
-                SoftCard(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  child: Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 10),
-                        child: Row(
-                          children: [
-                            Expanded(
-                              flex: 4,
-                              child: Text(
-                                'Mahsulot',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                'Miqdor',
-                                style: Theme.of(context).textTheme.bodySmall,
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
-                            Expanded(
-                              flex: 3,
-                              child: Text(
-                                'Holat',
-                                style: Theme.of(context).textTheme.bodySmall,
-                                textAlign: TextAlign.end,
-                              ),
-                            ),
-                          ],
+                ),
+                const SizedBox(height: 18),
+                SmoothAppear(
+                  delay: const Duration(milliseconds: 130),
+                  child: SoftCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Status Mix',
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
-                      ),
-                      Divider(height: 1, color: AppTheme.dockDivider(context)),
-                      ...history.asMap().entries.map((entry) {
+                        const SizedBox(height: 4),
+                        Text(
+                          'Jarayonlarning real taqsimoti.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 18),
+                        _StatusMixBar(
+                          pending: pendingCount,
+                          accepted: acceptedCount,
+                          partial: partialCount,
+                          rejected: rejectedCount,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Recent Activity',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                const SizedBox(height: 12),
+                if (history.isEmpty)
+                  const SoftCard(
+                    child: Text('Hali jo‘natishlar yo‘q.'),
+                  )
+                else if (compact)
+                  SoftCard(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    child: Column(
+                      children: history.asMap().entries.map((entry) {
                         final index = entry.key;
                         final record = entry.value;
                         return SmoothAppear(
@@ -245,11 +150,11 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
                             children: [
                               Padding(
                                 padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                    const EdgeInsets.symmetric(vertical: 12),
                                 child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Expanded(
-                                      flex: 4,
                                       child: Column(
                                         crossAxisAlignment:
                                             CrossAxisAlignment.start,
@@ -264,6 +169,13 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
                                           ),
                                           const SizedBox(height: 4),
                                           Text(
+                                            '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
+                                            style: Theme.of(context)
+                                                .textTheme
+                                                .bodyMedium,
+                                          ),
+                                          const SizedBox(height: 4),
+                                          Text(
                                             record.createdLabel,
                                             style: Theme.of(context)
                                                 .textTheme
@@ -272,36 +184,132 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen> {
                                         ],
                                       ),
                                     ),
-                                    Expanded(
-                                      flex: 2,
-                                      child: Text(
-                                        '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
-                                        textAlign: TextAlign.center,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                    ),
-                                    Expanded(
-                                      flex: 3,
-                                      child: Align(
-                                        alignment: Alignment.centerRight,
-                                        child:
-                                            StatusPill(status: record.status),
-                                      ),
-                                    ),
+                                    const SizedBox(width: 10),
+                                    StatusPill(status: record.status),
                                   ],
                                 ),
                               ),
                               if (index != history.length - 1)
-                                Divider(height: 1, color: AppTheme.dockDivider(context)),
+                                Divider(
+                                  height: 1,
+                                  color: AppTheme.dockDivider(context),
+                                ),
                             ],
                           ),
                         );
-                      }),
-                    ],
+                      }).toList(),
+                    ),
+                  )
+                else
+                  SoftCard(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    child: Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 4,
+                                child: Text(
+                                  'Mahsulot',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  'Miqdor',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              Expanded(
+                                flex: 3,
+                                child: Text(
+                                  'Holat',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                  textAlign: TextAlign.end,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Divider(
+                          height: 1,
+                          color: AppTheme.dockDivider(context),
+                        ),
+                        ...history.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final record = entry.value;
+                          return SmoothAppear(
+                            delay: Duration(milliseconds: 180 + (index * 45)),
+                            offset: const Offset(0, 16),
+                            child: Column(
+                              children: [
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 14),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 4,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              record.itemName.isEmpty
+                                                  ? record.itemCode
+                                                  : record.itemName,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .titleMedium,
+                                            ),
+                                            const SizedBox(height: 4),
+                                            Text(
+                                              record.createdLabel,
+                                              style: Theme.of(context)
+                                                  .textTheme
+                                                  .bodySmall,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
+                                          textAlign: TextAlign.center,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium,
+                                        ),
+                                      ),
+                                      Expanded(
+                                        flex: 3,
+                                        child: Align(
+                                          alignment: Alignment.centerRight,
+                                          child:
+                                              StatusPill(status: record.status),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                if (index != history.length - 1)
+                                  Divider(
+                                    height: 1,
+                                    color: AppTheme.dockDivider(context),
+                                  ),
+                              ],
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
                   ),
-                ),
                 const SizedBox(height: 12),
               ],
             ),
