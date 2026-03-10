@@ -135,38 +135,37 @@ class _ActivityStatusBadge extends StatelessWidget {
 
   final DispatchStatus status;
 
-  String get label {
+  IconData get icon {
     switch (status) {
       case DispatchStatus.draft:
-        return 'Draft';
+        return Icons.edit_outlined;
       case DispatchStatus.pending:
-        return 'Kutilmoqda';
+        return Icons.schedule_outlined;
       case DispatchStatus.accepted:
-        return 'Qabul qilindi';
+        return Icons.check_rounded;
       case DispatchStatus.partial:
-        return 'Qisman qabul';
+        return Icons.done_all_rounded;
       case DispatchStatus.rejected:
-        return 'Rad etildi';
+        return Icons.close_rounded;
       case DispatchStatus.cancelled:
-        return 'Bekor qilindi';
+        return Icons.remove_rounded;
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      height: 36,
+      width: 36,
       decoration: BoxDecoration(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(999),
+        shape: BoxShape.circle,
         border: Border.all(color: Theme.of(context).dividerColor),
       ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface,
-              fontWeight: FontWeight.w700,
-            ),
+      child: Icon(
+        icon,
+        size: 18,
+        color: Theme.of(context).colorScheme.onSurface,
       ),
     );
   }
