@@ -1,6 +1,5 @@
 import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
-import '../../../core/location/country_dial_code_service.dart';
 import '../../../core/security/security_controller.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -32,21 +31,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     loadRememberedCode();
-    _prefillPhoneCountryCode();
-  }
-
-  Future<void> _prefillPhoneCountryCode() async {
-    final prefix = await CountryDialCodeService.instance.suggestedPrefix();
-    if (!mounted || prefix == null || prefix.isEmpty) {
-      return;
-    }
-    if (phoneController.text.trim().isNotEmpty) {
-      return;
-    }
-    phoneController.text = '$prefix ';
-    phoneController.selection = TextSelection.collapsed(
-      offset: phoneController.text.length,
-    );
   }
 
   Future<void> loadRememberedCode() async {
@@ -208,7 +192,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     codeFocusNode.requestFocus(),
                                 decoration: const InputDecoration(
                                   labelText: 'Telefon raqam',
-                                  hintText: 'Masalan: +998 901234567',
+                                  hintText: 'Masalan: +998901234567',
                                 ),
                               ),
                             ),

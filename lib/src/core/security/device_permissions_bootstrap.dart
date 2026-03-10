@@ -1,4 +1,3 @@
-import 'package:geolocator/geolocator.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,7 +6,6 @@ class DevicePermissionsBootstrap {
 
   static final DevicePermissionsBootstrap instance =
       DevicePermissionsBootstrap._();
-  static const String _locationPromptedKey = 'device_location_prompted';
   static const String _biometricPromptedKey = 'device_biometric_prompted';
 
   final LocalAuthentication _localAuth = LocalAuthentication();
@@ -20,15 +18,8 @@ class DevicePermissionsBootstrap {
     _running = true;
     try {
       final prefs = await SharedPreferences.getInstance();
-      final bool locationPrompted =
-          prefs.getBool(_locationPromptedKey) ?? false;
       final bool biometricPrompted =
           prefs.getBool(_biometricPromptedKey) ?? false;
-
-      if (!locationPrompted) {
-        await _requestLocationPermission();
-        await prefs.setBool(_locationPromptedKey, true);
-      }
 
       if (!biometricPrompted) {
         await _requestBiometricAccess();
@@ -38,21 +29,6 @@ class DevicePermissionsBootstrap {
       // Best-effort startup permissions bootstrap.
     } finally {
       _running = false;
-    }
-  }
-
-  Future<void> _requestLocationPermission() async {
-    try {
-      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-      if (!serviceEnabled) {
-        return;
-      }
-      final LocationPermission permission = await Geolocator.checkPermission();
-      if (permission == LocationPermission.denied) {
-        await Geolocator.requestPermission();
-      }
-    } catch (_) {
-      // Plugin unavailable or denied; ignore silently.
     }
   }
 

@@ -1,5 +1,4 @@
 import '../../../core/api/mobile_api.dart';
-import '../../../core/location/country_dial_code_service.dart';
 import '../../../core/security/security_controller.dart';
 import '../../../app/app_router.dart';
 import '../../../core/session/app_session.dart';
@@ -33,9 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   bool savingAvatar = false;
   bool savingPin = false;
   bool savingBiometric = false;
-  bool savingLocation = false;
   String? errorMessage;
-  String? countryPrefix;
   File? cachedAvatar;
   Uint8List? pendingAvatarBytes;
   String? pendingAvatarName;
@@ -48,17 +45,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     WidgetsBinding.instance.addObserver(this);
     nicknameController.text = profile.displayName;
     _loadCachedAvatar();
-    _loadCountryPrefix();
-  }
-
-  Future<void> _loadCountryPrefix() async {
-    final prefix = await CountryDialCodeService.instance.cachedPrefix();
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      countryPrefix = prefix;
-    });
   }
 
   Future<void> _loadCachedAvatar() async {
@@ -307,34 +293,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
-  Future<void> _refreshCountryPrefix() async {
-    setState(() {
-      savingLocation = true;
-      errorMessage = null;
-    });
-    try {
-      final prefix =
-          await CountryDialCodeService.instance.refreshFromLocation();
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        countryPrefix = prefix;
-      });
-      if (prefix == null || prefix.isEmpty) {
-        setState(() {
-          errorMessage = 'Country code aniqlanmadi';
-        });
-      }
-    } finally {
-      if (mounted) {
-        setState(() {
-          savingLocation = false;
-        });
-      }
-    }
-  }
-
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -568,25 +526,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                             : null,
                       ),
                     ],
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    countryPrefix == null || countryPrefix!.isEmpty
-                        ? 'Country code aniqlanmagan'
-                        : 'Hozirgi country code: $countryPrefix',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: savingLocation ? null : _refreshCountryPrefix,
-                      child: Text(
-                        savingLocation
-                            ? 'Aniqlanmoqda...'
-                            : 'Country code yangilash',
-                      ),
-                    ),
                   ),
                 ],
               ),
