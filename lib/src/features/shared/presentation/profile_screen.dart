@@ -1,4 +1,5 @@
 import '../../../core/api/mobile_api.dart';
+import '../../../core/security/security_controller.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_controller.dart';
@@ -27,6 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen>
   final TextEditingController nicknameController = TextEditingController();
   bool savingNickname = false;
   bool savingAvatar = false;
+  bool savingPin = false;
+  bool savingBiometric = false;
   String? errorMessage;
   File? cachedAvatar;
   Uint8List? pendingAvatarBytes;
@@ -174,6 +177,199 @@ class _ProfileScreenState extends State<ProfileScreen>
     }
   }
 
+  Future<void> _showPinDialog() async {
+    final pinController = TextEditingController();
+    final confirmController = TextEditingController();
+    String? dialogError;
+
+    final result = await showDialog<String>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('4 xonali PIN'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: pinController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 4,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'PIN',
+                      counterText: '',
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  TextField(
+                    controller: confirmController,
+                    keyboardType: TextInputType.number,
+                    maxLength: 4,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'PIN takrorlang',
+                      counterText: '',
+                    ),
+                  ),
+                  if (dialogError != null) ...[
+                    const SizedBox(height: 8),
+                    Text(dialogError!,
+                        style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('Bekor qilish'),
+                ),
+                FilledButton(
+                  onPressed: () {
+                    final pin = pinController.text.trim();
+                    final confirm = confirmController.text.trim();
+                    if (!RegExp(r'^\d{4}$').hasMatch(pin)) {
+                      setDialogState(() {
+                        dialogError = 'PIN 4 xonali bo‘lishi kerak';
+                      });
+                      return;
+                    }
+                    if (pin != confirm) {
+                      setDialogState(() {
+                        dialogError = 'PIN bir xil emas';
+                      });
+                      return;
+                    }
+                    Navigator.of(context).pop(pin);
+                  },
+                  child: const Text('Saqlash'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+
+    pinController.dispose();
+    confirmController.dispose();
+
+    if (result == null || result.isEmpty) {
+      return;
+    }
+
+    setState(() {
+      savingPin = true;
+      errorMessage = null;
+    });
+    try {
+      await SecurityController.instance.savePinForCurrentUser(result);
+      if (!mounted) {
+        return;
+      }
+      final canUseBiometrics =
+          await SecurityController.instance.canUseBiometrics();
+      if (!mounted ||
+          !canUseBiometrics ||
+          SecurityController.instance.biometricEnabledForCurrentUser) {
+        return;
+      }
+      final enable = await showDialog<bool>(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Tezkor ochish'),
+            content: const Text(
+              'Face ID yoki fingerprint bilan tez ochishni yoqasizmi?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Yo‘q'),
+              ),
+              FilledButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Ha'),
+              ),
+            ],
+          );
+        },
+      );
+      if (enable == true) {
+        await _toggleBiometric(true);
+      } else {
+        setState(() {});
+      }
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        errorMessage = 'PIN saqlanmadi';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          savingPin = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _removePin() async {
+    setState(() {
+      savingPin = true;
+      errorMessage = null;
+    });
+    try {
+      await SecurityController.instance.clearPinForCurrentUser();
+      if (!mounted) {
+        return;
+      }
+      setState(() {});
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        errorMessage = 'PIN o‘chirilmadi';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          savingPin = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _toggleBiometric(bool enabled) async {
+    setState(() {
+      savingBiometric = true;
+      errorMessage = null;
+    });
+    try {
+      final ok = await SecurityController.instance
+          .setBiometricEnabledForCurrentUser(enabled);
+      if (!ok && mounted) {
+        setState(() {
+          errorMessage = enabled
+              ? 'Biometrik ochish yoqilmadi'
+              : 'Biometrik ochish o‘chirilmadi';
+        });
+      } else if (mounted) {
+        setState(() {});
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          savingBiometric = false;
+        });
+      }
+    }
+  }
+
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
@@ -197,6 +393,10 @@ class _ProfileScreenState extends State<ProfileScreen>
         : role == UserRole.werka
             ? 'Werka account'
             : 'Admin account';
+    final bool canConfigureSecurity = role != UserRole.admin;
+    final bool hasPin = SecurityController.instance.hasPinForCurrentUser;
+    final bool biometricEnabled =
+        SecurityController.instance.biometricEnabledForCurrentUser;
 
     return AppShell(
       title: 'Profile',
@@ -242,8 +442,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                             child: Icon(
                               Icons.camera_alt_rounded,
                               size: 16,
-                              color:
-                                  AppTheme.primaryButtonForeground(context),
+                              color: AppTheme.primaryButtonForeground(context),
                             ),
                           ),
                         ),
@@ -377,6 +576,70 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ],
               ),
             ),
+            if (canConfigureSecurity) ...[
+              const SizedBox(height: 18),
+              SoftCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Security',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      hasPin
+                          ? '4 xonali PIN yoqilgan'
+                          : 'App uchun 4 xonali PIN o‘rnating',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: savingPin ? null : _showPinDialog,
+                        child: Text(
+                          savingPin
+                              ? 'Saqlanmoqda...'
+                              : hasPin
+                                  ? 'PIN almashtirish'
+                                  : 'PIN o‘rnatish',
+                        ),
+                      ),
+                    ),
+                    if (hasPin) ...[
+                      const SizedBox(height: 10),
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton(
+                          onPressed: savingPin ? null : _removePin,
+                          child: const Text('PIN o‘chirish'),
+                        ),
+                      ),
+                      const SizedBox(height: 14),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              biometricEnabled
+                                  ? 'Face ID / Fingerprint yoqilgan'
+                                  : 'Face ID / Fingerprint o‘chirilgan',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ),
+                          Switch.adaptive(
+                            value: biometricEnabled,
+                            onChanged: hasPin && !savingBiometric
+                                ? (value) => _toggleBiometric(value)
+                                : null,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+            ],
             if (errorMessage != null) ...[
               const SizedBox(height: 14),
               SoftCard(
@@ -390,6 +653,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                 onPressed: () async {
                   final navigator = Navigator.of(context);
                   await MobileApi.instance.logout();
+                  await SecurityController.instance.clearForLogout();
                   if (!mounted) {
                     return;
                   }

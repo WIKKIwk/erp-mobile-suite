@@ -1,5 +1,6 @@
 import '../core/theme/app_theme.dart';
 import '../core/app_preview.dart';
+import '../core/security/app_lock_gate.dart';
 import '../core/session/app_session.dart';
 import '../core/theme/theme_controller.dart';
 import 'app_router.dart';
@@ -18,7 +19,13 @@ class ErpnextStockMobileApp extends StatelessWidget {
           title: 'ERP Stock Mobile',
           debugShowCheckedModeBanner: false,
           locale: AppPreview.enabled ? DevicePreview.locale(context) : null,
-          builder: AppPreview.enabled ? DevicePreview.appBuilder : null,
+          builder: (context, child) {
+            Widget current = child ?? const SizedBox.shrink();
+            if (AppPreview.enabled) {
+              current = DevicePreview.appBuilder(context, current);
+            }
+            return AppLockGate(child: current);
+          },
           theme: AppTheme.light(),
           darkTheme: AppTheme.dark(),
           themeMode: ThemeController.instance.themeMode,

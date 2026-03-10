@@ -1,5 +1,7 @@
 import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
+import '../../../core/location/country_dial_code_service.dart';
+import '../../../core/security/security_controller.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
@@ -30,6 +32,21 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     loadRememberedCode();
+    _prefillPhoneCountryCode();
+  }
+
+  Future<void> _prefillPhoneCountryCode() async {
+    final prefix = await CountryDialCodeService.instance.suggestedPrefix();
+    if (!mounted || prefix == null || prefix.isEmpty) {
+      return;
+    }
+    if (phoneController.text.trim().isNotEmpty) {
+      return;
+    }
+    phoneController.text = '$prefix ';
+    phoneController.selection = TextSelection.collapsed(
+      offset: phoneController.text.length,
+    );
   }
 
   Future<void> loadRememberedCode() async {
@@ -137,6 +154,7 @@ class _LoginScreenState extends State<LoginScreen> {
           ..setString(lastCodeKey, code)
           ..setString(lastPhoneKey, phone);
       });
+      SecurityController.instance.unlockAfterLogin();
       final String route = profile.role == UserRole.supplier
           ? AppRoutes.supplierHome
           : profile.role == UserRole.werka
@@ -182,12 +200,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 keyboardType: TextInputType.phone,
                                 autocorrect: false,
                                 enableSuggestions: true,
-                                autofillHints: const [AutofillHints.telephoneNumber],
+                                autofillHints: const [
+                                  AutofillHints.telephoneNumber
+                                ],
                                 onChanged: persistRememberedPhone,
-                                onSubmitted: (_) => codeFocusNode.requestFocus(),
+                                onSubmitted: (_) =>
+                                    codeFocusNode.requestFocus(),
                                 decoration: const InputDecoration(
                                   labelText: 'Telefon raqam',
-                                  hintText: 'Masalan: +998901234567',
+                                  hintText: 'Masalan: +998 901234567',
                                 ),
                               ),
                             ),
@@ -199,8 +220,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: Align(
                                   alignment: Alignment.centerLeft,
                                   child: ActionChip(
-                                    label:
-                                        Text('Oxirgi telefon: $rememberedPhone'),
+                                    label: Text(
+                                        'Oxirgi telefon: $rememberedPhone'),
                                     onPressed: () {
                                       phoneController.text = rememberedPhone!;
                                       codeFocusNode.requestFocus();
@@ -262,8 +283,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             decoration: BoxDecoration(
                               color: const Color(0xFF0B0B0B),
                               borderRadius: BorderRadius.circular(18),
-                              border: Border.all(
-                                  color: const Color(0xFF2A2A2A)),
+                              border:
+                                  Border.all(color: const Color(0xFF2A2A2A)),
                             ),
                             child: Text(
                               errorText!,
@@ -276,7 +297,8 @@ class _LoginScreenState extends State<LoginScreen> {
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: loading ? null : () => submitLogin(context),
+                          onPressed:
+                              loading ? null : () => submitLogin(context),
                           child: Text(loading ? 'Kuting...' : 'Login'),
                         ),
                       ),
