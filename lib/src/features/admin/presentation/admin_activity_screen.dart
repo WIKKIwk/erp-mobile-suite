@@ -64,7 +64,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
             return Center(
               child: SoftCard(
                 child: Text(
-                  'Hozircha harakatlar topilmadi.',
+                  'Hali harakat yo‘q.',
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
               ),
