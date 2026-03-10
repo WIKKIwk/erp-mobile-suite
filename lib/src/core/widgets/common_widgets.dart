@@ -349,8 +349,8 @@ class DockSvgIcon extends StatelessWidget {
 
     return SvgPicture.asset(
       asset,
-      width: size ?? (primary ? 24 : 23),
-      height: size ?? (primary ? 24 : 23),
+      width: size ?? (primary ? 26 : 25),
+      height: size ?? (primary ? 26 : 25),
       colorFilter: ColorFilter.mode(color, BlendMode.srcIn),
     );
   }
