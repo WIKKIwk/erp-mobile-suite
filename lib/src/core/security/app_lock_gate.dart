@@ -130,70 +130,80 @@ class _PinUnlockOverlayState extends State<_PinUnlockOverlay> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: const Color(0xFF050505),
-            borderRadius: BorderRadius.circular(28),
-            border: Border.all(color: const Color(0xFF2A2A2A)),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(22),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'App qulfi',
-                  style: Theme.of(context).textTheme.headlineMedium,
+    return Material(
+      type: MaterialType.transparency,
+      child: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF050505),
+                  borderRadius: BorderRadius.circular(28),
+                  border: Border.all(color: const Color(0xFF2A2A2A)),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  '4 xonali PIN kiriting',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-                const SizedBox(height: 14),
-                TextField(
-                  controller: _pinController,
-                  obscureText: true,
-                  keyboardType: TextInputType.number,
-                  maxLength: 4,
-                  autofocus: true,
-                  onSubmitted: (_) => _unlock(),
-                  decoration: const InputDecoration(
-                    labelText: 'PIN',
-                    counterText: '',
+                child: Padding(
+                  padding: const EdgeInsets.all(22),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'App qulfi',
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '4 xonali PIN kiriting',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 14),
+                      TextField(
+                        controller: _pinController,
+                        obscureText: true,
+                        keyboardType: TextInputType.number,
+                        maxLength: 4,
+                        autofocus: true,
+                        onSubmitted: (_) => _unlock(),
+                        decoration: const InputDecoration(
+                          labelText: 'PIN',
+                          counterText: '',
+                        ),
+                      ),
+                      if (_error != null) ...[
+                        const SizedBox(height: 8),
+                        Text(
+                          _error!,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                      const SizedBox(height: 14),
+                      SizedBox(
+                        width: double.infinity,
+                        child: FilledButton(
+                          onPressed: _unlocking ? null : _unlock,
+                          child:
+                              Text(_unlocking ? 'Tekshirilmoqda...' : 'Ochish'),
+                        ),
+                      ),
+                      if (SecurityController
+                          .instance.biometricEnabledForCurrentUser) ...[
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: OutlinedButton(
+                            onPressed:
+                                _unlocking ? null : _unlockWithBiometric,
+                            child: const Text('Face ID / Fingerprint'),
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
-                if (_error != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    _error!,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-                const SizedBox(height: 14),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _unlocking ? null : _unlock,
-                    child: Text(_unlocking ? 'Tekshirilmoqda...' : 'Ochish'),
-                  ),
-                ),
-                if (SecurityController
-                    .instance.biometricEnabledForCurrentUser) ...[
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: _unlocking ? null : _unlockWithBiometric,
-                      child: const Text('Face ID / Fingerprint'),
-                    ),
-                  ),
-                ],
-              ],
+              ),
             ),
           ),
         ),
