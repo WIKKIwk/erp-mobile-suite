@@ -34,10 +34,6 @@ class _AdminSuppliersScreenState extends State<AdminSuppliersScreen> {
   @override
   Widget build(BuildContext context) {
     return AppShell(
-      leading: AppShellIconAction(
-        icon: Icons.arrow_back_rounded,
-        onTap: () => Navigator.of(context).maybePop(),
-      ),
       title: 'Suppliers',
       subtitle: 'Supplierlar ro‘yxati.',
       bottom: const AdminDock(activeTab: AdminDockTab.suppliers),
