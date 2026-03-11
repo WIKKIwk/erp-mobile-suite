@@ -152,6 +152,8 @@ class AdminSettings {
     required this.werkaPhone,
     required this.werkaName,
     required this.werkaCode,
+    required this.werkaCodeLocked,
+    required this.werkaCodeRetryAfterSec,
     required this.adminPhone,
     required this.adminName,
   });
@@ -164,6 +166,8 @@ class AdminSettings {
   final String werkaPhone;
   final String werkaName;
   final String werkaCode;
+  final bool werkaCodeLocked;
+  final int werkaCodeRetryAfterSec;
   final String adminPhone;
   final String adminName;
 
@@ -177,6 +181,8 @@ class AdminSettings {
       werkaPhone: json['werka_phone'] as String? ?? '',
       werkaName: json['werka_name'] as String? ?? '',
       werkaCode: json['werka_code'] as String? ?? '',
+      werkaCodeLocked: json['werka_code_locked'] as bool? ?? false,
+      werkaCodeRetryAfterSec: json['werka_code_retry_after_sec'] as int? ?? 0,
       adminPhone: json['admin_phone'] as String? ?? '',
       adminName: json['admin_name'] as String? ?? '',
     );
@@ -192,6 +198,8 @@ class AdminSettings {
       'werka_phone': werkaPhone,
       'werka_name': werkaName,
       'werka_code': werkaCode,
+      'werka_code_locked': werkaCodeLocked,
+      'werka_code_retry_after_sec': werkaCodeRetryAfterSec,
       'admin_phone': adminPhone,
       'admin_name': adminName,
     };
@@ -263,6 +271,8 @@ class AdminSupplierDetail {
     required this.code,
     required this.blocked,
     required this.removed,
+    required this.codeLocked,
+    required this.codeRetryAfterSec,
     required this.assignedItems,
   });
 
@@ -272,6 +282,8 @@ class AdminSupplierDetail {
   final String code;
   final bool blocked;
   final bool removed;
+  final bool codeLocked;
+  final int codeRetryAfterSec;
   final List<SupplierItem> assignedItems;
 
   factory AdminSupplierDetail.fromJson(Map<String, dynamic> json) {
@@ -282,6 +294,8 @@ class AdminSupplierDetail {
       code: json['code'] as String? ?? '',
       blocked: json['blocked'] as bool? ?? false,
       removed: json['removed'] as bool? ?? false,
+      codeLocked: json['code_locked'] as bool? ?? false,
+      codeRetryAfterSec: json['code_retry_after_sec'] as int? ?? 0,
       assignedItems: (json['assigned_items'] as List<dynamic>? ?? [])
           .map((item) => SupplierItem.fromJson(item as Map<String, dynamic>))
           .toList(),
@@ -295,6 +309,8 @@ class AdminSupplierDetail {
     String? code,
     bool? blocked,
     bool? removed,
+    bool? codeLocked,
+    int? codeRetryAfterSec,
     List<SupplierItem>? assignedItems,
   }) {
     return AdminSupplierDetail(
@@ -304,6 +320,8 @@ class AdminSupplierDetail {
       code: code ?? this.code,
       blocked: blocked ?? this.blocked,
       removed: removed ?? this.removed,
+      codeLocked: codeLocked ?? this.codeLocked,
+      codeRetryAfterSec: codeRetryAfterSec ?? this.codeRetryAfterSec,
       assignedItems: assignedItems ?? this.assignedItems,
     );
   }

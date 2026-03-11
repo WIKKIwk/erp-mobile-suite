@@ -3,6 +3,8 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../shared/models/app_models.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -28,8 +30,10 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
   bool _removing = false;
   bool _searching = false;
   bool _searchOpen = false;
+  int _retryAfterSec = 0;
   List<SupplierItem> _searchResults = const <SupplierItem>[];
   final Map<String, SupplierItem> _selectedItems = <String, SupplierItem>{};
+  Timer? _retryTimer;
 
   @override
   void initState() {
@@ -39,6 +43,7 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -47,7 +52,26 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
     final detail =
         await MobileApi.instance.adminSupplierDetail(widget.supplierRef);
     _syncSelectedItems(detail.assignedItems);
+    _setRetryAfter(detail.codeRetryAfterSec);
     return detail;
+  }
+
+  void _setRetryAfter(int seconds) {
+    _retryTimer?.cancel();
+    _retryAfterSec = seconds > 0 ? seconds : 0;
+    if (_retryAfterSec <= 0) {
+      return;
+    }
+    _retryTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || _retryAfterSec <= 1) {
+        timer.cancel();
+        if (mounted) {
+          setState(() => _retryAfterSec = 0);
+        }
+        return;
+      }
+      setState(() => _retryAfterSec -= 1);
+    });
   }
 
   void _syncSelectedItems(List<SupplierItem> items) {
@@ -88,6 +112,7 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
       final updated = await MobileApi.instance
           .adminRegenerateSupplierCode(widget.supplierRef);
       _syncSelectedItems(updated.assignedItems);
+      _setRetryAfter(updated.codeRetryAfterSec);
       setState(() {
         _detailFuture = Future<AdminSupplierDetail>.value(updated);
       });
@@ -296,7 +321,9 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
                           icon: const Icon(Icons.content_copy_outlined),
                         ),
                         IconButton(
-                          onPressed: _regeneratingCode ? null : _regenerateCode,
+                          onPressed: _regeneratingCode || _retryAfterSec > 0
+                              ? null
+                              : _regenerateCode,
                           icon: _regeneratingCode
                               ? const SizedBox(
                                   height: 18,
@@ -309,6 +336,13 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
                         ),
                       ],
                     ),
+                    if (_retryAfterSec > 0) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Keyingi code uchun $_retryAfterSec soniyadan keyin qayta urining.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,

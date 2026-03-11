@@ -3,6 +3,8 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/admin_dock.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,9 +20,11 @@ class _AdminWerkaScreenState extends State<AdminWerkaScreen> {
   final phone = TextEditingController();
   final name = TextEditingController();
   String werkaCode = '';
+  int _retryAfterSec = 0;
   bool saving = false;
   bool regenerating = false;
   bool hydrated = false;
+  Timer? _retryTimer;
 
   @override
   void initState() {
@@ -30,6 +34,7 @@ class _AdminWerkaScreenState extends State<AdminWerkaScreen> {
 
   @override
   void dispose() {
+    _retryTimer?.cancel();
     phone.dispose();
     name.dispose();
     super.dispose();
@@ -42,7 +47,26 @@ class _AdminWerkaScreenState extends State<AdminWerkaScreen> {
     phone.text = settings.werkaPhone;
     name.text = settings.werkaName;
     werkaCode = settings.werkaCode;
+    _setRetryAfter(settings.werkaCodeRetryAfterSec);
     hydrated = true;
+  }
+
+  void _setRetryAfter(int seconds) {
+    _retryTimer?.cancel();
+    _retryAfterSec = seconds > 0 ? seconds : 0;
+    if (_retryAfterSec <= 0) {
+      return;
+    }
+    _retryTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || _retryAfterSec <= 1) {
+        timer.cancel();
+        if (mounted) {
+          setState(() => _retryAfterSec = 0);
+        }
+        return;
+      }
+      setState(() => _retryAfterSec -= 1);
+    });
   }
 
   Future<void> _save(AdminSettings current) async {
@@ -58,6 +82,8 @@ class _AdminWerkaScreenState extends State<AdminWerkaScreen> {
           werkaPhone: phone.text.trim(),
           werkaName: name.text.trim(),
           werkaCode: werkaCode,
+          werkaCodeLocked: current.werkaCodeLocked,
+          werkaCodeRetryAfterSec: _retryAfterSec,
           adminPhone: current.adminPhone,
           adminName: current.adminName,
         ),
@@ -77,6 +103,7 @@ class _AdminWerkaScreenState extends State<AdminWerkaScreen> {
       setState(() {
         werkaCode = updated.werkaCode;
       });
+      _setRetryAfter(updated.werkaCodeRetryAfterSec);
     } finally {
       if (mounted) {
         setState(() => regenerating = false);
@@ -150,7 +177,9 @@ class _AdminWerkaScreenState extends State<AdminWerkaScreen> {
                           icon: const Icon(Icons.content_copy_outlined),
                         ),
                         IconButton(
-                          onPressed: regenerating ? null : _regenerate,
+                          onPressed: regenerating || _retryAfterSec > 0
+                              ? null
+                              : _regenerate,
                           icon: regenerating
                               ? const SizedBox(
                                   height: 18,
@@ -163,6 +192,13 @@ class _AdminWerkaScreenState extends State<AdminWerkaScreen> {
                         ),
                       ],
                     ),
+                    if (_retryAfterSec > 0) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        'Keyingi code uchun $_retryAfterSec soniyadan keyin qayta urining.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                    ],
                   ],
                 ),
               ),

@@ -65,6 +65,8 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
           werkaPhone: werkaPhone.text.trim(),
           werkaName: werkaName.text.trim(),
           werkaCode: current.werkaCode,
+          werkaCodeLocked: current.werkaCodeLocked,
+          werkaCodeRetryAfterSec: current.werkaCodeRetryAfterSec,
           adminPhone: current.adminPhone,
           adminName: current.adminName,
         ),
