@@ -1,3 +1,4 @@
+import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
@@ -23,16 +24,10 @@ class AdminSupplierDetailScreen extends StatefulWidget {
 
 class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
   late Future<AdminSupplierDetail> _detailFuture;
-  final TextEditingController _searchController = TextEditingController();
   bool _savingStatus = false;
-  bool _savingItems = false;
   bool _regeneratingCode = false;
   bool _removing = false;
-  bool _searching = false;
-  bool _searchOpen = false;
   int _retryAfterSec = 0;
-  List<SupplierItem> _searchResults = const <SupplierItem>[];
-  final Map<String, SupplierItem> _selectedItems = <String, SupplierItem>{};
   Timer? _retryTimer;
 
   @override
@@ -44,14 +39,12 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
   @override
   void dispose() {
     _retryTimer?.cancel();
-    _searchController.dispose();
     super.dispose();
   }
 
   Future<AdminSupplierDetail> _loadDetail() async {
     final detail =
         await MobileApi.instance.adminSupplierDetail(widget.supplierRef);
-    _syncSelectedItems(detail.assignedItems);
     _setRetryAfter(detail.codeRetryAfterSec);
     return detail;
   }
@@ -74,12 +67,6 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
     });
   }
 
-  void _syncSelectedItems(List<SupplierItem> items) {
-    _selectedItems
-      ..clear()
-      ..addEntries(items.map((item) => MapEntry(item.code, item)));
-  }
-
   Future<void> _reload() async {
     final future = _loadDetail();
     setState(() {
@@ -95,7 +82,6 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
         ref: detail.ref,
         blocked: !detail.blocked,
       );
-      _syncSelectedItems(updated.assignedItems);
       setState(() {
         _detailFuture = Future<AdminSupplierDetail>.value(updated);
       });
@@ -111,7 +97,6 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
     try {
       final updated = await MobileApi.instance
           .adminRegenerateSupplierCode(widget.supplierRef);
-      _syncSelectedItems(updated.assignedItems);
       _setRetryAfter(updated.codeRetryAfterSec);
       setState(() {
         _detailFuture = Future<AdminSupplierDetail>.value(updated);
@@ -119,61 +104,6 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
     } finally {
       if (mounted) {
         setState(() => _regeneratingCode = false);
-      }
-    }
-  }
-
-  Future<void> _toggleItemSelection(SupplierItem item) async {
-    if (_savingItems) {
-      return;
-    }
-    final nextItems = Map<String, SupplierItem>.from(_selectedItems);
-    if (nextItems.containsKey(item.code)) {
-      nextItems.remove(item.code);
-    } else {
-      nextItems[item.code] = item;
-    }
-
-    setState(() {
-      _savingItems = true;
-      _selectedItems
-        ..clear()
-        ..addAll(nextItems);
-    });
-    try {
-      final updated = await MobileApi.instance.adminUpdateSupplierItems(
-        ref: widget.supplierRef,
-        itemCodes: nextItems.keys.toList(),
-      );
-      _syncSelectedItems(updated.assignedItems);
-      setState(() {
-        _detailFuture = Future<AdminSupplierDetail>.value(updated);
-      });
-    } finally {
-      if (mounted) {
-        setState(() {
-          _savingItems = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _searchItems() async {
-    setState(() => _searching = true);
-    try {
-      final items = await MobileApi.instance.adminItems(
-        query: _searchController.text.trim(),
-      );
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _searchResults = items;
-        _searchOpen = true;
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _searching = false);
       }
     }
   }
@@ -371,151 +301,36 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                     const SizedBox(height: 10),
-                    if (_selectedItems.isEmpty)
-                      Text(
-                        'Hozircha mahsulot biriktirilmagan.',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      )
-                    else
-                      Column(
-                        children: _selectedItems.values
-                            .map(
-                              (item) => Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(18),
-                                    border: Border.all(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .outlineVariant,
-                                    ),
-                                  ),
-                                  padding: const EdgeInsets.all(12),
-                                  child: Row(
-                                    children: [
-                                      IconButton(
-                                        onPressed: _savingItems
-                                            ? null
-                                            : () => _toggleItemSelection(item),
-                                        icon: const Icon(Icons.remove_rounded),
-                                      ),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              item.name,
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium,
-                                            ),
-                                            const SizedBox(height: 4),
-                                            Text(
-                                              '${item.code} • ${item.uom}',
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .bodySmall,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: _searchController,
-                      readOnly: false,
-                      decoration: const InputDecoration(
-                        labelText: 'Mahsulot qidirish',
-                        hintText: 'Masalan: Rice yoki ITEM-001',
-                      ),
-                      onTap: _searchItems,
-                      onChanged: (_) => _searchItems(),
+                    Text(
+                      detail.assignedItems.isEmpty
+                          ? 'Hozircha mahsulot biriktirilmagan.'
+                          : '${detail.assignedItems.length} ta mahsulot biriktirilgan.',
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
-                    if (_searchOpen) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outlineVariant,
+                    const SizedBox(height: 12),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(context).pushNamed(
+                              AppRoutes.adminSupplierItemsView,
+                              arguments: widget.supplierRef,
+                            ),
+                            child: const Text('Ko‘rish'),
                           ),
                         ),
-                        child: Column(
-                          children: [
-                            if (_searching)
-                              const Padding(
-                                padding: EdgeInsets.all(14),
-                                child: CircularProgressIndicator(),
-                              )
-                            else if (_searchResults.isEmpty)
-                              Padding(
-                                padding: const EdgeInsets.all(14),
-                                child: Text(
-                                  'Mahsulot topilmadi.',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                              )
-                            else
-                              ..._searchResults.map(
-                                (item) {
-                                  final bool selected =
-                                      _selectedItems.containsKey(item.code);
-                                  return InkWell(
-                                    onTap: _savingItems
-                                        ? null
-                                        : () => _toggleItemSelection(item),
-                                    child: Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 10,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          Icon(
-                                            selected
-                                                ? Icons.remove_rounded
-                                                : Icons.add_rounded,
-                                          ),
-                                          const SizedBox(width: 10),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  item.name,
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .titleMedium,
-                                                ),
-                                                const SizedBox(height: 4),
-                                                Text(
-                                                  '${item.code} • ${item.uom}',
-                                                  style: Theme.of(context)
-                                                      .textTheme
-                                                      .bodySmall,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                          ],
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => Navigator.of(context).pushNamed(
+                              AppRoutes.adminSupplierItemsAdd,
+                              arguments: widget.supplierRef,
+                            ),
+                            child: const Text('Qo‘shish'),
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ],
                 ),
               ),

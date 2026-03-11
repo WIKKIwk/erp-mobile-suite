@@ -476,6 +476,63 @@ class MobileApi {
     );
   }
 
+  Future<List<SupplierItem>> adminAssignedSupplierItems(String ref) async {
+    final response = await _sendAuthorized(
+      () => http.get(
+        Uri.parse('$baseUrl/v1/mobile/admin/suppliers/items/assigned')
+            .replace(queryParameters: {'ref': ref}),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Admin assigned supplier items failed');
+    }
+    final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
+    return json
+        .map((item) => SupplierItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<AdminSupplierDetail> adminAssignSupplierItem({
+    required String ref,
+    required String itemCode,
+  }) async {
+    final response = await _sendAuthorized(
+      () => http.post(
+        Uri.parse('$baseUrl/v1/mobile/admin/suppliers/items/add')
+            .replace(queryParameters: {'ref': ref}),
+        headers: _headers(requireToken())
+          ..['Content-Type'] = 'application/json',
+        body: jsonEncode({'item_code': itemCode}),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Admin assign supplier item failed');
+    }
+    return AdminSupplierDetail.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  Future<AdminSupplierDetail> adminRemoveSupplierItem({
+    required String ref,
+    required String itemCode,
+  }) async {
+    final response = await _sendAuthorized(
+      () => http.delete(
+        Uri.parse('$baseUrl/v1/mobile/admin/suppliers/items/remove')
+            .replace(queryParameters: {'ref': ref, 'item_code': itemCode}),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Admin remove supplier item failed');
+    }
+    return AdminSupplierDetail.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<void> adminRemoveSupplier(String ref) async {
     final response = await _sendAuthorized(
       () => http.delete(

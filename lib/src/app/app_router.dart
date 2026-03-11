@@ -7,6 +7,8 @@ import '../features/admin/presentation/admin_item_create_screen.dart';
 import '../features/admin/presentation/admin_settings_screen.dart';
 import '../features/admin/presentation/admin_supplier_create_screen.dart';
 import '../features/admin/presentation/admin_supplier_detail_screen.dart';
+import '../features/admin/presentation/admin_supplier_items_add_screen.dart';
+import '../features/admin/presentation/admin_supplier_items_view_screen.dart';
 import '../features/admin/presentation/admin_suppliers_screen.dart';
 import '../features/admin/presentation/admin_werka_screen.dart';
 import '../features/shared/models/app_models.dart';
@@ -50,6 +52,8 @@ class AppRoutes {
   static const String adminInactiveSuppliers = '/admin-inactive-suppliers';
   static const String adminItemCreate = '/admin-item-create';
   static const String adminSupplierDetail = '/admin-supplier-detail';
+  static const String adminSupplierItemsView = '/admin-supplier-items-view';
+  static const String adminSupplierItemsAdd = '/admin-supplier-items-add';
   static const String adminWerka = '/admin-werka';
 }
 
@@ -127,6 +131,18 @@ class AppRouter {
         return _buildRoute(
           settings,
           AdminSupplierDetailScreen(supplierRef: supplierRef),
+        );
+      case AppRoutes.adminSupplierItemsView:
+        final String supplierRef = settings.arguments as String;
+        return _buildRoute(
+          settings,
+          AdminSupplierItemsViewScreen(supplierRef: supplierRef),
+        );
+      case AppRoutes.adminSupplierItemsAdd:
+        final String supplierRef = settings.arguments as String;
+        return _buildRoute(
+          settings,
+          AdminSupplierItemsAddScreen(supplierRef: supplierRef),
         );
       case AppRoutes.adminWerka:
         return _buildRoute(settings, const AdminWerkaScreen());
