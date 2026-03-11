@@ -94,13 +94,16 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen>
 
           final history = snapshot.data ?? <DispatchRecord>[];
           final pendingCount = history
-              .where((item) => item.status == DispatchStatus.pending)
+              .where((item) =>
+                  item.status == DispatchStatus.pending ||
+                  item.status == DispatchStatus.draft)
               .length;
           final submittedCount = history
               .where((item) => item.status == DispatchStatus.accepted)
               .length;
           final returnedCount = history
               .where((item) =>
+                  item.status == DispatchStatus.partial ||
                   item.status == DispatchStatus.rejected ||
                   item.status == DispatchStatus.cancelled)
               .length;
