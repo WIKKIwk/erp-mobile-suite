@@ -94,9 +94,11 @@ class SupplierDock extends StatelessWidget {
             primary: false,
           ),
           active: activeTab == SupplierDockTab.profile,
+          onHoldComplete: activeTab == SupplierDockTab.profile
+              ? () => showLogoutPrompt(context)
+              : null,
           onTap: () {
             if (activeTab == SupplierDockTab.profile) {
-              showLogoutPrompt(context);
               return;
             }
             Navigator.of(context).pushNamedAndRemoveUntil(

@@ -1,6 +1,7 @@
 import '../../features/shared/models/app_models.dart';
 import '../theme/app_motion.dart';
 import '../theme/app_theme.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -225,7 +226,7 @@ class ActionDock extends StatelessWidget {
   }
 }
 
-class DockButton extends StatelessWidget {
+class DockButton extends StatefulWidget {
   const DockButton({
     super.key,
     this.icon,
@@ -233,6 +234,8 @@ class DockButton extends StatelessWidget {
     required this.onTap,
     this.active = false,
     this.primary = false,
+    this.onHoldComplete,
+    this.holdDuration = const Duration(seconds: 3),
   });
 
   final IconData? icon;
@@ -240,6 +243,39 @@ class DockButton extends StatelessWidget {
   final VoidCallback onTap;
   final bool active;
   final bool primary;
+  final VoidCallback? onHoldComplete;
+  final Duration holdDuration;
+
+  @override
+  State<DockButton> createState() => _DockButtonState();
+}
+
+class _DockButtonState extends State<DockButton> {
+  Timer? _holdTimer;
+  bool _holdTriggered = false;
+
+  void _startHold() {
+    if (widget.onHoldComplete == null) {
+      return;
+    }
+    _holdTriggered = false;
+    _holdTimer?.cancel();
+    _holdTimer = Timer(widget.holdDuration, () {
+      _holdTriggered = true;
+      widget.onHoldComplete?.call();
+    });
+  }
+
+  void _cancelHold() {
+    _holdTimer?.cancel();
+    _holdTimer = null;
+  }
+
+  @override
+  void dispose() {
+    _cancelHold();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -249,21 +285,30 @@ class DockButton extends StatelessWidget {
         : width <= 430
             ? _DockDeviceClass.medium
             : _DockDeviceClass.large;
-    final Color background = primary
+    final Color background = widget.primary
         ? AppTheme.primaryButton(context)
-        : active
+        : widget.active
             ? AppTheme.dockActive(context)
             : AppTheme.dockInactive(context);
-    final Color foreground = primary
+    final Color foreground = widget.primary
         ? AppTheme.primaryButtonForeground(context)
         : Theme.of(context).colorScheme.onSurface;
 
     return GestureDetector(
-      onTap: onTap,
+      onTapDown: (_) => _startHold(),
+      onTapUp: (_) => _cancelHold(),
+      onTapCancel: _cancelHold,
+      onTap: () {
+        if (_holdTriggered) {
+          _holdTriggered = false;
+          return;
+        }
+        widget.onTap();
+      },
       child: AnimatedContainer(
         duration: AppMotion.medium,
         curve: AppMotion.smooth,
-        height: primary
+        height: widget.primary
             ? switch (deviceClass) {
                 _DockDeviceClass.small => 54,
                 _DockDeviceClass.medium => 57,
@@ -274,7 +319,7 @@ class DockButton extends StatelessWidget {
                 _DockDeviceClass.medium => 50,
                 _DockDeviceClass.large => 50,
               },
-        width: primary
+        width: widget.primary
             ? switch (deviceClass) {
                 _DockDeviceClass.small => 54,
                 _DockDeviceClass.medium => 57,
@@ -289,10 +334,10 @@ class DockButton extends StatelessWidget {
           color: background,
           shape: BoxShape.circle,
           border: Border.all(
-            color: primary ? background : AppTheme.cardBorder(context),
-            width: primary ? 2 : 1.2,
+            color: widget.primary ? background : AppTheme.cardBorder(context),
+            width: widget.primary ? 2 : 1.2,
           ),
-          boxShadow: primary
+          boxShadow: widget.primary
               ? const [
                   BoxShadow(
                     color: Color(0x33000000),
@@ -303,11 +348,11 @@ class DockButton extends StatelessWidget {
               : null,
         ),
         child: Center(
-          child: iconWidget ??
+          child: widget.iconWidget ??
               Icon(
-                icon,
+                widget.icon,
                 color: foreground,
-                size: primary
+                size: widget.primary
                     ? switch (deviceClass) {
                         _DockDeviceClass.small => 24,
                         _DockDeviceClass.medium => 25,

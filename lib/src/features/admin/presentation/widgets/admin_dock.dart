@@ -78,9 +78,11 @@ class AdminDock extends StatelessWidget {
         DockButton(
           icon: Icons.person_outline_rounded,
           active: activeTab == AdminDockTab.profile,
+          onHoldComplete: activeTab == AdminDockTab.profile
+              ? () => showLogoutPrompt(context)
+              : null,
           onTap: () {
             if (activeTab == AdminDockTab.profile) {
-              showLogoutPrompt(context);
               return;
             }
             Navigator.of(context)

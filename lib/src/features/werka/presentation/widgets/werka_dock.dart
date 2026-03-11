@@ -81,9 +81,11 @@ class WerkaDock extends StatelessWidget {
         DockButton(
           icon: Icons.person_outline_rounded,
           active: activeTab == WerkaDockTab.profile,
+          onHoldComplete: activeTab == WerkaDockTab.profile
+              ? () => showLogoutPrompt(context)
+              : null,
           onTap: () {
             if (activeTab == WerkaDockTab.profile) {
-              showLogoutPrompt(context);
               return;
             }
             Navigator.of(context).pushNamedAndRemoveUntil(
