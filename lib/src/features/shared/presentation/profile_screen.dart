@@ -611,7 +611,7 @@ class _ThemeIconButton extends StatelessWidget {
               );
             }
             final turns = Tween<double>(
-              begin: -0.15,
+              begin: 0.15,
               end: 0,
             ).animate(animation);
             return RotationTransition(
