@@ -92,6 +92,7 @@ class _NotificationDetailScreenState extends State<NotificationDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final role = AppSession.instance.profile?.role;
+    final textTheme = Theme.of(context).textTheme;
     return AppShell(
       leading: AppShellIconAction(
         icon: Icons.arrow_back_rounded,
@@ -142,15 +143,72 @@ class _NotificationDetailScreenState extends State<NotificationDetailScreen> {
               physics: const AlwaysScrollableScrollPhysics(),
               padding: EdgeInsets.zero,
               children: [
-                Text('Supplier: ${record.supplierName}'),
+                Text.rich(
+                  TextSpan(
+                    style: textTheme.titleMedium,
+                    children: [
+                      const TextSpan(text: 'Supplier: '),
+                      TextSpan(
+                        text: record.supplierName,
+                        style: textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text('Mahsulot: ${record.itemCode} • ${record.itemName}'),
+                Text.rich(
+                  TextSpan(
+                    style: textTheme.titleMedium,
+                    children: [
+                      const TextSpan(text: 'Mahsulot: '),
+                      TextSpan(
+                        text: '${record.itemCode} • ${record.itemName}',
+                        style: textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text('Jo‘natilgan: ${record.sentQty.toStringAsFixed(2)} ${record.uom}'),
+                Text.rich(
+                  TextSpan(
+                    style: textTheme.titleMedium,
+                    children: [
+                      const TextSpan(text: 'Jo‘natilgan: '),
+                      TextSpan(
+                        text:
+                            '${record.sentQty.toStringAsFixed(2)} ${record.uom}',
+                        style: textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text('Qabul qilingan: ${record.acceptedQty.toStringAsFixed(2)} ${record.uom}'),
+                Text.rich(
+                  TextSpan(
+                    style: textTheme.titleMedium,
+                    children: [
+                      const TextSpan(text: 'Qabul qilingan: '),
+                      TextSpan(
+                        text:
+                            '${record.acceptedQty.toStringAsFixed(2)} ${record.uom}',
+                        style: textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 8),
-                Text('Status: ${_statusLabel(record.status)}'),
+                Text.rich(
+                  TextSpan(
+                    style: textTheme.titleMedium,
+                    children: [
+                      const TextSpan(text: 'Status: '),
+                      TextSpan(
+                        text: _statusLabel(record.status),
+                        style: textTheme.titleLarge,
+                      ),
+                    ],
+                  ),
+                ),
                 if (record.note.trim().isNotEmpty) ...[
                   const SizedBox(height: 12),
                   SoftCard(
