@@ -35,12 +35,12 @@ class SupplierConfirmScreen extends StatelessWidget {
         children: [
           Text.rich(
             TextSpan(
-              style: textTheme.bodyLarge,
+              style: textTheme.titleMedium,
               children: [
                 const TextSpan(text: 'Mahsulot: '),
                 TextSpan(
                   text: args.item.code,
-                  style: textTheme.titleMedium,
+                  style: textTheme.titleLarge,
                 ),
               ],
             ),
@@ -48,12 +48,12 @@ class SupplierConfirmScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text.rich(
             TextSpan(
-              style: textTheme.bodyLarge,
+              style: textTheme.titleMedium,
               children: [
                 const TextSpan(text: 'Nomi: '),
                 TextSpan(
                   text: args.item.name,
-                  style: textTheme.titleMedium,
+                  style: textTheme.titleLarge,
                 ),
               ],
             ),
@@ -61,12 +61,12 @@ class SupplierConfirmScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text.rich(
             TextSpan(
-              style: textTheme.bodyLarge,
+              style: textTheme.titleMedium,
               children: [
                 const TextSpan(text: 'Miqdor: '),
                 TextSpan(
                   text: '${args.qty.toStringAsFixed(2)} ${args.item.uom}',
-                  style: textTheme.titleMedium,
+                  style: textTheme.titleLarge,
                 ),
               ],
             ),
@@ -74,12 +74,12 @@ class SupplierConfirmScreen extends StatelessWidget {
           const SizedBox(height: 8),
           Text.rich(
             TextSpan(
-              style: textTheme.bodyLarge,
+              style: textTheme.titleMedium,
               children: [
                 const TextSpan(text: 'Ombor: '),
                 TextSpan(
                   text: args.item.warehouse,
-                  style: textTheme.titleMedium,
+                  style: textTheme.titleLarge,
                 ),
               ],
             ),
