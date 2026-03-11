@@ -1,7 +1,9 @@
 import '../../../core/api/mobile_api.dart';
+import '../../../app/app_router.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../shared/models/app_models.dart';
+import 'supplier_qty_screen.dart';
 import 'widgets/supplier_dock.dart';
 import 'package:flutter/material.dart';
 
@@ -114,63 +116,70 @@ class _SupplierRecentScreenState extends State<SupplierRecentScreen>
               ),
               itemBuilder: (context, index) {
                 final record = items[index];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Container(
-                        height: 44,
-                        width: 44,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFF111111),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.inventory_2_outlined,
-                          color: Colors.white,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              record.itemCode,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 3),
-                            Text(
-                              record.itemName,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
-                              style: Theme.of(context).textTheme.bodyLarge,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Icon(
-                            recentStatusIcon(record.status),
-                            color: recentStatusColor(record.status),
-                            size: 22,
+                final item = SupplierItem(
+                  code: record.itemCode,
+                  name: record.itemName,
+                  uom: record.uom,
+                  warehouse: '',
+                );
+                return InkWell(
+                  borderRadius: BorderRadius.circular(18),
+                  onTap: () => Navigator.of(context).pushNamed(
+                    AppRoutes.supplierQty,
+                    arguments: SupplierQtyArgs(
+                      item: item,
+                      initialQty: record.sentQty,
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          height: 44,
+                          width: 44,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF111111),
+                            shape: BoxShape.circle,
                           ),
-                          const SizedBox(height: 8),
-                          Text(
-                            record.createdLabel,
-                            style: Theme.of(context).textTheme.bodySmall,
+                          child: const Icon(
+                            Icons.inventory_2_outlined,
+                            color: Colors.white,
+                            size: 20,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                record.itemCode,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
+                                style: Theme.of(context).textTheme.bodyLarge,
+                              ),
+                              if (record.amount > 0) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${record.amount.toStringAsFixed(0)} ${record.currency.isEmpty ? "" : record.currency}'.trim(),
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          record.createdLabel,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
@@ -179,39 +188,5 @@ class _SupplierRecentScreenState extends State<SupplierRecentScreen>
         },
       ),
     );
-  }
-}
-
-IconData recentStatusIcon(DispatchStatus status) {
-  switch (status) {
-    case DispatchStatus.accepted:
-      return Icons.check_rounded;
-    case DispatchStatus.partial:
-      return Icons.timelapse_rounded;
-    case DispatchStatus.rejected:
-      return Icons.close_rounded;
-    case DispatchStatus.cancelled:
-      return Icons.remove_rounded;
-    case DispatchStatus.draft:
-      return Icons.edit_note_rounded;
-    case DispatchStatus.pending:
-      return Icons.schedule_rounded;
-  }
-}
-
-Color recentStatusColor(DispatchStatus status) {
-  switch (status) {
-    case DispatchStatus.accepted:
-      return const Color(0xFF5BB450);
-    case DispatchStatus.partial:
-      return const Color(0xFF2A6FDB);
-    case DispatchStatus.rejected:
-      return const Color(0xFFC53B30);
-    case DispatchStatus.cancelled:
-      return const Color(0xFF9CA3AF);
-    case DispatchStatus.draft:
-      return const Color(0xFFA78BFA);
-    case DispatchStatus.pending:
-      return const Color(0xFFFFD54F);
   }
 }

@@ -45,6 +45,8 @@ class DispatchRecord {
     required this.uom,
     required this.sentQty,
     required this.acceptedQty,
+    required this.amount,
+    required this.currency,
     required this.note,
     required this.eventType,
     required this.highlight,
@@ -59,6 +61,8 @@ class DispatchRecord {
   final String uom;
   final double sentQty;
   final double acceptedQty;
+  final double amount;
+  final String currency;
   final String note;
   final String eventType;
   final String highlight;
@@ -74,6 +78,8 @@ class DispatchRecord {
       uom: json['uom'] as String? ?? '',
       sentQty: (json['sent_qty'] as num?)?.toDouble() ?? 0,
       acceptedQty: (json['accepted_qty'] as num?)?.toDouble() ?? 0,
+      amount: (json['amount'] as num?)?.toDouble() ?? 0,
+      currency: json['currency'] as String? ?? '',
       note: json['note'] as String? ?? '',
       eventType: json['event_type'] as String? ?? '',
       highlight: json['highlight'] as String? ?? '',

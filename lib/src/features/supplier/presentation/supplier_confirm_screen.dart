@@ -71,19 +71,21 @@ class SupplierConfirmScreen extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          Text.rich(
-            TextSpan(
-              style: textTheme.titleMedium,
-              children: [
-                const TextSpan(text: 'Ombor: '),
-                TextSpan(
-                  text: args.item.warehouse,
-                  style: textTheme.titleLarge,
-                ),
-              ],
+          if (args.item.warehouse.trim().isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text.rich(
+              TextSpan(
+                style: textTheme.titleMedium,
+                children: [
+                  const TextSpan(text: 'Ombor: '),
+                  TextSpan(
+                    text: args.item.warehouse,
+                    style: textTheme.titleLarge,
+                  ),
+                ],
+              ),
             ),
-          ),
+          ],
           const SizedBox(height: 18),
           SizedBox(
             width: double.infinity,

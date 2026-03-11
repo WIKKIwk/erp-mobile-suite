@@ -86,6 +86,16 @@ class AppRouter {
       case AppRoutes.supplierItemPicker:
         return _buildRoute(settings, const SupplierItemPickerScreen());
       case AppRoutes.supplierQty:
+        if (settings.arguments is SupplierQtyArgs) {
+          final SupplierQtyArgs args = settings.arguments as SupplierQtyArgs;
+          return _buildRoute(
+            settings,
+            SupplierQtyScreen(
+              item: args.item,
+              initialQty: args.initialQty,
+            ),
+          );
+        }
         final SupplierItem item = settings.arguments as SupplierItem;
         return _buildRoute(settings, SupplierQtyScreen(item: item));
       case AppRoutes.supplierConfirm:

@@ -5,13 +5,25 @@ import 'supplier_confirm_screen.dart';
 import 'widgets/supplier_dock.dart';
 import 'package:flutter/material.dart';
 
+class SupplierQtyArgs {
+  const SupplierQtyArgs({
+    required this.item,
+    this.initialQty,
+  });
+
+  final SupplierItem item;
+  final double? initialQty;
+}
+
 class SupplierQtyScreen extends StatefulWidget {
   const SupplierQtyScreen({
     super.key,
     required this.item,
+    this.initialQty,
   });
 
   final SupplierItem item;
+  final double? initialQty;
 
   @override
   State<SupplierQtyScreen> createState() => _SupplierQtyScreenState();
@@ -19,6 +31,14 @@ class SupplierQtyScreen extends StatefulWidget {
 
 class _SupplierQtyScreenState extends State<SupplierQtyScreen> {
   final TextEditingController controller = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.initialQty != null && widget.initialQty! > 0) {
+      controller.text = widget.initialQty!.toStringAsFixed(0);
+    }
+  }
 
   @override
   void dispose() {

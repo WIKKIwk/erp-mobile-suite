@@ -52,6 +52,8 @@ class PushMessagingService {
           uom: data['uom'] ?? '',
           sentQty: double.tryParse('${data['sent_qty'] ?? 0}') ?? 0,
           acceptedQty: double.tryParse('${data['accepted_qty'] ?? 0}') ?? 0,
+          amount: double.tryParse('${data['amount'] ?? 0}') ?? 0,
+          currency: data['currency'] ?? '',
           note: data['note'] ?? '',
           eventType: data['event_type'] ?? '',
           highlight: data['highlight'] ?? '',
