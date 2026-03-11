@@ -130,7 +130,10 @@ class _SupplierNotificationsScreenState
                                 style: Theme.of(context).textTheme.titleLarge,
                               ),
                             ),
-                            _NotificationStatusBadge(status: record.status),
+                            _NotificationStatusBadge(
+                              status: record.status,
+                              note: record.note,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 10),
@@ -195,11 +198,16 @@ String notificationTitle(DispatchRecord record) {
 class _NotificationStatusBadge extends StatelessWidget {
   const _NotificationStatusBadge({
     required this.status,
+    required this.note,
   });
 
   final DispatchStatus status;
+  final String note;
 
   IconData get icon {
+    if (note.contains('Supplier tasdiqladi:')) {
+      return Icons.done_all_rounded;
+    }
     switch (status) {
       case DispatchStatus.draft:
         return Icons.schedule_rounded;
