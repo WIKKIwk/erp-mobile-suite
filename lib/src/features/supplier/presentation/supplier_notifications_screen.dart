@@ -160,6 +160,13 @@ class _SupplierNotificationsScreenState
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                         ],
+                        if (record.highlight.trim().isNotEmpty) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            record.highlight,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
                         const SizedBox(height: 8),
                         Text(
                           record.createdLabel,
@@ -205,7 +212,8 @@ class _NotificationStatusBadge extends StatelessWidget {
   final String note;
 
   IconData get icon {
-    if (note.contains('Supplier tasdiqladi:')) {
+    if (note.contains('Supplier tasdiqladi:') ||
+        note.contains('Tasdiqlayman, shu holat')) {
       return Icons.done_all_rounded;
     }
     switch (status) {
