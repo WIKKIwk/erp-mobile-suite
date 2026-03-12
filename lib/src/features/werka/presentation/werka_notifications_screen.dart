@@ -2,6 +2,8 @@ import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
 import '../../../core/cache/json_cache_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
+import '../../../core/notifications/notification_unread_store.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../shared/models/app_models.dart';
@@ -21,6 +23,7 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
   static const String _cacheKey = 'cache_werka_notifications';
   late Future<List<DispatchRecord>> _itemsFuture;
   List<DispatchRecord>? _cachedItems;
+  Set<String> _highlightedUnreadIds = <String>{};
   int _refreshVersion = 0;
 
   @override
@@ -73,6 +76,18 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
       _itemsFuture = future;
     });
     final items = await future;
+    final highlighted = NotificationUnreadStore.instance
+        .unreadIdsForProfile(AppSession.instance.profile)
+        .intersection(items.map((item) => item.id).toSet());
+    if (mounted) {
+      setState(() {
+        _highlightedUnreadIds = highlighted;
+      });
+    }
+    await NotificationUnreadStore.instance.markSeen(
+      profile: AppSession.instance.profile,
+      ids: items.map((item) => item.id),
+    );
     await JsonCacheStore.instance.writeList(
       _cacheKey,
       items.map((item) => item.toJson()).toList(),
@@ -146,7 +161,10 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 4),
-                  child: _WerkaNotificationsSection(items: items),
+                  child: _WerkaNotificationsSection(
+                    items: items,
+                    highlightedUnreadIds: _highlightedUnreadIds,
+                  ),
                 ),
               ],
             ),
@@ -160,9 +178,11 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
 class _WerkaNotificationsSection extends StatelessWidget {
   const _WerkaNotificationsSection({
     required this.items,
+    required this.highlightedUnreadIds,
   });
 
   final List<DispatchRecord> items;
+  final Set<String> highlightedUnreadIds;
 
   @override
   Widget build(BuildContext context) {
@@ -170,10 +190,13 @@ class _WerkaNotificationsSection extends StatelessWidget {
       padding: EdgeInsets.zero,
       borderWidth: 1.45,
       borderRadius: 20,
-      child: Column(
-        children: [
+        child: Column(
+          children: [
           for (int index = 0; index < items.length; index++) ...[
-            _WerkaNotificationRow(record: items[index]),
+            _WerkaNotificationRow(
+              record: items[index],
+              highlighted: highlightedUnreadIds.contains(items[index].id),
+            ),
             if (index != items.length - 1)
               const Divider(height: 1, thickness: 1),
           ],
@@ -186,9 +209,11 @@ class _WerkaNotificationsSection extends StatelessWidget {
 class _WerkaNotificationRow extends StatelessWidget {
   const _WerkaNotificationRow({
     required this.record,
+    required this.highlighted,
   });
 
   final DispatchRecord record;
+  final bool highlighted;
 
   String _secondary(DispatchRecord record) {
     if (record.eventType == 'supplier_ack') {
@@ -214,7 +239,8 @@ class _WerkaNotificationRow extends StatelessWidget {
         AppRoutes.notificationDetail,
         arguments: record.id,
       ),
-      child: Padding(
+      child: Container(
+        color: highlighted ? const Color(0xFF212121) : Colors.transparent,
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -225,7 +251,9 @@ class _WerkaNotificationRow extends StatelessWidget {
                 Expanded(
                   child: Text(
                     _notificationTitle(record),
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          color: highlighted ? Colors.white : null,
+                        ),
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -235,7 +263,9 @@ class _WerkaNotificationRow extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               _secondary(record),
-              style: Theme.of(context).textTheme.bodyMedium,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: highlighted ? Colors.white70 : null,
+                  ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
@@ -245,7 +275,9 @@ class _WerkaNotificationRow extends StatelessWidget {
                 Expanded(
                   child: Text(
                     _metricLine(record),
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: highlighted ? Colors.white70 : null,
+                        ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -253,7 +285,9 @@ class _WerkaNotificationRow extends StatelessWidget {
                 const SizedBox(width: 12),
                 Text(
                   record.createdLabel,
-                  style: Theme.of(context).textTheme.bodySmall,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: highlighted ? Colors.white70 : null,
+                      ),
                 ),
               ],
             ),

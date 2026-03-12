@@ -2,6 +2,8 @@ import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
 import '../../../core/cache/json_cache_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
+import '../../../core/notifications/notification_unread_store.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/app_shell.dart';
@@ -111,20 +113,47 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
       title: 'Werka',
       subtitle: '',
       actions: [
-        InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: () => Navigator.of(context).pushNamed(
-            AppRoutes.werkaNotifications,
-          ),
-          child: const Padding(
-            padding: EdgeInsets.all(6),
-            child: DockSvgIcon(
-              fillAsset: 'assets/icons/notification-3-fill.svg',
-              lineAsset: 'assets/icons/notification-3-line.svg',
-              primary: false,
-              size: 24,
-            ),
-          ),
+        AnimatedBuilder(
+          animation: NotificationUnreadStore.instance,
+          builder: (context, _) {
+            final showBadge =
+                NotificationUnreadStore.instance.hasUnreadForProfile(
+              AppSession.instance.profile,
+            );
+            return InkWell(
+              borderRadius: BorderRadius.circular(16),
+              onTap: () => Navigator.of(context).pushNamed(
+                AppRoutes.werkaNotifications,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(6),
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    const DockSvgIcon(
+                      fillAsset: 'assets/icons/notification-3-fill.svg',
+                      lineAsset: 'assets/icons/notification-3-line.svg',
+                      primary: false,
+                      size: 24,
+                    ),
+                    if (showBadge)
+                      Positioned(
+                        right: -2,
+                        top: -2,
+                        child: Container(
+                          height: 9,
+                          width: 9,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE53935),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ],
       bottom: const WerkaDock(activeTab: WerkaDockTab.home),

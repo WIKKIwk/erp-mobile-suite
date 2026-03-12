@@ -1,4 +1,5 @@
 import '../api/mobile_api.dart';
+import 'notification_unread_store.dart';
 import '../session/app_session.dart';
 import '../../features/shared/models/app_models.dart';
 import 'local_notification_service.dart';
@@ -42,6 +43,10 @@ class PushMessagingService {
 
     FirebaseMessaging.onMessage.listen((message) async {
       final data = message.data;
+      await NotificationUnreadStore.instance.markUnread(
+        profile: AppSession.instance.profile,
+        ids: [data['id'] ?? DateTime.now().millisecondsSinceEpoch.toString()],
+      );
       await LocalNotificationService.instance.showDispatchNotification(
         role: AppSession.instance.profile?.role ?? UserRole.supplier,
         record: DispatchRecord(
@@ -68,7 +73,8 @@ class PushMessagingService {
   }
 
   Future<void> syncCurrentToken() async {
-    if (defaultTargetPlatform != TargetPlatform.android || !AppSession.instance.isLoggedIn) {
+    if (defaultTargetPlatform != TargetPlatform.android ||
+        !AppSession.instance.isLoggedIn) {
       return;
     }
     final token = await FirebaseMessaging.instance.getToken();

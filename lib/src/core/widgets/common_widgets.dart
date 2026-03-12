@@ -18,19 +18,21 @@ class SoftCard extends StatelessWidget {
     this.padding = const EdgeInsets.all(18),
     this.borderWidth,
     this.borderRadius = 24,
+    this.backgroundColor,
   });
 
   final Widget child;
   final EdgeInsets padding;
   final double? borderWidth;
   final double borderRadius;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppTheme.isDark(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.cardBackground(context),
+        color: backgroundColor ?? AppTheme.cardBackground(context),
         borderRadius: BorderRadius.circular(borderRadius),
         boxShadow: isDark
             ? const [
@@ -248,6 +250,7 @@ class DockButton extends StatefulWidget {
     this.onHoldComplete,
     this.holdDuration = const Duration(seconds: 3),
     this.compact = false,
+    this.showBadge = false,
   });
 
   final IconData? icon;
@@ -258,6 +261,7 @@ class DockButton extends StatefulWidget {
   final VoidCallback? onHoldComplete;
   final Duration holdDuration;
   final bool compact;
+  final bool showBadge;
 
   @override
   State<DockButton> createState() => _DockButtonState();
@@ -368,23 +372,41 @@ class _DockButtonState extends State<DockButton> {
                   ),
                 ],
         ),
-        child: Center(
-          child: widget.iconWidget ??
-              Icon(
-                widget.icon,
-                color: foreground,
-                size: widget.primary
-                    ? switch (deviceClass) {
-                        _DockDeviceClass.small => 24,
-                        _DockDeviceClass.medium => 25,
-                        _DockDeviceClass.large => 25,
-                      }
-                    : switch (deviceClass) {
-                        _DockDeviceClass.small => 22,
-                        _DockDeviceClass.medium => 23,
-                        _DockDeviceClass.large => 23,
-                      },
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Center(
+              child: widget.iconWidget ??
+                  Icon(
+                    widget.icon,
+                    color: foreground,
+                    size: widget.primary
+                        ? switch (deviceClass) {
+                            _DockDeviceClass.small => 24,
+                            _DockDeviceClass.medium => 25,
+                            _DockDeviceClass.large => 25,
+                          }
+                        : switch (deviceClass) {
+                            _DockDeviceClass.small => 22,
+                            _DockDeviceClass.medium => 23,
+                            _DockDeviceClass.large => 23,
+                          },
+                  ),
+            ),
+            if (widget.showBadge)
+              Positioned(
+                right: 2,
+                top: 2,
+                child: Container(
+                  height: 9,
+                  width: 9,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFFE53935),
+                    shape: BoxShape.circle,
+                  ),
+                ),
               ),
+          ],
         ),
       ),
     );

@@ -2,6 +2,8 @@ import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
 import '../../../core/cache/json_cache_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
+import '../../../core/notifications/notification_unread_store.dart';
+import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../shared/models/app_models.dart';
@@ -21,6 +23,7 @@ class _SupplierNotificationsScreenState
   static const String _cacheKey = 'cache_supplier_notifications';
   late Future<List<DispatchRecord>> _itemsFuture;
   List<DispatchRecord>? _cachedItems;
+  Set<String> _highlightedUnreadIds = <String>{};
   int _refreshVersion = 0;
 
   @override
@@ -73,6 +76,18 @@ class _SupplierNotificationsScreenState
       _itemsFuture = future;
     });
     final items = await future;
+    final highlighted = NotificationUnreadStore.instance
+        .unreadIdsForProfile(AppSession.instance.profile)
+        .intersection(items.map((item) => item.id).toSet());
+    if (mounted) {
+      setState(() {
+        _highlightedUnreadIds = highlighted;
+      });
+    }
+    await NotificationUnreadStore.instance.markSeen(
+      profile: AppSession.instance.profile,
+      ids: items.map((item) => item.id),
+    );
     await JsonCacheStore.instance.writeList(
       _cacheKey,
       items.map((item) => item.toJson()).toList(),
@@ -153,6 +168,9 @@ class _SupplierNotificationsScreenState
                     arguments: record.id,
                   ),
                   child: SoftCard(
+                    backgroundColor: _highlightedUnreadIds.contains(record.id)
+                        ? const Color(0xFF212121)
+                        : null,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -161,7 +179,15 @@ class _SupplierNotificationsScreenState
                             Expanded(
                               child: Text(
                                 notificationTitle(record),
-                                style: Theme.of(context).textTheme.titleLarge,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleLarge
+                                    ?.copyWith(
+                                      color: _highlightedUnreadIds
+                                              .contains(record.id)
+                                          ? Colors.white
+                                          : null,
+                                    ),
                               ),
                             ),
                             _NotificationStatusBadge(
@@ -173,38 +199,83 @@ class _SupplierNotificationsScreenState
                         const SizedBox(height: 10),
                         Text(
                           '${record.itemCode} • ${record.itemName}',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: _highlightedUnreadIds.contains(record.id)
+                                    ? Colors.white70
+                                    : null,
+                              ),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           'Jo‘natildi: ${record.sentQty.toStringAsFixed(0)} ${record.uom}',
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: _highlightedUnreadIds.contains(record.id)
+                                    ? Colors.white70
+                                    : null,
+                              ),
                         ),
                         if (record.acceptedQty > 0) ...[
                           const SizedBox(height: 4),
                           Text(
                             'Qabul qilindi: ${record.acceptedQty.toStringAsFixed(0)} ${record.uom}',
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color:
+                                      _highlightedUnreadIds.contains(record.id)
+                                          ? Colors.white70
+                                          : null,
+                                ),
                           ),
                         ],
                         if (record.note.trim().isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Text(
                             record.note,
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color:
+                                      _highlightedUnreadIds.contains(record.id)
+                                          ? Colors.white70
+                                          : null,
+                                ),
                           ),
                         ],
                         if (record.highlight.trim().isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Text(
                             record.highlight,
-                            style: Theme.of(context).textTheme.bodySmall,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(
+                                  color:
+                                      _highlightedUnreadIds.contains(record.id)
+                                          ? Colors.white70
+                                          : null,
+                                ),
                           ),
                         ],
                         const SizedBox(height: 8),
                         Text(
                           record.createdLabel,
-                          style: Theme.of(context).textTheme.bodySmall,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(
+                                color: _highlightedUnreadIds.contains(record.id)
+                                    ? Colors.white70
+                                    : null,
+                              ),
                         ),
                       ],
                     ),
