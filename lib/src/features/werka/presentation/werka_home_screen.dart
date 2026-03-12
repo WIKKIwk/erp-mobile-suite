@@ -322,24 +322,42 @@ class _WerkaStatCard extends StatelessWidget {
         onTap: onTap,
         child: SoftCard(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.titleMedium,
+          child: Container(
+            decoration: BoxDecoration(
+              color: AppTheme.isDark(context)
+                  ? const Color(0xFF101010)
+                  : const Color(0xFFF3F0E8),
+              borderRadius: BorderRadius.circular(18),
+              boxShadow: [
+                BoxShadow(
+                  color: AppTheme.isDark(context)
+                      ? const Color(0x22000000)
+                      : const Color(0x10000000),
+                  blurRadius: 10,
+                  offset: const Offset(0, 3),
                 ),
-              ),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontSize: 34,
-                      color: AppTheme.isDark(context)
-                          ? Colors.white
-                          : const Color(0xFF1F1A17),
-                    ),
-              ),
-            ],
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
+                Text(
+                  value,
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                        fontSize: 34,
+                        color: AppTheme.isDark(context)
+                            ? Colors.white
+                            : const Color(0xFF1F1A17),
+                      ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
