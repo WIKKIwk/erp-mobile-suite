@@ -124,16 +124,9 @@ class _WerkaStatusDetailScreenState extends State<WerkaStatusDetailScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                record.itemCode,
-                                style: Theme.of(context).textTheme.titleLarge,
-                              ),
-                            ),
-                            StatusPill(status: record.status),
-                          ],
+                        Text(
+                          record.itemCode,
+                          style: Theme.of(context).textTheme.titleLarge,
                         ),
                         const SizedBox(height: 10),
                         Text('${record.itemCode} • ${record.itemName}'),
