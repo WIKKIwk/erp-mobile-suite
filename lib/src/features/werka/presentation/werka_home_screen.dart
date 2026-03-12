@@ -205,35 +205,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                     physics: const AlwaysScrollableScrollPhysics(),
                     padding: EdgeInsets.zero,
                     children: [
-                      _WerkaStatCard(
-                        label: 'Jarayonda',
-                        value: currentSummary.pendingCount.toString(),
-                        borderWidth: 1.55,
-                        onTap: () => Navigator.of(context).pushNamed(
-                          AppRoutes.werkaStatusBreakdown,
-                          arguments: WerkaStatusKind.pending,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _WerkaStatCard(
-                        label: 'Tasdiqlangan',
-                        value: currentSummary.confirmedCount.toString(),
-                        borderWidth: 1.55,
-                        onTap: () => Navigator.of(context).pushNamed(
-                          AppRoutes.werkaStatusBreakdown,
-                          arguments: WerkaStatusKind.confirmed,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      _WerkaStatCard(
-                        label: 'Qaytarilgan',
-                        value: currentSummary.returnedCount.toString(),
-                        borderWidth: 1.55,
-                        onTap: () => Navigator.of(context).pushNamed(
-                          AppRoutes.werkaStatusBreakdown,
-                          arguments: WerkaStatusKind.returned,
-                        ),
-                      ),
+                      _WerkaSummaryCard(summary: currentSummary),
                       if (previewItems.isNotEmpty) ...[
                         const SizedBox(height: 16),
                         Padding(
@@ -334,52 +306,6 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
   }
 }
 
-class _WerkaStatCard extends StatelessWidget {
-  const _WerkaStatCard({
-    required this.label,
-    required this.value,
-    this.onTap,
-    this.borderWidth,
-  });
-
-  final String label;
-  final String value;
-  final VoidCallback? onTap;
-  final double? borderWidth;
-
-  @override
-  Widget build(BuildContext context) {
-    return SmoothAppear(
-      child: PressableScale(
-        onTap: onTap,
-        child: SoftCard(
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-          borderWidth: borderWidth,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Text(
-                value,
-                style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                      fontSize: 34,
-                      color: AppTheme.isDark(context)
-                          ? Colors.white
-                          : const Color(0xFF1F1A17),
-                    ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _WerkaHomeData {
   const _WerkaHomeData({
     required this.summary,
@@ -388,4 +314,104 @@ class _WerkaHomeData {
 
   final WerkaHomeSummary summary;
   final List<DispatchRecord> pendingItems;
+}
+
+class _WerkaSummaryCard extends StatelessWidget {
+  const _WerkaSummaryCard({
+    required this.summary,
+  });
+
+  final WerkaHomeSummary summary;
+
+  @override
+  Widget build(BuildContext context) {
+    return SmoothAppear(
+      child: SoftCard(
+        padding: EdgeInsets.zero,
+        borderWidth: 1.55,
+        child: Column(
+          children: [
+            _WerkaSummaryRow(
+              label: 'Jarayonda',
+              value: summary.pendingCount.toString(),
+              onTap: () => Navigator.of(context).pushNamed(
+                AppRoutes.werkaStatusBreakdown,
+                arguments: WerkaStatusKind.pending,
+              ),
+            ),
+            _WerkaSummaryDivider(),
+            _WerkaSummaryRow(
+              label: 'Tasdiqlangan',
+              value: summary.confirmedCount.toString(),
+              onTap: () => Navigator.of(context).pushNamed(
+                AppRoutes.werkaStatusBreakdown,
+                arguments: WerkaStatusKind.confirmed,
+              ),
+            ),
+            _WerkaSummaryDivider(),
+            _WerkaSummaryRow(
+              label: 'Qaytarilgan',
+              value: summary.returnedCount.toString(),
+              onTap: () => Navigator.of(context).pushNamed(
+                AppRoutes.werkaStatusBreakdown,
+                arguments: WerkaStatusKind.returned,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WerkaSummaryRow extends StatelessWidget {
+  const _WerkaSummaryRow({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    fontSize: 34,
+                    color: AppTheme.isDark(context)
+                        ? Colors.white
+                        : const Color(0xFF1F1A17),
+                  ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _WerkaSummaryDivider extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Divider(
+      height: 1,
+      thickness: 1,
+      color: AppTheme.cardBorder(context),
+    );
+  }
 }
