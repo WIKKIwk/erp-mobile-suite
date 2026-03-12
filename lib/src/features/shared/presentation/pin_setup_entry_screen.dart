@@ -11,44 +11,31 @@ class PinSetupEntryScreen extends StatefulWidget {
 }
 
 class _PinSetupEntryScreenState extends State<PinSetupEntryScreen> {
-  String _pin = '';
+  final TextEditingController _pinController = TextEditingController();
 
-  Future<void> _handleDigit(String digit) async {
-    if (_pin.length >= 4) {
-      return;
-    }
-    setState(() {
-      _pin = '$_pin$digit';
-    });
-    if (_pin.length == 4) {
-      await Future<void>.delayed(const Duration(milliseconds: 120));
-      if (!mounted) {
-        return;
-      }
-      final result = await Navigator.of(context).pushNamed(
-        AppRoutes.pinSetupConfirm,
-        arguments: PinSetupConfirmArgs(firstPin: _pin),
-      );
-      if (!mounted) {
-        return;
-      }
-      if (result == true) {
-        Navigator.of(context).pop(true);
-      } else {
-        setState(() {
-          _pin = '';
-        });
-      }
-    }
+  @override
+  void dispose() {
+    _pinController.dispose();
+    super.dispose();
   }
 
-  void _handleBackspace() {
-    if (_pin.isEmpty) {
+  Future<void> _handleNext() async {
+    final pin = _pinController.text.trim();
+    if (pin.length != 4) {
       return;
     }
-    setState(() {
-      _pin = _pin.substring(0, _pin.length - 1);
-    });
+    final result = await Navigator.of(context).pushNamed(
+      AppRoutes.pinSetupConfirm,
+      arguments: PinSetupConfirmArgs(firstPin: pin),
+    );
+    if (!mounted) {
+      return;
+    }
+    if (result == true) {
+      Navigator.of(context).pop(true);
+    } else {
+      _pinController.clear();
+    }
   }
 
   @override
@@ -56,9 +43,9 @@ class _PinSetupEntryScreenState extends State<PinSetupEntryScreen> {
     return PinEntryScaffold(
       title: 'PIN kiriting',
       subtitle: '',
-      length: _pin.length,
-      onDigit: _handleDigit,
-      onBackspace: _handleBackspace,
+      controller: _pinController,
+      actionLabel: 'Keyingi',
+      onAction: _handleNext,
     );
   }
 }

@@ -23,62 +23,51 @@ class PinSetupConfirmScreen extends StatefulWidget {
 }
 
 class _PinSetupConfirmScreenState extends State<PinSetupConfirmScreen> {
-  String _pin = '';
+  final TextEditingController _pinController = TextEditingController();
   String? _error;
   bool _saving = false;
 
-  Future<void> _handleDigit(String digit) async {
-    if (_saving || _pin.length >= 4) {
-      return;
-    }
-    setState(() {
-      _pin = '$_pin$digit';
-      _error = null;
-    });
-    if (_pin.length == 4) {
-      if (_pin != widget.args.firstPin) {
-        await Future<void>.delayed(const Duration(milliseconds: 120));
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _pin = '';
-          _error = 'PIN bir xil emas. Qayta kiriting.';
-        });
-        return;
-      }
-
-      setState(() => _saving = true);
-      try {
-        await SecurityController.instance.savePinForCurrentUser(_pin);
-        if (!mounted) {
-          return;
-        }
-        Navigator.of(context).pop(true);
-      } catch (_) {
-        if (!mounted) {
-          return;
-        }
-        setState(() {
-          _pin = '';
-          _error = 'PIN saqlanmadi';
-        });
-      } finally {
-        if (mounted) {
-          setState(() => _saving = false);
-        }
-      }
-    }
+  @override
+  void dispose() {
+    _pinController.dispose();
+    super.dispose();
   }
 
-  void _handleBackspace() {
-    if (_saving || _pin.isEmpty) {
+  Future<void> _handleConfirm() async {
+    if (_saving) {
       return;
     }
+    final pin = _pinController.text.trim();
     setState(() {
-      _pin = _pin.substring(0, _pin.length - 1);
       _error = null;
     });
+    if (pin != widget.args.firstPin) {
+      setState(() {
+        _pinController.clear();
+        _error = 'PIN bir xil emas. Qayta kiriting.';
+      });
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await SecurityController.instance.savePinForCurrentUser(pin);
+      if (!mounted) {
+        return;
+      }
+      Navigator.of(context).pop(true);
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _pinController.clear();
+        _error = 'PIN saqlanmadi';
+      });
+    } finally {
+      if (mounted) {
+        setState(() => _saving = false);
+      }
+    }
   }
 
   @override
@@ -86,10 +75,11 @@ class _PinSetupConfirmScreenState extends State<PinSetupConfirmScreen> {
     return PinEntryScaffold(
       title: 'PIN takrorlang',
       subtitle: '',
-      length: _pin.length,
+      controller: _pinController,
+      actionLabel: 'Saqlash',
+      onAction: _handleConfirm,
       errorText: _error,
-      onDigit: _handleDigit,
-      onBackspace: _handleBackspace,
+      busy: _saving,
     );
   }
 }
