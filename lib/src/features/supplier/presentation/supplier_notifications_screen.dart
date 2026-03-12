@@ -72,18 +72,15 @@ class _SupplierNotificationsScreenState
 
   Future<List<DispatchRecord>> _loadAndTrack() async {
     final items = await MobileApi.instance.supplierHistory();
-    final highlighted = NotificationUnreadStore.instance
-        .unreadIdsForProfile(AppSession.instance.profile)
-        .intersection(items.map((item) => item.id).toSet());
+    final highlighted = await NotificationUnreadStore.instance.consumeUnread(
+      profile: AppSession.instance.profile,
+      ids: items.map((item) => item.id),
+    );
     if (mounted) {
       setState(() {
         _highlightedUnreadIds = highlighted;
       });
     }
-    await NotificationUnreadStore.instance.markSeen(
-      profile: AppSession.instance.profile,
-      ids: items.map((item) => item.id),
-    );
     await JsonCacheStore.instance.writeList(
       _cacheKey,
       items.map((item) => item.toJson()).toList(),

@@ -72,18 +72,15 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
 
   Future<List<DispatchRecord>> _loadAndTrack() async {
     final items = await MobileApi.instance.werkaHistory();
-    final highlighted = NotificationUnreadStore.instance
-        .unreadIdsForProfile(AppSession.instance.profile)
-        .intersection(items.map((item) => item.id).toSet());
+    final highlighted = await NotificationUnreadStore.instance.consumeUnread(
+      profile: AppSession.instance.profile,
+      ids: items.map((item) => item.id),
+    );
     if (mounted) {
       setState(() {
         _highlightedUnreadIds = highlighted;
       });
     }
-    await NotificationUnreadStore.instance.markSeen(
-      profile: AppSession.instance.profile,
-      ids: items.map((item) => item.id),
-    );
     await JsonCacheStore.instance.writeList(
       _cacheKey,
       items.map((item) => item.toJson()).toList(),
@@ -195,8 +192,8 @@ class _WerkaNotificationsSection extends StatelessWidget {
       padding: EdgeInsets.zero,
       borderWidth: 1.45,
       borderRadius: 20,
-        child: Column(
-          children: [
+      child: Column(
+        children: [
           for (int index = 0; index < items.length; index++) ...[
             _WerkaNotificationRow(
               record: items[index],
@@ -245,7 +242,15 @@ class _WerkaNotificationRow extends StatelessWidget {
         arguments: record.id,
       ),
       child: Container(
-        color: highlighted ? const Color(0xFF212121) : Colors.transparent,
+        decoration: BoxDecoration(
+          color: highlighted ? const Color(0xFF212121) : Colors.transparent,
+          border: const Border(
+            bottom: BorderSide(
+              color: Colors.transparent,
+              width: 0,
+            ),
+          ),
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
