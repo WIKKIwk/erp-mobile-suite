@@ -58,9 +58,14 @@ class _WerkaUnannouncedQtyScreenState extends State<WerkaUnannouncedQtyScreen> {
           TextField(
             controller: _controller,
             keyboardType: const TextInputType.numberWithOptions(decimal: true),
+            style: Theme.of(context).textTheme.displaySmall,
             decoration: InputDecoration(
               hintText: '0',
               suffixText: widget.args.item.uom,
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 22,
+              ),
             ),
           ),
           const SizedBox(height: 16),

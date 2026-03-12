@@ -20,13 +20,42 @@ class WerkaCreateHubScreen extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          InkWell(
-            borderRadius: BorderRadius.circular(24),
-            onTap: () => Navigator.of(context).pushNamed(
-              AppRoutes.werkaUnannouncedSupplier,
-            ),
-            child: const SoftCard(
-              child: Text('Aytilmagan mol'),
+          SoftCard(
+            padding: EdgeInsets.zero,
+            borderWidth: 1.45,
+            borderRadius: 20,
+            child: Column(
+              children: [
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () => Navigator.of(context).pushNamed(
+                    AppRoutes.werkaUnannouncedSupplier,
+                  ),
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Text('Aytilmagan mol'),
+                    ),
+                  ),
+                ),
+                const Divider(height: 1, thickness: 1),
+                InkWell(
+                  borderRadius: BorderRadius.circular(20),
+                  onTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Mol jo‘natish keyingi bosqichda')),
+                    );
+                  },
+                  child: const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 18, vertical: 20),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: Text('Mol jo‘natish'),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],

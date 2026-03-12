@@ -33,23 +33,10 @@ class _WerkaUnannouncedConfirmScreenState extends State<WerkaUnannouncedConfirmS
   bool _saving = false;
 
   Future<void> _submit() async {
-    final first = await showDialog<bool>(
+    final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
         title: const Text('Tasdiqlash'),
-        content: const Text('Haqiqatan ham davom etasizmi?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Yo‘q')),
-          FilledButton(onPressed: () => Navigator.of(context).pop(true), child: const Text('Ha')),
-        ],
-      ),
-    );
-    if (first != true) return;
-    if (!mounted) return;
-    final second = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Yakuniy tasdiq'),
         content: const Text('Draft ochilsinmi?'),
         actions: [
           TextButton(onPressed: () => Navigator.of(context).pop(false), child: const Text('Yo‘q')),
@@ -57,7 +44,7 @@ class _WerkaUnannouncedConfirmScreenState extends State<WerkaUnannouncedConfirmS
         ],
       ),
     );
-    if (second != true) return;
+    if (confirmed != true) return;
     setState(() => _saving = true);
     try {
       final record = await MobileApi.instance.createWerkaUnannouncedDraft(

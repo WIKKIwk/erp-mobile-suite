@@ -66,30 +66,50 @@ class _WerkaUnannouncedSupplierScreenState
           final items = snapshot.data ?? const <SupplierDirectoryEntry>[];
           return RefreshIndicator(
             onRefresh: _reload,
-            child: ListView.separated(
+            child: ListView(
               padding: EdgeInsets.zero,
-              itemCount: items.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 12),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                return InkWell(
-                  borderRadius: BorderRadius.circular(24),
-                  onTap: () => Navigator.of(context).pushNamed(
-                    AppRoutes.werkaUnannouncedItem,
-                    arguments: item,
-                  ),
-                  child: SoftCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(item.name, style: Theme.of(context).textTheme.titleLarge),
-                        const SizedBox(height: 6),
-                        Text(item.phone, style: Theme.of(context).textTheme.bodySmall),
+              children: [
+                SoftCard(
+                  padding: EdgeInsets.zero,
+                  borderWidth: 1.45,
+                  borderRadius: 20,
+                  child: Column(
+                    children: [
+                      for (int index = 0; index < items.length; index++) ...[
+                        InkWell(
+                          borderRadius: BorderRadius.circular(20),
+                          onTap: () => Navigator.of(context).pushNamed(
+                            AppRoutes.werkaUnannouncedItem,
+                            arguments: items[index],
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 18,
+                              vertical: 16,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  items[index].name,
+                                  style: Theme.of(context).textTheme.titleLarge,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  items[index].phone,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (index != items.length - 1)
+                          const Divider(height: 1, thickness: 1),
                       ],
-                    ),
+                    ],
                   ),
-                );
-              },
+                ),
+              ],
             ),
           );
         },
