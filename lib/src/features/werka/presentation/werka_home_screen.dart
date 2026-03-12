@@ -167,6 +167,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                     const WerkaHomeSummary(
                       pendingCount: 0,
                       confirmedCount: 0,
+                      returnedCount: 0,
                     );
                 final previewItems = pendingItems.length > 3
                     ? pendingItems.take(3).toList()
@@ -181,11 +182,28 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                       _WerkaStatCard(
                         label: 'Jarayonda',
                         value: currentSummary.pendingCount.toString(),
+                        onTap: () => Navigator.of(context).pushNamed(
+                          AppRoutes.werkaStatusBreakdown,
+                          arguments: WerkaStatusKind.pending,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       _WerkaStatCard(
                         label: 'Tasdiqlangan',
                         value: currentSummary.confirmedCount.toString(),
+                        onTap: () => Navigator.of(context).pushNamed(
+                          AppRoutes.werkaStatusBreakdown,
+                          arguments: WerkaStatusKind.confirmed,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _WerkaStatCard(
+                        label: 'Qaytarilgan',
+                        value: currentSummary.returnedCount.toString(),
+                        onTap: () => Navigator.of(context).pushNamed(
+                          AppRoutes.werkaStatusBreakdown,
+                          arguments: WerkaStatusKind.returned,
+                        ),
                       ),
                       if (previewItems.isNotEmpty) ...[
                         const SizedBox(height: 16),
@@ -265,34 +283,39 @@ class _WerkaStatCard extends StatelessWidget {
   const _WerkaStatCard({
     required this.label,
     required this.value,
+    this.onTap,
   });
 
   final String label;
   final String value;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return SmoothAppear(
-      child: SoftCard(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: Theme.of(context).textTheme.titleMedium,
+      child: PressableScale(
+        onTap: onTap,
+        child: SoftCard(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
               ),
-            ),
-            Text(
-              value,
-              style: Theme.of(context).textTheme.displaySmall?.copyWith(
-                    fontSize: 34,
-                    color: AppTheme.isDark(context)
-                        ? Colors.white
-                        : const Color(0xFF1F1A17),
-                  ),
-            ),
-          ],
+              Text(
+                value,
+                style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                      fontSize: 34,
+                      color: AppTheme.isDark(context)
+                          ? Colors.white
+                          : const Color(0xFF1F1A17),
+                    ),
+              ),
+            ],
+          ),
         ),
       ),
     );

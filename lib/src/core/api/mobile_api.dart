@@ -303,6 +303,30 @@ class MobileApi {
     );
   }
 
+  Future<List<WerkaStatusBreakdownEntry>> werkaStatusBreakdown(
+    WerkaStatusKind kind,
+  ) async {
+    final http.Response response = await _sendAuthorized(
+      () => http.get(
+        Uri.parse('$baseUrl/v1/mobile/werka/status-breakdown').replace(
+          queryParameters: {'kind': kind.name},
+        ),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Werka status breakdown failed');
+    }
+    final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
+    return json
+        .map(
+          (item) => WerkaStatusBreakdownEntry.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+  }
+
   Future<List<DispatchRecord>> werkaHistory() async {
     final http.Response response = await _sendAuthorized(
       () => http.get(

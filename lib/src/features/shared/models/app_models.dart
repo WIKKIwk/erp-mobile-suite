@@ -68,15 +68,18 @@ class WerkaHomeSummary {
   const WerkaHomeSummary({
     required this.pendingCount,
     required this.confirmedCount,
+    required this.returnedCount,
   });
 
   final int pendingCount;
   final int confirmedCount;
+  final int returnedCount;
 
   factory WerkaHomeSummary.fromJson(Map<String, dynamic> json) {
     return WerkaHomeSummary(
       pendingCount: json['pending_count'] as int? ?? 0,
       confirmedCount: json['confirmed_count'] as int? ?? 0,
+      returnedCount: json['returned_count'] as int? ?? 0,
     );
   }
 
@@ -84,7 +87,46 @@ class WerkaHomeSummary {
     return {
       'pending_count': pendingCount,
       'confirmed_count': confirmedCount,
+      'returned_count': returnedCount,
     };
+  }
+}
+
+enum WerkaStatusKind {
+  pending,
+  confirmed,
+  returned,
+}
+
+class WerkaStatusBreakdownEntry {
+  const WerkaStatusBreakdownEntry({
+    required this.supplierRef,
+    required this.supplierName,
+    required this.receiptCount,
+    required this.totalSentQty,
+    required this.totalAcceptedQty,
+    required this.totalReturnedQty,
+    required this.uom,
+  });
+
+  final String supplierRef;
+  final String supplierName;
+  final int receiptCount;
+  final double totalSentQty;
+  final double totalAcceptedQty;
+  final double totalReturnedQty;
+  final String uom;
+
+  factory WerkaStatusBreakdownEntry.fromJson(Map<String, dynamic> json) {
+    return WerkaStatusBreakdownEntry(
+      supplierRef: json['supplier_ref'] as String? ?? '',
+      supplierName: json['supplier_name'] as String? ?? '',
+      receiptCount: json['receipt_count'] as int? ?? 0,
+      totalSentQty: (json['total_sent_qty'] as num?)?.toDouble() ?? 0,
+      totalAcceptedQty: (json['total_accepted_qty'] as num?)?.toDouble() ?? 0,
+      totalReturnedQty: (json['total_returned_qty'] as num?)?.toDouble() ?? 0,
+      uom: json['uom'] as String? ?? '',
+    );
   }
 }
 
