@@ -166,7 +166,7 @@ class _NotificationDetailScreenState extends State<NotificationDetailScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton(
+                    child: FilledButton(
                       onPressed: () => Navigator.of(context).pop(false),
                       child: const Text('Yo‘q'),
                     ),
