@@ -241,10 +241,10 @@ class AppTheme {
       isDark(context) ? const Color(0xFF1F1F1F) : const Color(0xFFE3E0D8);
 
   static Color dockInactive(BuildContext context) =>
-      isDark(context) ? const Color(0xFF101010) : const Color(0xFFFFFFFF);
+      isDark(context) ? const Color(0xFF161616) : const Color(0xFFF4F2EC);
 
   static Color dockActive(BuildContext context) =>
-      isDark(context) ? const Color(0xFF181818) : const Color(0xFFF2F0EB);
+      isDark(context) ? const Color(0xFF1E1E1E) : const Color(0xFFEDE9E0);
 
   static Color primaryButton(BuildContext context) =>
       isDark(context) ? Colors.white : const Color(0xFF141414);

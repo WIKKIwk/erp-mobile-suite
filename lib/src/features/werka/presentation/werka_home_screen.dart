@@ -248,17 +248,17 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                                                 CrossAxisAlignment.start,
                                             children: [
                                               Text(
-                                                record.supplierName,
+                                                record.itemName,
                                                 style: Theme.of(context)
                                                     .textTheme
                                                     .titleLarge,
                                               ),
                                               const SizedBox(height: 6),
                                               Text(
-                                                '${record.itemCode} • ${record.itemName}',
+                                                record.supplierName,
                                                 style: Theme.of(context)
                                                     .textTheme
-                                                    .bodyMedium,
+                                                    .bodySmall,
                                               ),
                                             ],
                                           ),
@@ -272,7 +272,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                                               '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
                                               style: Theme.of(context)
                                                   .textTheme
-                                                  .headlineMedium,
+                                                  .titleMedium,
                                             ),
                                             const SizedBox(height: 6),
                                             Text(

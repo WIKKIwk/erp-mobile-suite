@@ -345,7 +345,15 @@ class _DockButtonState extends State<DockButton> {
                     offset: Offset(0, 4),
                   ),
                 ]
-              : null,
+              : [
+                  BoxShadow(
+                    color: AppTheme.isDark(context)
+                        ? const Color(0x22000000)
+                        : const Color(0x12000000),
+                    blurRadius: 10,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
         ),
         child: Center(
           child: widget.iconWidget ??
