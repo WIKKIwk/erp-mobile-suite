@@ -111,6 +111,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
       title: 'Werka',
       subtitle: '',
       bottom: const WerkaDock(activeTab: WerkaDockTab.home),
+      contentPadding: const EdgeInsets.fromLTRB(14, 0, 16, 0),
       child: Column(
         children: [
           Expanded(
@@ -182,6 +183,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                       _WerkaStatCard(
                         label: 'Jarayonda',
                         value: currentSummary.pendingCount.toString(),
+                        borderWidth: 1.55,
                         onTap: () => Navigator.of(context).pushNamed(
                           AppRoutes.werkaStatusBreakdown,
                           arguments: WerkaStatusKind.pending,
@@ -191,6 +193,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                       _WerkaStatCard(
                         label: 'Tasdiqlangan',
                         value: currentSummary.confirmedCount.toString(),
+                        borderWidth: 1.55,
                         onTap: () => Navigator.of(context).pushNamed(
                           AppRoutes.werkaStatusBreakdown,
                           arguments: WerkaStatusKind.confirmed,
@@ -200,6 +203,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                       _WerkaStatCard(
                         label: 'Qaytarilgan',
                         value: currentSummary.returnedCount.toString(),
+                        borderWidth: 1.55,
                         onTap: () => Navigator.of(context).pushNamed(
                           AppRoutes.werkaStatusBreakdown,
                           arguments: WerkaStatusKind.returned,
@@ -235,6 +239,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
                                   horizontal: 18,
                                   vertical: 16,
                                 ),
+                                borderWidth: 1.55,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -309,11 +314,13 @@ class _WerkaStatCard extends StatelessWidget {
     required this.label,
     required this.value,
     this.onTap,
+    this.borderWidth,
   });
 
   final String label;
   final String value;
   final VoidCallback? onTap;
+  final double? borderWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -322,6 +329,7 @@ class _WerkaStatCard extends StatelessWidget {
         onTap: onTap,
         child: SoftCard(
           padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+          borderWidth: borderWidth,
           child: Row(
             children: [
               Expanded(

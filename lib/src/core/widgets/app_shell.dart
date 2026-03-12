@@ -11,6 +11,7 @@ class AppShell extends StatelessWidget {
     this.leading,
     this.actions,
     this.bottom,
+    this.contentPadding = const EdgeInsets.fromLTRB(20, 0, 24, 0),
   });
 
   final String title;
@@ -19,6 +20,7 @@ class AppShell extends StatelessWidget {
   final Widget? leading;
   final List<Widget>? actions;
   final Widget? bottom;
+  final EdgeInsets contentPadding;
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +85,7 @@ class AppShell extends StatelessWidget {
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(20, 0, 24, 0),
+                  padding: contentPadding,
                   child: child,
                 ),
               ),

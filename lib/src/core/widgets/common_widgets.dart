@@ -16,10 +16,12 @@ class SoftCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(18),
+    this.borderWidth,
   });
 
   final Widget child;
   final EdgeInsets padding;
+  final double? borderWidth;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +47,7 @@ class SoftCard extends StatelessWidget {
               ],
         border: Border.all(
           color: AppTheme.cardBorder(context),
-          width: isDark ? 1.35 : 1,
+          width: borderWidth ?? (isDark ? 1.35 : 1),
         ),
       ),
       padding: padding,
