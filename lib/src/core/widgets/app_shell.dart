@@ -51,47 +51,61 @@ class AppShell extends StatelessWidget {
         ),
         child: SafeArea(
           bottom: false,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (leading != null) ...[
-                      leading!,
-                      const SizedBox(width: 14),
-                    ],
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            title,
-                            style: theme.textTheme.headlineMedium,
-                          ),
-                          if (subtitle.trim().isNotEmpty) ...[
-                            const SizedBox(height: 6),
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: 1),
+            duration: AppMotion.pageEnter,
+            curve: AppMotion.pageIn,
+            builder: (context, value, animatedChild) {
+              return Opacity(
+                opacity: value,
+                child: Transform.translate(
+                  offset: Offset(18 * (1 - value), 0),
+                  child: animatedChild,
+                ),
+              );
+            },
+            child: Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (leading != null) ...[
+                        leading!,
+                        const SizedBox(width: 14),
+                      ],
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
                             Text(
-                              subtitle,
-                              style: theme.textTheme.bodyMedium,
+                              title,
+                              style: theme.textTheme.headlineMedium,
                             ),
+                            if (subtitle.trim().isNotEmpty) ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                subtitle,
+                                style: theme.textTheme.bodyMedium,
+                              ),
+                            ],
                           ],
-                        ],
+                        ),
                       ),
-                    ),
-                    if (actions != null) ...actions!,
-                  ],
+                      if (actions != null) ...actions!,
+                    ],
+                  ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  width: double.infinity,
-                  padding: contentPadding,
-                  child: child,
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    padding: contentPadding,
+                    child: child,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
