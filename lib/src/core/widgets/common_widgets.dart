@@ -193,22 +193,12 @@ class ActionDock extends StatelessWidget {
       ...trailing,
     ];
 
-    final double panelHeight = 10;
     final double hostHeight = _hostHeightForDevice(deviceClass);
 
     return SizedBox(
       height: hostHeight,
       child: Stack(
         children: [
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              height: panelHeight,
-              color: AppTheme.cardBackground(context),
-            ),
-          ),
           Positioned(
             left: tightToEdges ? 4 : 0,
             right: tightToEdges ? 4 : 0,
