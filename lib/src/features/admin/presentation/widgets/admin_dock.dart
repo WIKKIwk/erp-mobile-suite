@@ -30,7 +30,11 @@ class AdminDock extends StatelessWidget {
       tightToEdges: tightToEdges,
       leading: [
         DockButton(
-          icon: Icons.home_rounded,
+          iconWidget: const DockSvgIcon(
+            fillAsset: 'assets/icons/home-fill.svg',
+            lineAsset: 'assets/icons/home-line.svg',
+            primary: false,
+          ),
           active: activeTab == AdminDockTab.home,
           compact: compact,
           onTap: () {
