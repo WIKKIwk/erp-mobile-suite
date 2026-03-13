@@ -102,7 +102,8 @@ class _NotificationRuntimeState extends State<NotificationRuntime>
       for (final record in records) {
         final next = _signature(record);
         final old = previous[record.id];
-        if (old == null || old != next) {
+        if ((old == null || old != next) &&
+            _shouldSurfaceForCurrentProfile(profile, record, hadPrevious: old != null)) {
           await NotificationUnreadStore.instance.markUnread(
             profile: profile,
             ids: [record.id],
@@ -133,6 +134,37 @@ class _NotificationRuntimeState extends State<NotificationRuntime>
       record.sentQty.toStringAsFixed(4),
       record.acceptedQty.toStringAsFixed(4),
     ].join('|');
+  }
+
+  bool _shouldSurfaceForCurrentProfile(
+    SessionProfile profile,
+    DispatchRecord record, {
+    required bool hadPrevious,
+  }) {
+    if (profile.role == UserRole.supplier) {
+      if (record.eventType == 'werka_unannounced_pending') {
+        return true;
+      }
+      if (!hadPrevious &&
+          (record.status == DispatchStatus.pending ||
+              record.status == DispatchStatus.draft)) {
+        return false;
+      }
+      return true;
+    }
+
+    if (profile.role == UserRole.werka) {
+      if (record.eventType == 'supplier_ack') {
+        return true;
+      }
+      if (!hadPrevious &&
+          record.eventType == 'werka_unannounced_pending') {
+        return false;
+      }
+      return true;
+    }
+
+    return false;
   }
 
   @override
