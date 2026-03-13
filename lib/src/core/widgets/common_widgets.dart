@@ -240,7 +240,7 @@ class DockButton extends StatefulWidget {
     this.active = false,
     this.primary = false,
     this.onHoldComplete,
-    this.holdDuration = const Duration(seconds: 3),
+    this.holdDuration = const Duration(seconds: 1),
     this.compact = false,
     this.showBadge = false,
   });
