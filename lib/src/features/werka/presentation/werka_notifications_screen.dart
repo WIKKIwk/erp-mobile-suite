@@ -6,6 +6,7 @@ import '../../../core/notifications/notification_unread_store.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/werka_dock.dart';
 import 'package:flutter/material.dart';
@@ -63,6 +64,23 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
     _reload();
   }
 
+  Future<void> _openDetail(String receiptId) async {
+    await Navigator.of(context).pushNamed(
+      AppRoutes.notificationDetail,
+      arguments: receiptId,
+    );
+    await NotificationUnreadStore.instance.markSeen(
+      profile: AppSession.instance.profile,
+      ids: [receiptId],
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _highlightedUnreadIds.remove(receiptId);
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
@@ -72,10 +90,13 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
 
   Future<List<DispatchRecord>> _loadAndTrack() async {
     final items = await MobileApi.instance.werkaHistory();
-    final highlighted = await NotificationUnreadStore.instance.consumeUnread(
-      profile: AppSession.instance.profile,
-      ids: items.map((item) => item.id),
+    final unread = NotificationUnreadStore.instance.unreadIdsForProfile(
+      AppSession.instance.profile,
     );
+    final highlighted = items
+        .map((item) => item.id)
+        .where((id) => unread.contains(id))
+        .toSet();
     if (mounted) {
       setState(() {
         _highlightedUnreadIds = highlighted;
@@ -170,6 +191,7 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
                   child: _WerkaNotificationsSection(
                     items: orderedItems,
                     highlightedUnreadIds: _highlightedUnreadIds,
+                    onTapRecord: _openDetail,
                   ),
                 ),
               ],
@@ -185,10 +207,12 @@ class _WerkaNotificationsSection extends StatelessWidget {
   const _WerkaNotificationsSection({
     required this.items,
     required this.highlightedUnreadIds,
+    required this.onTapRecord,
   });
 
   final List<DispatchRecord> items;
   final Set<String> highlightedUnreadIds;
+  final ValueChanged<String> onTapRecord;
 
   @override
   Widget build(BuildContext context) {
@@ -204,6 +228,7 @@ class _WerkaNotificationsSection extends StatelessWidget {
               highlighted: highlightedUnreadIds.contains(items[index].id),
               isFirst: index == 0,
               isLast: index == items.length - 1,
+              onTap: () => onTapRecord(items[index].id),
             ),
             if (index != items.length - 1)
               const Divider(height: 1, thickness: 1),
@@ -220,12 +245,14 @@ class _WerkaNotificationRow extends StatelessWidget {
     required this.highlighted,
     required this.isFirst,
     required this.isLast,
+    required this.onTap,
   });
 
   final DispatchRecord record;
   final bool highlighted;
   final bool isFirst;
   final bool isLast;
+  final VoidCallback onTap;
 
   String _secondary(DispatchRecord record) {
     if (record.eventType == 'supplier_ack') {
@@ -245,12 +272,9 @@ class _WerkaNotificationRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
-      onTap: () => Navigator.of(context).pushNamed(
-        AppRoutes.notificationDetail,
-        arguments: record.id,
-      ),
+    return PressableScale(
+      borderRadius: 20,
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: highlighted ? const Color(0xFF212121) : Colors.transparent,

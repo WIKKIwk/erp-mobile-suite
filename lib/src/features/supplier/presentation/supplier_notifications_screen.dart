@@ -64,6 +64,23 @@ class _SupplierNotificationsScreenState
     _reload();
   }
 
+  Future<void> _openDetail(String receiptId) async {
+    await Navigator.of(context).pushNamed(
+      AppRoutes.notificationDetail,
+      arguments: receiptId,
+    );
+    await NotificationUnreadStore.instance.markSeen(
+      profile: AppSession.instance.profile,
+      ids: [receiptId],
+    );
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _highlightedUnreadIds.remove(receiptId);
+    });
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed && mounted) {
@@ -73,10 +90,13 @@ class _SupplierNotificationsScreenState
 
   Future<List<DispatchRecord>> _loadAndTrack() async {
     final items = await MobileApi.instance.supplierHistory();
-    final highlighted = await NotificationUnreadStore.instance.consumeUnread(
-      profile: AppSession.instance.profile,
-      ids: items.map((item) => item.id),
+    final unread = NotificationUnreadStore.instance.unreadIdsForProfile(
+      AppSession.instance.profile,
     );
+    final highlighted = items
+        .map((item) => item.id)
+        .where((id) => unread.contains(id))
+        .toSet();
     if (mounted) {
       setState(() {
         _highlightedUnreadIds = highlighted;
@@ -181,6 +201,7 @@ class _SupplierNotificationsScreenState
                               .contains(orderedItems[index].id),
                           isFirst: index == 0,
                           isLast: index == orderedItems.length - 1,
+                          onTap: () => _openDetail(orderedItems[index].id),
                         ),
                         if (index != orderedItems.length - 1)
                           const Divider(height: 1, thickness: 1),
@@ -203,12 +224,14 @@ class _SupplierNotificationRow extends StatelessWidget {
     required this.highlighted,
     required this.isFirst,
     required this.isLast,
+    required this.onTap,
   });
 
   final DispatchRecord record;
   final bool highlighted;
   final bool isFirst;
   final bool isLast;
+  final VoidCallback onTap;
 
   String _secondary(DispatchRecord record) {
     if (record.highlight.trim().isNotEmpty) {
@@ -230,10 +253,7 @@ class _SupplierNotificationRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return PressableScale(
       borderRadius: 20,
-      onTap: () => Navigator.of(context).pushNamed(
-        AppRoutes.notificationDetail,
-        arguments: record.id,
-      ),
+      onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: highlighted ? const Color(0xFF212121) : Colors.transparent,
