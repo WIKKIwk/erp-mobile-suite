@@ -131,12 +131,13 @@ class _LoginScreenState extends State<LoginScreen> {
     if (rememberedPhone == null || rememberedPhone!.isEmpty) {
       return;
     }
-    phoneController.text = rememberedPhone!;
-    if (rememberedCode != null && rememberedCode!.isNotEmpty) {
-      codeController.text = rememberedCode!;
-    }
-    codeFocusNode.unfocus();
-    setState(() {});
+    FocusScope.of(context).unfocus();
+    setState(() {
+      phoneController.text = rememberedPhone!;
+      if (rememberedCode != null && rememberedCode!.isNotEmpty) {
+        codeController.text = rememberedCode!;
+      }
+    });
   }
 
   @override
