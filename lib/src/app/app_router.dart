@@ -28,6 +28,10 @@ import '../features/supplier/presentation/supplier_success_screen.dart';
 import '../features/werka/presentation/werka_detail_screen.dart';
 import '../features/werka/presentation/werka_home_screen.dart';
 import '../features/werka/presentation/werka_create_hub_screen.dart';
+import '../features/werka/presentation/werka_customer_issue_confirm_screen.dart';
+import '../features/werka/presentation/werka_customer_issue_customer_screen.dart';
+import '../features/werka/presentation/werka_customer_issue_item_screen.dart';
+import '../features/werka/presentation/werka_customer_issue_qty_screen.dart';
 import '../features/werka/presentation/werka_notifications_screen.dart';
 import '../features/werka/presentation/werka_unannounced_confirm_screen.dart';
 import '../features/werka/presentation/werka_unannounced_qty_screen.dart';
@@ -53,6 +57,10 @@ class AppRoutes {
   static const String notificationDetail = '/notification-detail';
   static const String werkaHome = '/werka-home';
   static const String werkaCreateHub = '/werka-create-hub';
+  static const String werkaCustomerIssueCustomer = '/werka-customer-issue-customer';
+  static const String werkaCustomerIssueItem = '/werka-customer-issue-item';
+  static const String werkaCustomerIssueQty = '/werka-customer-issue-qty';
+  static const String werkaCustomerIssueConfirm = '/werka-customer-issue-confirm';
   static const String werkaUnannouncedSupplier = '/werka-unannounced-supplier';
   static const String werkaUnannouncedItem = '/werka-unannounced-item';
   static const String werkaUnannouncedQty = '/werka-unannounced-qty';
@@ -151,6 +159,26 @@ class AppRouter {
         return _buildRoute(settings, const WerkaHomeScreen());
       case AppRoutes.werkaCreateHub:
         return _buildRoute(settings, const WerkaCreateHubScreen());
+      case AppRoutes.werkaCustomerIssueCustomer:
+        return _buildRoute(settings, const WerkaCustomerIssueCustomerScreen());
+      case AppRoutes.werkaCustomerIssueItem:
+        final CustomerDirectoryEntry customer =
+            settings.arguments as CustomerDirectoryEntry;
+        return _buildRoute(
+          settings,
+          WerkaCustomerIssueItemScreen(customer: customer),
+        );
+      case AppRoutes.werkaCustomerIssueQty:
+        final WerkaCustomerIssueQtyArgs args =
+            settings.arguments as WerkaCustomerIssueQtyArgs;
+        return _buildRoute(settings, WerkaCustomerIssueQtyScreen(args: args));
+      case AppRoutes.werkaCustomerIssueConfirm:
+        final WerkaCustomerIssueConfirmArgs args =
+            settings.arguments as WerkaCustomerIssueConfirmArgs;
+        return _buildRoute(
+          settings,
+          WerkaCustomerIssueConfirmScreen(args: args),
+        );
       case AppRoutes.werkaUnannouncedSupplier:
         return _buildRoute(settings, const WerkaUnannouncedSupplierScreen());
       case AppRoutes.werkaUnannouncedItem:

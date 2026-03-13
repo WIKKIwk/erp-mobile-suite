@@ -56,6 +56,61 @@ class SupplierDirectoryEntry {
   }
 }
 
+class CustomerDirectoryEntry {
+  const CustomerDirectoryEntry({
+    required this.ref,
+    required this.name,
+    required this.phone,
+  });
+
+  final String ref;
+  final String name;
+  final String phone;
+
+  factory CustomerDirectoryEntry.fromJson(Map<String, dynamic> json) {
+    return CustomerDirectoryEntry(
+      ref: json['ref'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      phone: json['phone'] as String? ?? '',
+    );
+  }
+}
+
+class WerkaCustomerIssueRecord {
+  const WerkaCustomerIssueRecord({
+    required this.entryID,
+    required this.customerRef,
+    required this.customerName,
+    required this.itemCode,
+    required this.itemName,
+    required this.uom,
+    required this.qty,
+    required this.createdLabel,
+  });
+
+  final String entryID;
+  final String customerRef;
+  final String customerName;
+  final String itemCode;
+  final String itemName;
+  final String uom;
+  final double qty;
+  final String createdLabel;
+
+  factory WerkaCustomerIssueRecord.fromJson(Map<String, dynamic> json) {
+    return WerkaCustomerIssueRecord(
+      entryID: json['entry_id'] as String? ?? '',
+      customerRef: json['customer_ref'] as String? ?? '',
+      customerName: json['customer_name'] as String? ?? '',
+      itemCode: json['item_code'] as String? ?? '',
+      itemName: json['item_name'] as String? ?? '',
+      uom: json['uom'] as String? ?? '',
+      qty: (json['qty'] as num?)?.toDouble() ?? 0,
+      createdLabel: json['created_label'] as String? ?? '',
+    );
+  }
+}
+
 class SupplierHomeSummary {
   const SupplierHomeSummary({
     required this.pendingCount,

@@ -356,6 +356,28 @@ class MobileApi {
         .toList();
   }
 
+  Future<List<CustomerDirectoryEntry>> werkaCustomers({String query = ''}) async {
+    final response = await _sendAuthorized(
+      () => http.get(
+        Uri.parse('$baseUrl/v1/mobile/werka/customers').replace(
+          queryParameters: query.trim().isEmpty ? null : {'q': query.trim()},
+        ),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Werka customers failed');
+    }
+    final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
+    return json
+        .map(
+          (item) => CustomerDirectoryEntry.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+  }
+
   Future<List<SupplierItem>> werkaSupplierItems({
     required String supplierRef,
     String query = '',
@@ -373,6 +395,30 @@ class MobileApi {
     );
     if (response.statusCode != 200) {
       throw Exception('Werka supplier items failed');
+    }
+    final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
+    return json
+        .map((item) => SupplierItem.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<SupplierItem>> werkaCustomerItems({
+    required String customerRef,
+    String query = '',
+  }) async {
+    final response = await _sendAuthorized(
+      () => http.get(
+        Uri.parse('$baseUrl/v1/mobile/werka/customer-items').replace(
+          queryParameters: {
+            'customer_ref': customerRef,
+            if (query.trim().isNotEmpty) 'q': query.trim(),
+          },
+        ),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Werka customer items failed');
     }
     final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
     return json
@@ -401,6 +447,31 @@ class MobileApi {
       throw Exception('Werka unannounced create failed');
     }
     return DispatchRecord.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  Future<WerkaCustomerIssueRecord> createWerkaCustomerIssue({
+    required String customerRef,
+    required String itemCode,
+    required double qty,
+  }) async {
+    final response = await _sendAuthorized(
+      () => http.post(
+        Uri.parse('$baseUrl/v1/mobile/werka/customer-issue/create'),
+        headers: _headers(requireToken())
+          ..['Content-Type'] = 'application/json',
+        body: jsonEncode({
+          'customer_ref': customerRef,
+          'item_code': itemCode,
+          'qty': qty,
+        }),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Werka customer issue create failed');
+    }
+    return WerkaCustomerIssueRecord.fromJson(
       jsonDecode(response.body) as Map<String, dynamic>,
     );
   }
