@@ -167,6 +167,7 @@ class _AdminSuppliersSummarySection extends StatelessWidget {
   Widget build(BuildContext context) {
     return SoftCard(
       padding: EdgeInsets.zero,
+      backgroundColor: const Color(0xFF161616),
       child: Column(
         children: [
           _AdminSuppliersSummaryRow(
