@@ -4,10 +4,8 @@ import '../../../core/notifications/push_messaging_service.dart';
 import '../../../core/security/security_controller.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
-import '../../../core/widgets/common_widgets.dart';
 import '../../shared/models/app_models.dart';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -17,55 +15,15 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  static const String lastCodeKey = 'last_login_code';
-  static const String lastPhoneKey = 'last_login_phone';
-
   final TextEditingController phoneController = TextEditingController();
   final TextEditingController codeController = TextEditingController();
   final FocusNode phoneFocusNode = FocusNode();
   final FocusNode codeFocusNode = FocusNode();
   String? errorText;
   bool loading = false;
-  String? rememberedCode;
-  String? rememberedPhone;
-
-  @override
-  void initState() {
-    super.initState();
-    phoneFocusNode.addListener(_refreshRememberedSuggestion);
-    phoneController.addListener(_refreshRememberedSuggestion);
-    loadRememberedCode();
-  }
-
-  void _refreshRememberedSuggestion() {
-    if (!mounted) {
-      return;
-    }
-    setState(() {});
-  }
-
-  Future<void> loadRememberedCode() async {
-    final prefs = await SharedPreferences.getInstance();
-    final savedCode = (prefs.getString(lastCodeKey) ?? '').trim();
-    final savedPhone = (prefs.getString(lastPhoneKey) ?? '').trim();
-    final hasPair = savedCode.isNotEmpty && savedPhone.isNotEmpty;
-    if (!hasPair) {
-      await prefs.remove(lastCodeKey);
-      await prefs.remove(lastPhoneKey);
-    }
-    if (!mounted) {
-      return;
-    }
-    setState(() {
-      rememberedCode = hasPair ? savedCode : null;
-      rememberedPhone = hasPair ? savedPhone : null;
-    });
-  }
 
   @override
   void dispose() {
-    phoneFocusNode.removeListener(_refreshRememberedSuggestion);
-    phoneController.removeListener(_refreshRememberedSuggestion);
     phoneController.dispose();
     codeController.dispose();
     phoneFocusNode.dispose();
@@ -95,11 +53,6 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!context.mounted) {
         return;
       }
-      SharedPreferences.getInstance().then((prefs) {
-        prefs
-          ..setString(lastCodeKey, code)
-          ..setString(lastPhoneKey, phone);
-      });
       PushMessagingService.instance.syncCurrentToken();
       SecurityController.instance.unlockAfterLogin();
       final String route = profile.role == UserRole.supplier
@@ -116,27 +69,6 @@ class _LoginScreenState extends State<LoginScreen> {
         errorText = 'Login muvaffaqiyatsiz';
         loading = false;
       });
-    });
-  }
-
-  bool get _showRememberedSuggestion =>
-      phoneFocusNode.hasFocus &&
-      phoneController.text.trim().isEmpty &&
-      rememberedPhone != null &&
-      rememberedPhone!.isNotEmpty &&
-      rememberedCode != null &&
-      rememberedCode!.isNotEmpty;
-
-  void _applyRememberedLogin() {
-    if (rememberedPhone == null || rememberedPhone!.isEmpty) {
-      return;
-    }
-    FocusScope.of(context).unfocus();
-    setState(() {
-      phoneController.text = rememberedPhone!;
-      if (rememberedCode != null && rememberedCode!.isNotEmpty) {
-        codeController.text = rememberedCode!;
-      }
     });
   }
 
@@ -159,59 +91,18 @@ class _LoginScreenState extends State<LoginScreen> {
                       AutofillGroup(
                         child: Column(
                           children: [
-                            if (_showRememberedSuggestion) ...[
-                              SmoothAppear(
-                                delay: const Duration(milliseconds: 20),
-                                child: Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: PressableScale(
-                                    borderRadius: 18,
-                                    onTap: _applyRememberedLogin,
-                                    child: SoftCard(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 12,
-                                      ),
-                                      borderRadius: 18,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            'Shu nomermi?',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .bodySmall,
-                                          ),
-                                          const SizedBox(height: 6),
-                                          Text(
-                                            rememberedPhone!,
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleMedium,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(height: 10),
-                            ],
                             SmoothAppear(
                               delay: const Duration(milliseconds: 30),
                               child: TextField(
                                 controller: phoneController,
                                 focusNode: phoneFocusNode,
-                                textInputAction: TextInputAction.next,
+                                textInputAction: TextInputAction.done,
                                 keyboardType: TextInputType.phone,
                                 autocorrect: false,
                                 enableSuggestions: true,
                                 autofillHints: const [
                                   AutofillHints.telephoneNumber
                                 ],
-                                onSubmitted: (_) =>
-                                    codeFocusNode.requestFocus(),
                                 decoration: const InputDecoration(
                                   labelText: 'Telefon raqam',
                                   hintText: 'Masalan: +998901234567',
