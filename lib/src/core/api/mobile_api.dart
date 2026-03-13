@@ -823,6 +823,26 @@ class MobileApi {
     );
   }
 
+  Future<List<CustomerDirectoryEntry>> adminCustomers() async {
+    final response = await _sendAuthorized(
+      () => http.get(
+        Uri.parse('$baseUrl/v1/mobile/admin/customers'),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Admin customers failed');
+    }
+    final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
+    return json
+        .map(
+          (item) => CustomerDirectoryEntry.fromJson(
+            item as Map<String, dynamic>,
+          ),
+        )
+        .toList();
+  }
+
   Future<AdminSupplierDetail> adminSetSupplierBlocked({
     required String ref,
     required bool blocked,

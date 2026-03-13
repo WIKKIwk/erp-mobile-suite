@@ -635,6 +635,7 @@ class AdminSupplierDetail {
 enum AdminUserKind {
   supplier,
   werka,
+  customer,
 }
 
 class AdminUserListEntry {
@@ -652,7 +653,11 @@ class AdminUserListEntry {
   final AdminUserKind kind;
   final bool blocked;
 
-  String get roleLabel => kind == AdminUserKind.werka ? 'Werka' : 'Supplier';
+  String get roleLabel => kind == AdminUserKind.werka
+      ? 'Werka'
+      : kind == AdminUserKind.customer
+          ? 'Customer'
+          : 'Supplier';
 }
 
 DispatchStatus parseDispatchStatus(String raw) {

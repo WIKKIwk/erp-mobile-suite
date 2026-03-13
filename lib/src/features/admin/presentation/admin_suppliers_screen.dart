@@ -36,11 +36,14 @@ class _AdminSuppliersScreenState extends State<AdminSuppliersScreen> {
     final results = await Future.wait<dynamic>([
       MobileApi.instance.adminSupplierSummary(),
       MobileApi.instance.adminSuppliers(),
+      MobileApi.instance.adminCustomers(),
       MobileApi.instance.adminSettings(),
     ]);
     final AdminSupplierSummary summary = results[0] as AdminSupplierSummary;
     final List<AdminSupplier> suppliers = results[1] as List<AdminSupplier>;
-    final AdminSettings settings = results[2] as AdminSettings;
+    final List<CustomerDirectoryEntry> customers =
+        results[2] as List<CustomerDirectoryEntry>;
+    final AdminSettings settings = results[3] as AdminSettings;
 
     final items = <AdminUserListEntry>[
       if (settings.werkaName.trim().isNotEmpty ||
@@ -60,6 +63,14 @@ class _AdminSuppliersScreenState extends State<AdminSuppliersScreen> {
           phone: item.phone,
           kind: AdminUserKind.supplier,
           blocked: item.blocked,
+        ),
+      ),
+      ...customers.map(
+        (item) => AdminUserListEntry(
+          id: item.ref,
+          name: item.name,
+          phone: item.phone,
+          kind: AdminUserKind.customer,
         ),
       ),
     ];
@@ -110,6 +121,13 @@ class _AdminSuppliersScreenState extends State<AdminSuppliersScreen> {
                   onTapUser: (item) async {
                     if (item.kind == AdminUserKind.werka) {
                       await Navigator.of(context).pushNamed(AppRoutes.adminWerka);
+                    } else if (item.kind == AdminUserKind.customer) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Customer detail keyingi bosqichda'),
+                        ),
+                      );
                     } else {
                       await Navigator.of(context).pushNamed(
                         AppRoutes.adminSupplierDetail,

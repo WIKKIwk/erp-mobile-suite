@@ -76,7 +76,9 @@ class _AdminSupplierRow extends StatelessWidget {
               child: Icon(
                 item.kind == AdminUserKind.werka
                     ? Icons.badge_outlined
-                    : Icons.person_outline_rounded,
+                    : item.kind == AdminUserKind.customer
+                        ? Icons.storefront_outlined
+                        : Icons.person_outline_rounded,
                 size: 20,
                 color: Theme.of(context).colorScheme.onSurface,
               ),
