@@ -112,6 +112,57 @@ class MobileApi {
     return profile;
   }
 
+  Future<CustomerHomeSummary> customerSummary() async {
+    final response = await _sendAuthorized(
+      () => http.get(
+        Uri.parse('$baseUrl/v1/mobile/customer/summary'),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Customer summary failed');
+    }
+    return CustomerHomeSummary.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
+  Future<List<DispatchRecord>> customerHistory() async {
+    final response = await _sendAuthorized(
+      () => http.get(
+        Uri.parse('$baseUrl/v1/mobile/customer/history'),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Customer history failed');
+    }
+    final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
+    return json
+        .map((item) => DispatchRecord.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<List<DispatchRecord>> customerStatusDetails(
+    CustomerStatusKind kind,
+  ) async {
+    final response = await _sendAuthorized(
+      () => http.get(
+        Uri.parse('$baseUrl/v1/mobile/customer/status-details').replace(
+          queryParameters: {'kind': kind.name},
+        ),
+        headers: _headers(requireToken()),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Customer status details failed');
+    }
+    final List<dynamic> json = jsonDecode(response.body) as List<dynamic>;
+    return json
+        .map((item) => DispatchRecord.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<SessionProfile> updateNickname(String nickname) async {
     final http.Response response = await _sendAuthorized(
       () => http.put(
@@ -356,7 +407,8 @@ class MobileApi {
         .toList();
   }
 
-  Future<List<CustomerDirectoryEntry>> werkaCustomers({String query = ''}) async {
+  Future<List<CustomerDirectoryEntry>> werkaCustomers(
+      {String query = ''}) async {
     final response = await _sendAuthorized(
       () => http.get(
         Uri.parse('$baseUrl/v1/mobile/werka/customers').replace(

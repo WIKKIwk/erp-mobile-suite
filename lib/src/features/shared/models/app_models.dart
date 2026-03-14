@@ -140,6 +140,40 @@ class SupplierHomeSummary {
   }
 }
 
+class CustomerHomeSummary {
+  const CustomerHomeSummary({
+    required this.pendingCount,
+    required this.confirmedCount,
+    required this.rejectedCount,
+  });
+
+  final int pendingCount;
+  final int confirmedCount;
+  final int rejectedCount;
+
+  factory CustomerHomeSummary.fromJson(Map<String, dynamic> json) {
+    return CustomerHomeSummary(
+      pendingCount: json['pending_count'] as int? ?? 0,
+      confirmedCount: json['confirmed_count'] as int? ?? 0,
+      rejectedCount: json['rejected_count'] as int? ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'pending_count': pendingCount,
+      'confirmed_count': confirmedCount,
+      'rejected_count': rejectedCount,
+    };
+  }
+}
+
+enum CustomerStatusKind {
+  pending,
+  confirmed,
+  rejected,
+}
+
 enum SupplierStatusKind {
   pending,
   submitted,
@@ -171,10 +205,8 @@ class SupplierStatusBreakdownEntry {
       itemName: json['item_name'] as String? ?? '',
       receiptCount: json['receipt_count'] as int? ?? 0,
       totalSentQty: (json['total_sent_qty'] as num?)?.toDouble() ?? 0,
-      totalAcceptedQty:
-          (json['total_accepted_qty'] as num?)?.toDouble() ?? 0,
-      totalReturnedQty:
-          (json['total_returned_qty'] as num?)?.toDouble() ?? 0,
+      totalAcceptedQty: (json['total_accepted_qty'] as num?)?.toDouble() ?? 0,
+      totalReturnedQty: (json['total_returned_qty'] as num?)?.toDouble() ?? 0,
       uom: json['uom'] as String? ?? '',
     );
   }
@@ -392,9 +424,9 @@ class SessionProfile {
           ? UserRole.werka
           : roleValue == 'customer'
               ? UserRole.customer
-          : roleValue == 'admin'
-              ? UserRole.admin
-              : UserRole.supplier,
+              : roleValue == 'admin'
+                  ? UserRole.admin
+                  : UserRole.supplier,
       displayName: json['display_name'] as String? ?? '',
       legalName: json['legal_name'] as String? ?? '',
       ref: json['ref'] as String? ?? '',
@@ -409,9 +441,9 @@ class SessionProfile {
           ? 'werka'
           : role == UserRole.customer
               ? 'customer'
-          : role == UserRole.admin
-              ? 'admin'
-              : 'supplier',
+              : role == UserRole.admin
+                  ? 'admin'
+                  : 'supplier',
       'display_name': displayName,
       'legal_name': legalName,
       'ref': ref,

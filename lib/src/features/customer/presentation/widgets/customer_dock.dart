@@ -15,7 +15,7 @@ class CustomerDock extends StatelessWidget {
     required this.activeTab,
   });
 
-  final CustomerDockTab activeTab;
+  final CustomerDockTab? activeTab;
 
   @override
   Widget build(BuildContext context) {
@@ -47,8 +47,10 @@ class CustomerDock extends StatelessWidget {
         active: activeTab == CustomerDockTab.notifications,
         primary: false,
         onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Customer feed keyingi bosqichda')),
+          if (activeTab == CustomerDockTab.notifications) return;
+          Navigator.of(context).pushNamedAndRemoveUntil(
+            AppRoutes.customerNotifications,
+            (route) => false,
           );
         },
       ),

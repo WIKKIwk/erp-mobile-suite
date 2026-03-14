@@ -1,5 +1,7 @@
 import '../features/auth/presentation/login_screen.dart';
 import '../features/customer/presentation/customer_home_screen.dart';
+import '../features/customer/presentation/customer_notifications_screen.dart';
+import '../features/customer/presentation/customer_status_detail_screen.dart';
 import '../features/admin/presentation/admin_activity_screen.dart';
 import '../features/admin/presentation/admin_create_hub_screen.dart';
 import '../features/admin/presentation/admin_home_screen.dart';
@@ -60,10 +62,12 @@ class AppRoutes {
   static const String notificationDetail = '/notification-detail';
   static const String werkaHome = '/werka-home';
   static const String werkaCreateHub = '/werka-create-hub';
-  static const String werkaCustomerIssueCustomer = '/werka-customer-issue-customer';
+  static const String werkaCustomerIssueCustomer =
+      '/werka-customer-issue-customer';
   static const String werkaCustomerIssueItem = '/werka-customer-issue-item';
   static const String werkaCustomerIssueQty = '/werka-customer-issue-qty';
-  static const String werkaCustomerIssueConfirm = '/werka-customer-issue-confirm';
+  static const String werkaCustomerIssueConfirm =
+      '/werka-customer-issue-confirm';
   static const String werkaUnannouncedSupplier = '/werka-unannounced-supplier';
   static const String werkaUnannouncedItem = '/werka-unannounced-item';
   static const String werkaUnannouncedQty = '/werka-unannounced-qty';
@@ -75,6 +79,8 @@ class AppRoutes {
   static const String werkaSuccess = '/werka-success';
   static const String profile = '/profile';
   static const String customerHome = '/customer-home';
+  static const String customerNotifications = '/customer-notifications';
+  static const String customerStatusDetail = '/customer-status-detail';
   static const String pinSetupEntry = '/pin-setup-entry';
   static const String pinSetupConfirm = '/pin-setup-confirm';
   static const String adminHome = '/admin-home';
@@ -108,6 +114,7 @@ class AppRouter {
     AppRoutes.adminWerka,
     AppRoutes.profile,
     AppRoutes.customerHome,
+    AppRoutes.customerNotifications,
   };
 
   static Route<dynamic> onGenerateRoute(RouteSettings settings) {
@@ -231,6 +238,15 @@ class AppRouter {
         return _buildRoute(settings, const ProfileScreen());
       case AppRoutes.customerHome:
         return _buildRoute(settings, const CustomerHomeScreen());
+      case AppRoutes.customerNotifications:
+        return _buildRoute(settings, const CustomerNotificationsScreen());
+      case AppRoutes.customerStatusDetail:
+        final CustomerStatusKind kind =
+            settings.arguments as CustomerStatusKind;
+        return _buildRoute(
+          settings,
+          CustomerStatusDetailScreen(kind: kind),
+        );
       case AppRoutes.pinSetupEntry:
         return _buildRoute(settings, const PinSetupEntryScreen());
       case AppRoutes.pinSetupConfirm:
