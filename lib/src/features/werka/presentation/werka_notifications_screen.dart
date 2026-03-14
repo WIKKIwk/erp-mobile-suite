@@ -292,23 +292,29 @@ class _WerkaNotificationsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SoftCard(
-      padding: EdgeInsets.zero,
+      padding: const EdgeInsets.all(10),
       borderWidth: 1.45,
       borderRadius: 20,
-      child: Column(
-        children: [
-          for (int index = 0; index < items.length; index++) ...[
-            _WerkaNotificationRow(
-              record: items[index],
-              highlighted: highlightedUnreadIds.contains(items[index].id),
-              isFirst: index == 0,
-              isLast: index == items.length - 1,
-              onTap: () => onTapRecord(items[index].id),
-            ),
-            if (index != items.length - 1)
-              const Divider(height: 1, thickness: 1),
-          ],
-        ],
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          color: const Color(0xFF000000),
+          child: Column(
+            children: [
+              for (int index = 0; index < items.length; index++) ...[
+                _WerkaNotificationRow(
+                  record: items[index],
+                  highlighted: highlightedUnreadIds.contains(items[index].id),
+                  isFirst: index == 0,
+                  isLast: index == items.length - 1,
+                  onTap: () => onTapRecord(items[index].id),
+                ),
+                if (index != items.length - 1)
+                  const Divider(height: 1, thickness: 1),
+              ],
+            ],
+          ),
+        ),
       ),
     );
   }
