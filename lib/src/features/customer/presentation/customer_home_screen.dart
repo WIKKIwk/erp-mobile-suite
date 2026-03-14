@@ -318,13 +318,20 @@ class _CustomerShipmentsPanel extends StatelessWidget {
     final bool isDark = theme.brightness == Brightness.dark;
 
     return _QuietPanel(
+      padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Recent shipments', style: theme.textTheme.titleLarge),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Text('Recent shipments', style: theme.textTheme.titleLarge),
+          ),
           const SizedBox(height: 14),
           if (items.isEmpty)
-            const _CustomerEmptyState()
+            const Padding(
+              padding: EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: _CustomerEmptyState(),
+            )
           else
             Card.filled(
               margin: EdgeInsets.zero,
