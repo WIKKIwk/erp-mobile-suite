@@ -151,10 +151,8 @@ class _SupplierNotificationsScreenState
     final unread = NotificationUnreadStore.instance.unreadIdsForProfile(
       AppSession.instance.profile,
     );
-    final highlighted = items
-        .map((item) => item.id)
-        .where((id) => unread.contains(id))
-        .toSet();
+    final highlighted =
+        items.map((item) => item.id).where((id) => unread.contains(id)).toSet();
     if (mounted) {
       setState(() {
         _highlightedUnreadIds = highlighted;
@@ -329,16 +327,16 @@ class _SupplierNotificationRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PressableScale(
-      borderRadius: 20,
+      borderRadius: 0,
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
           color: highlighted ? const Color(0xFF212121) : Colors.transparent,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(isFirst ? 20 : 0),
-            topRight: Radius.circular(isFirst ? 20 : 0),
-            bottomLeft: Radius.circular(isLast ? 20 : 0),
-            bottomRight: Radius.circular(isLast ? 20 : 0),
+          borderRadius: const BorderRadius.only(
+            topLeft: Radius.circular(0),
+            topRight: Radius.circular(0),
+            bottomLeft: Radius.circular(0),
+            bottomRight: Radius.circular(0),
           ),
         ),
         padding: const EdgeInsets.all(18),

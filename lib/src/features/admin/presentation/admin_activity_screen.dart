@@ -134,9 +134,10 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
           final hidden = NotificationHiddenStore.instance.hiddenIdsForProfile(
             AppSession.instance.profile,
           );
-          final items = (snapshot.data ?? _cachedItems ?? const <DispatchRecord>[])
-              .where((item) => !hidden.contains(item.id))
-              .toList();
+          final items =
+              (snapshot.data ?? _cachedItems ?? const <DispatchRecord>[])
+                  .where((item) => !hidden.contains(item.id))
+                  .toList();
           if (snapshot.connectionState != ConnectionState.done &&
               items.isEmpty) {
             return const Center(child: CircularProgressIndicator());
@@ -239,12 +240,12 @@ class _AdminActivityRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(isFirst ? 20 : 0),
-          topRight: Radius.circular(isFirst ? 20 : 0),
-          bottomLeft: Radius.circular(isLast ? 20 : 0),
-          bottomRight: Radius.circular(isLast ? 20 : 0),
+      decoration: const BoxDecoration(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(0),
+          topRight: Radius.circular(0),
+          bottomLeft: Radius.circular(0),
+          bottomRight: Radius.circular(0),
         ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
