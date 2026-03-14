@@ -162,6 +162,7 @@ class ActionDock extends StatelessWidget {
     required this.center,
     this.compact = false,
     this.tightToEdges = false,
+    this.centered = false,
     this.liftCenter = true,
   });
 
@@ -170,6 +171,7 @@ class ActionDock extends StatelessWidget {
   final Widget center;
   final bool compact;
   final bool tightToEdges;
+  final bool centered;
   final bool liftCenter;
 
   double _hostHeightForDevice(_DockDeviceClass deviceClass) {
@@ -232,30 +234,49 @@ class ActionDock extends StatelessWidget {
             left: tightToEdges ? 8 : 20,
             right: tightToEdges ? 8 : 20,
             bottom: compact ? 8 : 10,
-            child: Row(
-              mainAxisAlignment: tightToEdges
-                  ? MainAxisAlignment.spaceBetween
-                  : MainAxisAlignment.spaceEvenly,
-              children: List<Widget>.generate(
-                buttons.length,
-                (index) => Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: switch (deviceClass) {
-                      _DockDeviceClass.small => tightToEdges ? 0 : 1,
-                      _DockDeviceClass.medium => tightToEdges ? 1 : 2,
-                      _DockDeviceClass.large => tightToEdges ? 1 : 3,
-                    },
-                  ),
-                  child: Transform.translate(
-                    offset: Offset(
-                      0,
-                      liftCenter && index == leading.length ? -3 : 0,
+            child: centered && !tightToEdges
+                ? Center(
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List<Widget>.generate(
+                        buttons.length,
+                        (index) => Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Transform.translate(
+                            offset: Offset(
+                              0,
+                              liftCenter && index == leading.length ? -3 : 0,
+                            ),
+                            child: buttons[index],
+                          ),
+                        ),
+                      ),
                     ),
-                    child: buttons[index],
+                  )
+                : Row(
+                    mainAxisAlignment: tightToEdges
+                        ? MainAxisAlignment.spaceBetween
+                        : MainAxisAlignment.spaceEvenly,
+                    children: List<Widget>.generate(
+                      buttons.length,
+                      (index) => Padding(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: switch (deviceClass) {
+                            _DockDeviceClass.small => tightToEdges ? 0 : 1,
+                            _DockDeviceClass.medium => tightToEdges ? 1 : 2,
+                            _DockDeviceClass.large => tightToEdges ? 1 : 3,
+                          },
+                        ),
+                        child: Transform.translate(
+                          offset: Offset(
+                            0,
+                            liftCenter && index == leading.length ? -3 : 0,
+                          ),
+                          child: buttons[index],
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
           ),
         ],
       ),
@@ -352,14 +373,14 @@ class _DockButtonState extends State<DockButton> {
         : (widget.iconWidget ?? Icon(widget.icon));
     final double iconSize = widget.primary
         ? switch (deviceClass) {
-            _DockDeviceClass.small => 27,
-            _DockDeviceClass.medium => 28,
-            _DockDeviceClass.large => 28,
+            _DockDeviceClass.small => 29,
+            _DockDeviceClass.medium => 30,
+            _DockDeviceClass.large => 30,
           }
         : switch (deviceClass) {
-            _DockDeviceClass.small => 24,
-            _DockDeviceClass.medium => 24,
-            _DockDeviceClass.large => 24,
+            _DockDeviceClass.small => 26,
+            _DockDeviceClass.medium => 27,
+            _DockDeviceClass.large => 27,
           };
 
     return AnimatedScale(
@@ -402,9 +423,9 @@ class _DockButtonState extends State<DockButton> {
                     _DockDeviceClass.large => widget.compact ? 54 : 58,
                   }
                 : switch (deviceClass) {
-                    _DockDeviceClass.small => widget.compact ? 48 : 52,
-                    _DockDeviceClass.medium => widget.compact ? 50 : 54,
-                    _DockDeviceClass.large => widget.compact ? 50 : 54,
+                    _DockDeviceClass.small => widget.compact ? 52 : 56,
+                    _DockDeviceClass.medium => widget.compact ? 54 : 58,
+                    _DockDeviceClass.large => widget.compact ? 54 : 58,
                   },
             width: widget.primary
                 ? switch (deviceClass) {
@@ -413,9 +434,9 @@ class _DockButtonState extends State<DockButton> {
                     _DockDeviceClass.large => widget.compact ? 54 : 58,
                   }
                 : switch (deviceClass) {
-                    _DockDeviceClass.small => widget.compact ? 62 : 66,
-                    _DockDeviceClass.medium => widget.compact ? 66 : 72,
-                    _DockDeviceClass.large => widget.compact ? 66 : 72,
+                    _DockDeviceClass.small => widget.compact ? 66 : 72,
+                    _DockDeviceClass.medium => widget.compact ? 70 : 78,
+                    _DockDeviceClass.large => widget.compact ? 70 : 78,
                   },
             decoration: BoxDecoration(
               color: background,
@@ -441,8 +462,8 @@ class _DockButtonState extends State<DockButton> {
                         AnimatedContainer(
                           duration: AppMotion.medium,
                           curve: AppMotion.smooth,
-                          height: 32,
-                          width: widget.active ? 56 : 32,
+                          height: 38,
+                          width: widget.active ? 62 : 38,
                           decoration: BoxDecoration(
                             color: widget.active
                                 ? scheme.secondaryContainer

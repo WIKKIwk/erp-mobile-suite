@@ -35,11 +35,12 @@ class CustomerDock extends StatelessWidget {
         return ActionDock(
           compact: compact,
           tightToEdges: tightToEdges,
+          centered: true,
           liftCenter: false,
           leading: [
             DockButton(
               icon: Icons.home_outlined,
-              selectedIcon: Icons.home_rounded,
+              selectedIcon: Icons.home_filled,
               active: activeTab == CustomerDockTab.home,
               compact: compact,
               onTap: () {
@@ -53,7 +54,7 @@ class CustomerDock extends StatelessWidget {
           ],
           center: DockButton(
             icon: Icons.notifications_outlined,
-            selectedIcon: Icons.notifications_rounded,
+            selectedIcon: Icons.notifications,
             active: activeTab == CustomerDockTab.notifications,
             primary: false,
             showBadge: showBadge,
@@ -69,7 +70,7 @@ class CustomerDock extends StatelessWidget {
           trailing: [
             DockButton(
               icon: Icons.account_circle_outlined,
-              selectedIcon: Icons.account_circle_rounded,
+              selectedIcon: Icons.account_circle,
               active: activeTab == CustomerDockTab.profile,
               compact: compact,
               onHoldComplete: activeTab == CustomerDockTab.profile
