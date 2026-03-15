@@ -382,7 +382,7 @@ class _CustomerShipmentsPanel extends StatelessWidget {
           else
             Card.filled(
               margin: EdgeInsets.zero,
-              color: isDark ? const Color(0xFF2A2931) : scheme.surfaceContainer,
+              color: isDark ? const Color(0xFF3A4559) : scheme.surfaceContainer,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
