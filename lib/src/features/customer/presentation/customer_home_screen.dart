@@ -366,6 +366,7 @@ class _CustomerShipmentsPanel extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
+    final titleColor = isDark ? theme.colorScheme.onSurface : scheme.onPrimary;
 
     return _QuietPanel(
       padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
@@ -375,7 +376,12 @@ class _CustomerShipmentsPanel extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text('Recent shipments', style: theme.textTheme.titleLarge),
+            child: Text(
+              'Recent shipments',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: titleColor,
+              ),
+            ),
           ),
           const SizedBox(height: 14),
           if (items.isEmpty)
@@ -386,7 +392,7 @@ class _CustomerShipmentsPanel extends StatelessWidget {
           else
             Card.filled(
               margin: EdgeInsets.zero,
-              color: isDark ? const Color(0xFF2A2931) : scheme.surfaceContainer,
+              color: isDark ? const Color(0xFF2A2931) : const Color(0xFFFDEAF6),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(24),
               ),
