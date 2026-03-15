@@ -4,7 +4,6 @@ import '../../shared/models/app_models.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 class AdminCustomerDetailScreen extends StatefulWidget {
   const AdminCustomerDetailScreen({
@@ -25,8 +24,6 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
   AdminCustomerDetail? _detail;
   Object? _loadError;
   bool _loading = true;
-  bool _savingPhone = false;
-  bool _regeneratingCode = false;
   int _retryAfterSec = 0;
   Timer? _retryTimer;
 
@@ -98,100 +95,10 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
     }
   }
 
-  Future<void> _addPhone(AdminCustomerDetail detail) async {
-    final controller = TextEditingController();
-    final phone = await showDialog<String>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Telefon raqam qo‘shish'),
-          content: TextField(
-            controller: controller,
-            keyboardType: TextInputType.phone,
-            autofocus: true,
-            decoration: const InputDecoration(
-              hintText: '+998901234567',
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Bekor qilish'),
-            ),
-            FilledButton(
-              onPressed: () =>
-                  Navigator.of(context).pop(controller.text.trim()),
-              child: const Text('Saqlash'),
-            ),
-          ],
-        );
-      },
-    );
-    controller.dispose();
-    if (phone == null || phone.trim().isEmpty) {
-      return;
-    }
-
-    setState(() => _savingPhone = true);
-    try {
-      final updated = await MobileApi.instance.adminUpdateCustomerPhone(
-        ref: detail.ref,
-        phone: phone,
-      );
-      if (!mounted) {
-        return;
-      }
-      _setRetryAfter(updated.codeRetryAfterSec);
-      setState(() {
-        _detail = updated;
-      });
-    } catch (error) {
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Telefon saqlanmadi: $error')),
-      );
-    } finally {
-      if (mounted) {
-        setState(() => _savingPhone = false);
-      }
-    }
-  }
-
-  Future<void> _regenerateCode() async {
-    setState(() => _regeneratingCode = true);
-    try {
-      final updated = await MobileApi.instance
-          .adminRegenerateCustomerCode(widget.customerRef);
-      if (!mounted) {
-        return;
-      }
-      _setRetryAfter(updated.codeRetryAfterSec);
-      setState(() {
-        _detail = updated;
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _regeneratingCode = false);
-      }
-    }
-  }
-
-  Future<void> _copyCode(String code) async {
-    await Clipboard.setData(ClipboardData(text: code));
-    if (!mounted) {
-      return;
-    }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Code nusxalandi')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final detail = _detail ??
+    final AdminCustomerDetail detail = _detail ??
         AdminCustomerDetail(
           ref: widget.customerRef,
           name: _loading ? 'Yuklanmoqda...' : 'Customer',
@@ -216,26 +123,15 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
-                    'Customer Detail',
+                    'Customer',
                     style: theme.textTheme.headlineMedium,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Text(
-              'debug-marker: ${widget.customerRef}',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.primary,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
             const SizedBox(height: 20),
             _AdminCustomerDetailCard(
               detail: detail,
-              savingPhone: _savingPhone || _loading,
-              regeneratingCode: _regeneratingCode,
-              retryAfterSec: _retryAfterSec,
               statusLabel: _loading
                   ? 'Yuklanmoqda'
                   : _loadError != null
@@ -243,20 +139,10 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
                       : _detail == null
                           ? 'Bo‘sh'
                           : 'Tayyor',
-              onAddPhone: _addPhone,
-              onRegenerateCode: _regenerateCode,
-              onCopyCode: _copyCode,
-            ),
-            const SizedBox(height: 12),
-            _AdminCustomerInfoCard(
-              child: Text(
-                'Customer detail route: ${widget.customerRef}',
-                style: theme.textTheme.titleMedium,
-              ),
             ),
             if (_loadError != null) ...[
               const SizedBox(height: 12),
-              _AdminCustomerInfoCard(
+              _AdminCustomerNoticeCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -283,57 +169,19 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
   }
 }
 
-class _AdminCustomerInfoCard extends StatelessWidget {
-  const _AdminCustomerInfoCard({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Card.filled(
-      margin: EdgeInsets.zero,
-      color: scheme.surfaceContainerLow,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(28),
-        side: BorderSide(
-          color: scheme.outlineVariant.withValues(alpha: 0.7),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(18),
-        child: child,
-      ),
-    );
-  }
-}
-
 class _AdminCustomerDetailCard extends StatelessWidget {
   const _AdminCustomerDetailCard({
     required this.detail,
-    required this.savingPhone,
-    required this.regeneratingCode,
-    required this.retryAfterSec,
     required this.statusLabel,
-    required this.onAddPhone,
-    required this.onRegenerateCode,
-    required this.onCopyCode,
   });
 
   final AdminCustomerDetail detail;
-  final bool savingPhone;
-  final bool regeneratingCode;
-  final int retryAfterSec;
   final String statusLabel;
-  final Future<void> Function(AdminCustomerDetail detail) onAddPhone;
-  final Future<void> Function() onRegenerateCode;
-  final Future<void> Function(String code) onCopyCode;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final hasPhone = detail.phone.trim().isNotEmpty;
 
     return Card.filled(
       margin: EdgeInsets.zero,
@@ -357,80 +205,25 @@ class _AdminCustomerDetailCard extends StatelessWidget {
                     style: theme.textTheme.headlineMedium,
                   ),
                 ),
-                _AdminStateChip(label: statusLabel),
+                _StatusChip(label: statusLabel),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 18),
             Text('Ref', style: theme.textTheme.bodySmall),
             const SizedBox(height: 6),
-            _AdminCustomerField(
-              child: Text(
-                detail.ref,
-                style: theme.textTheme.titleMedium,
-              ),
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Telefon',
-                    style: theme.textTheme.bodySmall,
-                  ),
-                ),
-                FilledButton.tonal(
-                  onPressed: savingPhone ? null : () => onAddPhone(detail),
-                  child: Text(hasPhone ? 'Yangilash' : 'Qo‘shish'),
-                ),
-              ],
-            ),
+            _DetailField(value: detail.ref),
+            const SizedBox(height: 14),
+            Text('Telefon', style: theme.textTheme.bodySmall),
             const SizedBox(height: 6),
-            _AdminCustomerField(
-              child: Text(
-                hasPhone ? detail.phone : 'Kiritilmagan',
-                style: theme.textTheme.titleMedium,
-              ),
-            ),
-            const SizedBox(height: 16),
+            _DetailField(value: detail.phone),
+            const SizedBox(height: 14),
             Text('Code', style: theme.textTheme.bodySmall),
             const SizedBox(height: 6),
-            _AdminCustomerField(
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      detail.code.trim().isEmpty
-                          ? 'Hali generatsiya qilinmagan'
-                          : detail.code,
-                      style: theme.textTheme.titleMedium,
-                    ),
-                  ),
-                  if (detail.code.trim().isNotEmpty)
-                    IconButton(
-                      onPressed: () => onCopyCode(detail.code),
-                      icon: const Icon(Icons.content_copy_outlined),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 14),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: regeneratingCode || retryAfterSec > 0
-                    ? null
-                    : onRegenerateCode,
-                child: Text(
-                  regeneratingCode
-                      ? 'Generatsiya qilinmoqda...'
-                      : 'Code generatsiya qilish',
-                ),
-              ),
-            ),
-            if (retryAfterSec > 0) ...[
-              const SizedBox(height: 8),
+            _DetailField(value: detail.code),
+            if (detail.codeRetryAfterSec > 0) ...[
+              const SizedBox(height: 12),
               Text(
-                'Keyingi code uchun $retryAfterSec soniyadan keyin qayta urining.',
+                'Keyingi code uchun ${detail.codeRetryAfterSec} soniya kuting.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: scheme.onSurfaceVariant,
                 ),
@@ -443,32 +236,55 @@ class _AdminCustomerDetailCard extends StatelessWidget {
   }
 }
 
-class _AdminCustomerField extends StatelessWidget {
-  const _AdminCustomerField({
-    this.child,
-  });
+class _AdminCustomerNoticeCard extends StatelessWidget {
+  const _AdminCustomerNoticeCard({required this.child});
 
-  final Widget? child;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+        side: BorderSide(
+          color: scheme.outlineVariant.withValues(alpha: 0.7),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: child,
+      ),
+    );
+  }
+}
+
+class _DetailField extends StatelessWidget {
+  const _DetailField({required this.value});
+
+  final String value;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(
-        horizontal: 14,
-        vertical: 12,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(18),
       ),
-      child: child,
+      child: Text(
+        value.trim().isEmpty ? 'Kiritilmagan' : value,
+        style: Theme.of(context).textTheme.titleMedium,
+      ),
     );
   }
 }
 
-class _AdminStateChip extends StatelessWidget {
-  const _AdminStateChip({required this.label});
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.label});
 
   final String label;
 
