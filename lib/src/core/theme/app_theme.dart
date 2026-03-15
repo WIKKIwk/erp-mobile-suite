@@ -104,26 +104,34 @@ class AppTheme {
   }
 
   static ThemeData light() {
-    const seed = Color(0xFF4F6DAA);
+    const seed = Color(0xFF917FB3);
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seed,
       brightness: Brightness.light,
     ).copyWith(
-      surface: const Color(0xFFFFFBFE),
-      onSurface: const Color(0xFF1C1B1F),
-      surfaceDim: const Color(0xFFDED8E1),
-      surfaceBright: const Color(0xFFFFFBFE),
+      primary: const Color(0xFF2A2F4F),
+      onPrimary: const Color(0xFFFDE2F3),
+      primaryContainer: const Color(0xFF917FB3),
+      onPrimaryContainer: const Color(0xFFFDE2F3),
+      secondary: const Color(0xFF917FB3),
+      onSecondary: const Color(0xFFFFFFFF),
+      secondaryContainer: const Color(0xFFE5BEEC),
+      onSecondaryContainer: const Color(0xFF2A2F4F),
+      tertiary: const Color(0xFFE5BEEC),
+      onTertiary: const Color(0xFF2A2F4F),
+      tertiaryContainer: const Color(0xFFF1D3F1),
+      onTertiaryContainer: const Color(0xFF2A2F4F),
+      surface: const Color(0xFFFDE2F3),
+      onSurface: const Color(0xFF2A2F4F),
+      surfaceDim: const Color(0xFFF4D3EA),
+      surfaceBright: const Color(0xFFFFF7FC),
       surfaceContainerLowest: const Color(0xFFFFFFFF),
-      surfaceContainerLow: const Color(0xFFF7F2FA),
-      surfaceContainer: const Color(0xFFF1ECF4),
-      surfaceContainerHigh: const Color(0xFFECE6EF),
-      surfaceContainerHighest: const Color(0xFFE6E0E9),
-      outline: const Color(0xFF7A757F),
-      outlineVariant: const Color(0xFFCAC4CF),
-      secondaryContainer: const Color(0xFFDCE3F9),
-      onSecondaryContainer: const Color(0xFF111C2E),
-      primaryContainer: const Color(0xFFD8E2FF),
-      onPrimaryContainer: const Color(0xFF102F63),
+      surfaceContainerLow: const Color(0xFFFDEAF6),
+      surfaceContainer: const Color(0xFFF7D9EE),
+      surfaceContainerHigh: const Color(0xFFF0CDEE),
+      surfaceContainerHighest: const Color(0xFFE5BEEC),
+      outline: const Color(0xFF917FB3),
+      outlineVariant: const Color(0xFFCDB8D8),
     );
     final textTheme = _textTheme(
       base: GoogleFonts.robotoTextTheme(ThemeData.light().textTheme),
