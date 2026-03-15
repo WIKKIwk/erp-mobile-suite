@@ -46,7 +46,6 @@ import '../features/werka/presentation/werka_unannounced_item_screen.dart';
 import '../features/werka/presentation/werka_status_detail_screen.dart';
 import '../features/werka/presentation/werka_status_breakdown_screen.dart';
 import '../features/werka/presentation/werka_success_screen.dart';
-import '../core/theme/app_motion.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
@@ -320,58 +319,10 @@ class AppRouter {
       );
     }
 
-    return PageRouteBuilder<dynamic>(
+    return MaterialPageRoute<dynamic>(
       settings: settings,
-      pageBuilder: (context, animation, secondaryAnimation) => child,
-      transitionDuration: AppMotion.pageEnter,
-      reverseTransitionDuration: AppMotion.pageExit,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final CurvedAnimation incoming = CurvedAnimation(
-          parent: animation,
-          curve: AppMotion.pageIn,
-          reverseCurve: AppMotion.pageOut,
-        );
-        final CurvedAnimation outgoing = CurvedAnimation(
-          parent: secondaryAnimation,
-          curve: AppMotion.pageIn,
-          reverseCurve: AppMotion.pageOut,
-        );
-        final Animation<double> fade = Tween<double>(
-          begin: 0,
-          end: 1,
-        ).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: const Interval(0.0, 1.0, curve: AppMotion.pageIn),
-            reverseCurve: const Interval(0.0, 1.0, curve: AppMotion.pageOut),
-          ),
-        );
-        final Animation<Offset> slideIn = Tween<Offset>(
-          begin: const Offset(0.08, 0.0),
-          end: Offset.zero,
-        ).animate(incoming);
-        final Animation<Offset> slideOut = Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(-0.02, 0.0),
-        ).animate(outgoing);
-        final Animation<double> scale = Tween<double>(
-          begin: 0.992,
-          end: 1,
-        ).animate(incoming);
-
-        return SlideTransition(
-          position: slideOut,
-          child: FadeTransition(
-            opacity: fade,
-            child: ScaleTransition(
-              scale: scale,
-              child: SlideTransition(
-                position: slideIn,
-                child: child,
-              ),
-            ),
-          ),
-        );
+      builder: (context) {
+        return child;
       },
     );
   }
@@ -380,61 +331,10 @@ class AppRouter {
     RouteSettings settings,
     Widget child,
   ) {
-    return PageRouteBuilder<dynamic>(
+    return MaterialPageRoute<dynamic>(
       settings: settings,
-      transitionDuration: AppMotion.pageEnter,
-      reverseTransitionDuration: AppMotion.pageExit,
-      pageBuilder: (context, animation, secondaryAnimation) => child,
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final Animation<double> fade = CurvedAnimation(
-          parent: animation,
-          curve: AppMotion.emphasizedDecelerate,
-          reverseCurve: AppMotion.emphasizedAccelerate,
-        );
-        final Animation<Offset> slideIn = Tween<Offset>(
-          begin: const Offset(0.06, 0),
-          end: Offset.zero,
-        ).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: AppMotion.emphasizedDecelerate,
-            reverseCurve: AppMotion.emphasizedAccelerate,
-          ),
-        );
-        final Animation<Offset> slideOut = Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(-0.02, 0),
-        ).animate(
-          CurvedAnimation(
-            parent: secondaryAnimation,
-            curve: AppMotion.standard,
-            reverseCurve: AppMotion.standardAccelerate,
-          ),
-        );
-        final Animation<double> scale = Tween<double>(
-          begin: 0.992,
-          end: 1,
-        ).animate(
-          CurvedAnimation(
-            parent: animation,
-            curve: AppMotion.standardDecelerate,
-            reverseCurve: AppMotion.standardAccelerate,
-          ),
-        );
-
-        return SlideTransition(
-          position: slideOut,
-          child: FadeTransition(
-            opacity: fade,
-            child: ScaleTransition(
-              scale: scale,
-              child: SlideTransition(
-                position: slideIn,
-                child: child,
-              ),
-            ),
-          ),
-        );
+      builder: (context) {
+        return child;
       },
     );
   }
