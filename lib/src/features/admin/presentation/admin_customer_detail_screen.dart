@@ -22,7 +22,9 @@ class AdminCustomerDetailScreen extends StatefulWidget {
 }
 
 class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
-  late Future<AdminCustomerDetail> _future;
+  AdminCustomerDetail? _detail;
+  Object? _loadError;
+  bool _loading = true;
   bool _savingPhone = false;
   bool _regeneratingCode = false;
   int _retryAfterSec = 0;
@@ -31,7 +33,7 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _future = _loadDetail();
+    unawaited(_reload());
   }
 
   @override
@@ -70,9 +72,30 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
   }
 
   Future<void> _reload() async {
-    final future = _loadDetail();
-    setState(() => _future = future);
-    await future;
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
+    try {
+      final detail = await _loadDetail();
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _detail = detail;
+        _loadError = null;
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _detail = null;
+        _loadError = error;
+        _loading = false;
+      });
+    }
   }
 
   Future<void> _addPhone(AdminCustomerDetail detail) async {
@@ -115,8 +138,12 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
         ref: detail.ref,
         phone: phone,
       );
+      if (!mounted) {
+        return;
+      }
+      _setRetryAfter(updated.codeRetryAfterSec);
       setState(() {
-        _future = Future<AdminCustomerDetail>.value(updated);
+        _detail = updated;
       });
     } catch (error) {
       if (!mounted) {
@@ -137,9 +164,12 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
     try {
       final updated = await MobileApi.instance
           .adminRegenerateCustomerCode(widget.customerRef);
+      if (!mounted) {
+        return;
+      }
       _setRetryAfter(updated.codeRetryAfterSec);
       setState(() {
-        _future = Future<AdminCustomerDetail>.value(updated);
+        _detail = updated;
       });
     } finally {
       if (mounted) {
@@ -199,125 +229,81 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            FutureBuilder<AdminCustomerDetail>(
-              future: _future,
-              builder: (context, snapshot) {
-                try {
-                  return _buildSnapshotBody(context, snapshot);
-                } catch (error, stackTrace) {
-                  FlutterError.reportError(
-                    FlutterErrorDetails(
-                      exception: error,
-                      stack: stackTrace,
-                      library: 'admin_customer_detail_screen',
-                      context:
-                          ErrorDescription('while building customer detail'),
+            if (_loading)
+              _AdminCustomerInfoCard(
+                child: Row(
+                  children: [
+                    const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child:
+                          CircularProgressIndicator.adaptive(strokeWidth: 2.2),
                     ),
-                  );
-                  return _AdminCustomerInfoCard(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        'Customer detail yuklanmoqda...',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ),
+                    const _AdminStateChip(label: 'Yuklanmoqda'),
+                  ],
+                ),
+              )
+            else if (_loadError != null)
+              _AdminCustomerInfoCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
                       children: [
-                        const Text('Customer detail build xatosi'),
-                        const SizedBox(height: 8),
-                        Text('$error'),
+                        Expanded(
+                          child: Text(
+                            'Customer detail yuklanmadi',
+                            style: theme.textTheme.titleMedium,
+                          ),
+                        ),
+                        const _AdminStateChip(label: 'Xato'),
                       ],
                     ),
-                  );
-                }
-              },
-            ),
+                    const SizedBox(height: 8),
+                    Text('$_loadError'),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: _reload,
+                      child: const Text('Qayta urinish'),
+                    ),
+                  ],
+                ),
+              )
+            else if (_detail == null)
+              _AdminCustomerInfoCard(
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Customer detail topilmadi.',
+                        style: theme.textTheme.titleMedium,
+                      ),
+                    ),
+                    const _AdminStateChip(label: 'Bo‘sh'),
+                  ],
+                ),
+              )
+            else
+              _AdminCustomerDetailCard(
+                detail: _detail!,
+                savingPhone: _savingPhone,
+                regeneratingCode: _regeneratingCode,
+                retryAfterSec: _retryAfterSec,
+                onAddPhone: _addPhone,
+                onRegenerateCode: _regenerateCode,
+                onCopyCode: _copyCode,
+              ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSnapshotBody(
-    BuildContext context,
-    AsyncSnapshot<AdminCustomerDetail> snapshot,
-  ) {
-    final theme = Theme.of(context);
-    final stateLabel = snapshot.connectionState != ConnectionState.done
-        ? 'Yuklanmoqda'
-        : snapshot.hasError
-            ? 'Xato'
-            : snapshot.hasData
-                ? 'Tayyor'
-                : 'Bo‘sh';
-
-    if (snapshot.connectionState != ConnectionState.done) {
-      return _AdminCustomerInfoCard(
-        child: Row(
-          children: [
-            const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator.adaptive(strokeWidth: 2.2),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'Customer detail yuklanmoqda...',
-                style: theme.textTheme.titleMedium,
-              ),
-            ),
-            _AdminStateChip(label: stateLabel),
-          ],
-        ),
-      );
-    }
-    if (snapshot.hasError) {
-      return _AdminCustomerInfoCard(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Customer detail yuklanmadi',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                ),
-                _AdminStateChip(label: stateLabel),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text('${snapshot.error}'),
-            const SizedBox(height: 12),
-            FilledButton(
-              onPressed: _reload,
-              child: const Text('Qayta urinish'),
-            ),
-          ],
-        ),
-      );
-    }
-    if (!snapshot.hasData) {
-      return _AdminCustomerInfoCard(
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                'Customer detail topilmadi.',
-                style: theme.textTheme.titleMedium,
-              ),
-            ),
-            _AdminStateChip(label: stateLabel),
-          ],
-        ),
-      );
-    }
-    return _AdminCustomerDetailCard(
-      detail: snapshot.data!,
-      savingPhone: _savingPhone,
-      regeneratingCode: _regeneratingCode,
-      retryAfterSec: _retryAfterSec,
-      onAddPhone: _addPhone,
-      onRegenerateCode: _regenerateCode,
-      onCopyCode: _copyCode,
     );
   }
 }
@@ -386,9 +372,16 @@ class _AdminCustomerDetailCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              detail.name,
-              style: theme.textTheme.headlineMedium,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    detail.name,
+                    style: theme.textTheme.headlineMedium,
+                  ),
+                ),
+                const _AdminStateChip(label: 'Tayyor'),
+              ],
             ),
             const SizedBox(height: 14),
             Text('Ref', style: theme.textTheme.bodySmall),
