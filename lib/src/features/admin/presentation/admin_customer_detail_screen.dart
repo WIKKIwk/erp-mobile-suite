@@ -261,9 +261,13 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
           children: [
             Row(
               children: [
-                IconButton.filledTonal(
+                SizedBox(
+                  height: 52,
+                  width: 52,
+                  child: IconButton.filledTonal(
                   onPressed: () => Navigator.of(context).maybePop(),
-                  icon: const Icon(Icons.arrow_back_rounded),
+                    icon: const Icon(Icons.arrow_back_rounded, size: 28),
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
