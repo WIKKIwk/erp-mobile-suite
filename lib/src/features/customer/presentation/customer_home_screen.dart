@@ -366,22 +366,15 @@ class _CustomerShipmentsPanel extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     final bool isDark = theme.brightness == Brightness.dark;
-    final titleColor = isDark ? theme.colorScheme.onSurface : scheme.onPrimary;
-
     return _QuietPanel(
       padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
-      color: isDark ? null : const Color(0xFF2A2F4F),
+      color: isDark ? null : scheme.surfaceContainerLow,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              'Recent shipments',
-              style: theme.textTheme.titleLarge?.copyWith(
-                color: titleColor,
-              ),
-            ),
+            child: Text('Recent shipments', style: theme.textTheme.titleLarge),
           ),
           const SizedBox(height: 14),
           if (items.isEmpty)
