@@ -177,11 +177,19 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
-                    'Customer',
+                    'Customer Detail',
                     style: theme.textTheme.headlineMedium,
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'debug-marker: ${widget.customerRef}',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.primary,
+                fontWeight: FontWeight.w700,
+              ),
             ),
             const SizedBox(height: 20),
             _AdminCustomerInfoCard(
@@ -202,7 +210,8 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
                       exception: error,
                       stack: stackTrace,
                       library: 'admin_customer_detail_screen',
-                      context: ErrorDescription('while building customer detail'),
+                      context:
+                          ErrorDescription('while building customer detail'),
                     ),
                   );
                   return _AdminCustomerInfoCard(
