@@ -148,6 +148,7 @@ class _CustomerDeliveryDetailScreenState
         icon: Icons.arrow_back_rounded,
         onTap: () => Navigator.of(context).maybePop(),
       ),
+      contentPadding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
       bottom: const CustomerDock(activeTab: null),
       child: FutureBuilder<CustomerDeliveryDetail>(
         future: _future,
