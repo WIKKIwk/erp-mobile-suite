@@ -1,7 +1,6 @@
 import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
 import '../../../core/widgets/app_shell.dart';
-import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/admin_dock.dart';
@@ -82,6 +81,7 @@ class _AdminSuppliersScreenState extends State<AdminSuppliersScreen> {
     return AppShell(
       title: 'Suppliers',
       subtitle: '',
+      contentPadding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
       bottom: const AdminDock(activeTab: AdminDockTab.suppliers),
       child: FutureBuilder<_AdminSuppliersData>(
         future: _future,
@@ -91,8 +91,12 @@ class _AdminSuppliersScreenState extends State<AdminSuppliersScreen> {
           }
           if (snapshot.hasError) {
             return Center(
-              child: SoftCard(
-                child: Text('Users yuklanmadi: ${snapshot.error}'),
+              child: Card.filled(
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text('Users yuklanmadi: ${snapshot.error}'),
+                ),
               ),
             );
           }
@@ -110,30 +114,37 @@ class _AdminSuppliersScreenState extends State<AdminSuppliersScreen> {
             child: ListView(
               padding: EdgeInsets.zero,
               children: [
-                _AdminSuppliersSummarySection(
-                  summary: data.summary,
-                  onTapBlocked: () => Navigator.of(context)
-                      .pushNamed(AppRoutes.adminInactiveSuppliers),
+                SmoothAppear(
+                  delay: const Duration(milliseconds: 20),
+                  child: _AdminSuppliersSummarySection(
+                    summary: data.summary,
+                    onTapBlocked: () => Navigator.of(context)
+                        .pushNamed(AppRoutes.adminInactiveSuppliers),
+                  ),
                 ),
                 const SizedBox(height: 12),
-                AdminSupplierListModule(
-                  items: data.items,
-                  onTapUser: (item) async {
-                    if (item.kind == AdminUserKind.werka) {
-                      await Navigator.of(context).pushNamed(AppRoutes.adminWerka);
-                    } else if (item.kind == AdminUserKind.customer) {
-                      await Navigator.of(context).pushNamed(
-                        AppRoutes.adminCustomerDetail,
-                        arguments: item.id,
-                      );
-                    } else {
-                      await Navigator.of(context).pushNamed(
-                        AppRoutes.adminSupplierDetail,
-                        arguments: item.id,
-                      );
-                    }
-                    await _reload();
-                  },
+                SmoothAppear(
+                  delay: const Duration(milliseconds: 60),
+                  child: AdminSupplierListModule(
+                    items: data.items,
+                    onTapUser: (item) async {
+                      if (item.kind == AdminUserKind.werka) {
+                        await Navigator.of(context)
+                            .pushNamed(AppRoutes.adminWerka);
+                      } else if (item.kind == AdminUserKind.customer) {
+                        await Navigator.of(context).pushNamed(
+                          AppRoutes.adminCustomerDetail,
+                          arguments: item.id,
+                        );
+                      } else {
+                        await Navigator.of(context).pushNamed(
+                          AppRoutes.adminSupplierDetail,
+                          arguments: item.id,
+                        );
+                      }
+                      await _reload();
+                    },
+                  ),
                 ),
               ],
             ),
@@ -165,9 +176,13 @@ class _AdminSuppliersSummarySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SoftCard(
-      padding: EdgeInsets.zero,
-      backgroundColor: const Color(0xFF161616),
+    final scheme = Theme.of(context).colorScheme;
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
       child: Column(
         children: [
           _AdminSuppliersSummaryRow(
@@ -204,19 +219,36 @@ class _AdminSuppliersSummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final row = Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: Theme.of(context).textTheme.titleLarge,
+              style: theme.textTheme.titleLarge,
             ),
           ),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineMedium,
+          FilledButton.tonal(
+            onPressed: onTap,
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(44, 40),
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              visualDensity: VisualDensity.compact,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            child: Text(
+              value,
+              style: theme.textTheme.titleMedium?.copyWith(
+                color: scheme.onSecondaryContainer,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
           ),
         ],
       ),
@@ -240,7 +272,9 @@ class _AdminSuppliersSectionDivider extends StatelessWidget {
     return Divider(
       height: 1,
       thickness: 1,
-      color: Theme.of(context).dividerColor,
+      indent: 18,
+      endIndent: 18,
+      color: Theme.of(context).dividerColor.withValues(alpha: 0.55),
     );
   }
 }

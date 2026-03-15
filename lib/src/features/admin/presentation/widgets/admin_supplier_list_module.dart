@@ -1,5 +1,4 @@
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/widgets/motion_widgets.dart';
 import '../../../shared/models/app_models.dart';
 import 'package:flutter/material.dart';
@@ -16,28 +15,47 @@ class AdminSupplierListModule extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     if (items.isEmpty) {
-      return SoftCard(
-        child: Text(
-          'Userlar topilmadi.',
-          style: Theme.of(context).textTheme.bodySmall,
+      return Card.filled(
+        margin: EdgeInsets.zero,
+        color: scheme.surfaceContainerLow,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(28),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'Userlar topilmadi.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
         ),
       );
     }
 
-    return SoftCard(
-      padding: EdgeInsets.zero,
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
       child: Column(
         children: [
           for (int index = 0; index < items.length; index++) ...[
             if (index > 0)
-              Container(
+              Divider(
                 height: 1,
-                color: AppTheme.cardBorder(context),
+                thickness: 1,
+                indent: 18,
+                endIndent: 18,
+                color: AppTheme.cardBorder(context).withValues(alpha: 0.55),
               ),
-            _AdminSupplierRow(
-              item: items[index],
-              onTap: () => onTapUser(items[index]),
+            SoftReveal(
+              delay: Duration(milliseconds: 20 + (index * 24)),
+              child: _AdminSupplierRow(
+                item: items[index],
+                onTap: () => onTapUser(items[index]),
+              ),
             ),
           ],
         ],
@@ -57,68 +75,78 @@ class _AdminSupplierRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PressableScale(
-      borderRadius: 24,
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                color: AppTheme.actionSurface(context),
-                shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.cardBorder(context)),
-              ),
-              alignment: Alignment.center,
-              child: Icon(
-                item.kind == AdminUserKind.werka
-                    ? Icons.badge_outlined
-                    : item.kind == AdminUserKind.customer
-                        ? Icons.storefront_outlined
-                        : Icons.person_outline_rounded,
-                size: 20,
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.name,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.roleLabel,
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              ),
-            ),
-            if (item.blocked)
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(28),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 6,
-                ),
+                height: 40,
+                width: 40,
                 decoration: BoxDecoration(
-                  color: Colors.transparent,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: AppTheme.cardBorder(context)),
+                  color: item.kind == AdminUserKind.werka
+                      ? scheme.secondaryContainer
+                      : scheme.surfaceContainerHighest,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Text(
-                  'Blocked',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                alignment: Alignment.center,
+                child: Icon(
+                  item.kind == AdminUserKind.werka
+                      ? Icons.badge_outlined
+                      : item.kind == AdminUserKind.customer
+                          ? Icons.storefront_outlined
+                          : Icons.person_outline_rounded,
+                  size: 20,
+                  color: item.kind == AdminUserKind.werka
+                      ? scheme.onSecondaryContainer
+                      : scheme.onSurfaceVariant,
                 ),
               ),
-          ],
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.name,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.roleLabel,
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (item.blocked)
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: scheme.errorContainer,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    'Blocked',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onErrorContainer,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );
