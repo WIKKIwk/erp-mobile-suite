@@ -123,10 +123,11 @@ class _PressableScaleState extends State<PressableScale> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return AnimatedScale(
       scale: pressed ? widget.scale : 1,
       duration: AppMotion.fast,
-      curve: AppMotion.smooth,
+      curve: AppMotion.standard,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(widget.borderRadius),
         child: Stack(
@@ -138,8 +139,8 @@ class _PressableScaleState extends State<PressableScale> {
                 color: Colors.transparent,
                 child: InkWell(
                   borderRadius: BorderRadius.circular(widget.borderRadius),
-                  splashColor: widget.splashColor,
-                  highlightColor: widget.highlightColor,
+                  splashColor: scheme.primary.withValues(alpha: 0.08),
+                  highlightColor: scheme.primary.withValues(alpha: 0.05),
                   onTapDown: (_) => setState(() => pressed = true),
                   onTapCancel: () => setState(() => pressed = false),
                   onTapUp: (_) => setState(() => pressed = false),

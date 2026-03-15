@@ -104,13 +104,16 @@ class AppShell extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: AppMotion.pageEnter,
-      curve: AppMotion.pageIn,
+      curve: AppMotion.standardDecelerate,
       builder: (context, value, animatedChild) {
         return Opacity(
           opacity: value,
-          child: Transform.translate(
-            offset: Offset(18 * (1 - value), 0),
-            child: animatedChild,
+          child: Transform.scale(
+            scale: 0.992 + (0.008 * value),
+            child: Transform.translate(
+              offset: Offset(0, 10 * (1 - value)),
+              child: animatedChild,
+            ),
           ),
         );
       },
@@ -140,23 +143,24 @@ class _AppShellIconActionState extends State<AppShellIconAction> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return AnimatedScale(
       duration: AppMotion.fast,
-      curve: AppMotion.smooth,
-      scale: _pressed ? 0.95 : 1,
+      curve: AppMotion.standard,
+      scale: _pressed ? 0.94 : 1,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
-          splashColor: const Color(0x33212121),
-          highlightColor: const Color(0x14212121),
+          splashColor: scheme.primary.withValues(alpha: 0.10),
+          highlightColor: scheme.primary.withValues(alpha: 0.06),
           onTapDown: (_) => setState(() => _pressed = true),
           onTapUp: (_) => setState(() => _pressed = false),
           onTapCancel: () => setState(() => _pressed = false),
           onTap: widget.onTap,
           child: AnimatedContainer(
-            duration: AppMotion.fast,
-            curve: AppMotion.smooth,
+            duration: AppMotion.medium,
+            curve: AppMotion.standardDecelerate,
             height: 48,
             width: 48,
             decoration: BoxDecoration(

@@ -385,8 +385,8 @@ class _DockButtonState extends State<DockButton> {
 
     return AnimatedScale(
       duration: AppMotion.fast,
-      curve: AppMotion.smooth,
-      scale: _pressed ? 0.96 : 1,
+      curve: AppMotion.standard,
+      scale: _pressed ? 0.97 : 1,
       child: Material(
         color: Colors.transparent,
         shape: tapShape,
@@ -415,7 +415,7 @@ class _DockButtonState extends State<DockButton> {
           },
           child: AnimatedContainer(
             duration: AppMotion.medium,
-            curve: AppMotion.smooth,
+            curve: AppMotion.standardDecelerate,
             height: widget.primary
                 ? switch (deviceClass) {
                     _DockDeviceClass.small => widget.compact ? 52 : 56,
@@ -461,7 +461,7 @@ class _DockButtonState extends State<DockButton> {
                       if (!widget.primary)
                         AnimatedContainer(
                           duration: AppMotion.medium,
-                          curve: AppMotion.smooth,
+                          curve: AppMotion.standardDecelerate,
                           height: 42,
                           width: widget.active ? 68 : 42,
                           decoration: BoxDecoration(

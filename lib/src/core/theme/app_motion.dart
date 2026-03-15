@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
 class AppMotion {
-  static const Duration fast = Duration(milliseconds: 160);
-  static const Duration medium = Duration(milliseconds: 260);
+  static const Duration fast = Duration(milliseconds: 140);
+  static const Duration medium = Duration(milliseconds: 240);
   static const Duration slow = Duration(milliseconds: 420);
-  static const Duration pageEnter = Duration(milliseconds: 360);
-  static const Duration pageExit = Duration(milliseconds: 300);
+  static const Duration pageEnter = Duration(milliseconds: 320);
+  static const Duration pageExit = Duration(milliseconds: 240);
 
   static const Curve standard = Easing.standard;
   static const Curve standardAccelerate = Easing.standardAccelerate;
