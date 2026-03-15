@@ -6,6 +6,7 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/customer_dock.dart';
+import 'widgets/customer_tab_navigation.dart';
 import 'package:flutter/material.dart';
 
 class CustomerHomeScreen extends StatefulWidget {
@@ -81,46 +82,54 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       title: 'Customer',
       subtitle: '',
       bottom: const CustomerDock(activeTab: CustomerDockTab.home),
-      child: FutureBuilder<_CustomerHomePayload>(
-        future: _future,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator.adaptive());
-          }
-          if (snapshot.hasError) {
-            return Center(
-              child: _QuietPanel(
-                child: Text('${snapshot.error}'),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (details) => handleCustomerTabSwipe(
+          context,
+          activeTab: CustomerDockTab.home,
+          details: details,
+        ),
+        child: FutureBuilder<_CustomerHomePayload>(
+          future: _future,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState != ConnectionState.done) {
+              return const Center(child: CircularProgressIndicator.adaptive());
+            }
+            if (snapshot.hasError) {
+              return Center(
+                child: _QuietPanel(
+                  child: Text('${snapshot.error}'),
+                ),
+              );
+            }
+
+            final payload = snapshot.data!;
+            return RefreshIndicator.adaptive(
+              onRefresh: _reload,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+                children: [
+                  SmoothAppear(
+                    delay: const Duration(milliseconds: 20),
+                    child: _CustomerStatusPanel(
+                      summary: payload.summary,
+                      onOpenStatus: _openStatus,
+                    ),
+                  ),
+                  const SizedBox(height: 18),
+                  SmoothAppear(
+                    delay: const Duration(milliseconds: 60),
+                    child: _CustomerShipmentsPanel(
+                      items: payload.previewItems,
+                      onTapRecord: _openDetail,
+                    ),
+                  ),
+                ],
               ),
             );
-          }
-
-          final payload = snapshot.data!;
-          return RefreshIndicator.adaptive(
-            onRefresh: _reload,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
-              children: [
-                SmoothAppear(
-                  delay: const Duration(milliseconds: 20),
-                  child: _CustomerStatusPanel(
-                    summary: payload.summary,
-                    onOpenStatus: _openStatus,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                SmoothAppear(
-                  delay: const Duration(milliseconds: 60),
-                  child: _CustomerShipmentsPanel(
-                    items: payload.previewItems,
-                    onTapRecord: _openDetail,
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+          },
+        ),
       ),
     );
   }

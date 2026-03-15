@@ -10,6 +10,7 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/customer_dock.dart';
+import 'widgets/customer_tab_navigation.dart';
 import 'package:flutter/material.dart';
 
 class CustomerNotificationsScreen extends StatefulWidget {
@@ -211,57 +212,66 @@ class _CustomerNotificationsScreenState
         ),
       ],
       bottom: const CustomerDock(activeTab: CustomerDockTab.notifications),
-      child: FutureBuilder<List<DispatchRecord>>(
-        future: _future,
-        builder: (context, snapshot) {
-          final hidden = NotificationHiddenStore.instance.hiddenIdsForProfile(
-            AppSession.instance.profile,
-          );
-          final items = (snapshot.data ?? _cachedItems ?? <DispatchRecord>[])
-              .where((item) => !hidden.contains(item.id))
-              .toList();
-          final orderedItems = [
-            ...items.where((item) => _highlightedUnreadIds.contains(item.id)),
-            ...items.where((item) => !_highlightedUnreadIds.contains(item.id)),
-          ];
-
-          if (snapshot.connectionState != ConnectionState.done &&
-              items.isEmpty) {
-            return const Center(child: CircularProgressIndicator.adaptive());
-          }
-          if (snapshot.hasError && items.isEmpty) {
-            return Center(
-              child: _NotificationPanel(
-                child: Text('${snapshot.error}'),
-              ),
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: (details) => handleCustomerTabSwipe(
+          context,
+          activeTab: CustomerDockTab.notifications,
+          details: details,
+        ),
+        child: FutureBuilder<List<DispatchRecord>>(
+          future: _future,
+          builder: (context, snapshot) {
+            final hidden = NotificationHiddenStore.instance.hiddenIdsForProfile(
+              AppSession.instance.profile,
             );
-          }
-          if (items.isEmpty) {
-            return const Center(
-              child: _NotificationPanel(
-                child: Text('Hozircha yozuv yo‘q.'),
-              ),
-            );
-          }
+            final items = (snapshot.data ?? _cachedItems ?? <DispatchRecord>[])
+                .where((item) => !hidden.contains(item.id))
+                .toList();
+            final orderedItems = [
+              ...items.where((item) => _highlightedUnreadIds.contains(item.id)),
+              ...items
+                  .where((item) => !_highlightedUnreadIds.contains(item.id)),
+            ];
 
-          return RefreshIndicator.adaptive(
-            onRefresh: _reload,
-            child: ListView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
-              children: [
-                SmoothAppear(
-                  delay: const Duration(milliseconds: 20),
-                  child: _NotificationSection(
-                    items: orderedItems,
-                    highlightedUnreadIds: _highlightedUnreadIds,
-                    onTapRecord: _openDetail,
-                  ),
+            if (snapshot.connectionState != ConnectionState.done &&
+                items.isEmpty) {
+              return const Center(child: CircularProgressIndicator.adaptive());
+            }
+            if (snapshot.hasError && items.isEmpty) {
+              return Center(
+                child: _NotificationPanel(
+                  child: Text('${snapshot.error}'),
                 ),
-              ],
-            ),
-          );
-        },
+              );
+            }
+            if (items.isEmpty) {
+              return const Center(
+                child: _NotificationPanel(
+                  child: Text('Hozircha yozuv yo‘q.'),
+                ),
+              );
+            }
+
+            return RefreshIndicator.adaptive(
+              onRefresh: _reload,
+              child: ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+                children: [
+                  SmoothAppear(
+                    delay: const Duration(milliseconds: 20),
+                    child: _NotificationSection(
+                      items: orderedItems,
+                      highlightedUnreadIds: _highlightedUnreadIds,
+                      onTapRecord: _openDetail,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

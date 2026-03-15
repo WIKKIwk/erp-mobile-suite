@@ -11,6 +11,7 @@ import '../models/app_models.dart';
 import '../../admin/presentation/widgets/admin_dock.dart';
 import '../../supplier/presentation/widgets/supplier_dock.dart';
 import '../../customer/presentation/widgets/customer_dock.dart';
+import '../../customer/presentation/widgets/customer_tab_navigation.dart';
 import '../../werka/presentation/widgets/werka_dock.dart';
 import 'dart:io';
 import 'dart:typed_data';
@@ -350,215 +351,227 @@ class _ProfileScreenState extends State<ProfileScreen>
                   ? const CustomerDock(activeTab: CustomerDockTab.profile)
                   : const AdminDock(activeTab: AdminDockTab.profile),
       contentPadding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
-      child: RefreshIndicator.adaptive(
-        onRefresh: _refreshProfile,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          children: [
-            SmoothAppear(
-              delay: const Duration(milliseconds: 20),
-              child: _ProfilePanel(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Stack(
-                          children: [
-                            _AvatarPreview(
-                              displayName: current.displayName,
-                              cachedAvatar: cachedAvatar,
-                              pendingAvatarBytes: pendingAvatarBytes,
-                            ),
-                            Positioned(
-                              right: 0,
-                              bottom: 0,
-                              child: GestureDetector(
-                                onTap: savingAvatar ? null : _pickAvatar,
-                                child: Container(
-                                  height: 32,
-                                  width: 32,
-                                  decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
+        onHorizontalDragEnd: role == UserRole.customer
+            ? (details) => handleCustomerTabSwipe(
+                  context,
+                  activeTab: CustomerDockTab.profile,
+                  details: details,
+                )
+            : null,
+        child: RefreshIndicator.adaptive(
+          onRefresh: _refreshProfile,
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.zero,
+            children: [
+              SmoothAppear(
+                delay: const Duration(milliseconds: 20),
+                child: _ProfilePanel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Stack(
+                            children: [
+                              _AvatarPreview(
+                                displayName: current.displayName,
+                                cachedAvatar: cachedAvatar,
+                                pendingAvatarBytes: pendingAvatarBytes,
+                              ),
+                              Positioned(
+                                right: 0,
+                                bottom: 0,
+                                child: GestureDetector(
+                                  onTap: savingAvatar ? null : _pickAvatar,
+                                  child: Container(
+                                    height: 32,
+                                    width: 32,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .surfaceContainerLow,
+                                        width: 2,
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.camera_alt_rounded,
+                                      size: 16,
                                       color: Theme.of(context)
                                           .colorScheme
-                                          .surfaceContainerLow,
-                                      width: 2,
+                                          .onPrimary,
                                     ),
-                                  ),
-                                  child: Icon(
-                                    Icons.camera_alt_rounded,
-                                    size: 16,
-                                    color:
-                                        Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                current.displayName,
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.w700),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                subtitle,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
                             ],
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        _ThemeIconToggle(
-                          isDark: ThemeController.instance.isDark,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 18),
-                    _InfoTile(
-                      label: 'Telefon',
-                      value: current.phone,
-                    ),
-                    const SizedBox(height: 10),
-                    _InfoTile(
-                      label: 'Asl ism',
-                      value: current.legalName.isEmpty
-                          ? current.displayName
-                          : current.legalName,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: nicknameController,
-                      onChanged: (_) => setState(() {}),
-                      decoration: const InputDecoration(
-                        labelText: 'Nickname',
-                        hintText: 'O‘zingizga ko‘rinadigan ism',
-                      ),
-                    ),
-                    if (_hasProfileChanges) ...[
-                      const SizedBox(height: 14),
-                      SizedBox(
-                        width: double.infinity,
-                        child: FilledButton.icon(
-                          onPressed:
-                              savingProfileChanges ? null : _saveProfileChanges,
-                          icon: savingProfileChanges
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : const Icon(Icons.check_rounded),
-                          label: const Text('Saqlash'),
-                        ),
-                      ),
-                    ],
-                    if (pendingAvatarBytes != null) ...[
-                      const SizedBox(height: 10),
-                      Text(
-                        'Yangi rasm tanlandi, saqlashni bosing.',
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 18),
-            SmoothAppear(
-              delay: const Duration(milliseconds: 60),
-              child: _ProfilePanel(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Security',
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      hasPin
-                          ? '4 xonali PIN yoqilgan'
-                          : 'App uchun 4 xonali PIN o‘rnating',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 14),
-                    _ProfileActionButton(
-                      primary: true,
-                      onPressed: savingPin ? null : _showPinFlow,
-                      label: savingPin
-                          ? 'Saqlanmoqda...'
-                          : hasPin
-                              ? 'PIN almashtirish'
-                              : 'PIN o‘rnatish',
-                    ),
-                    if (hasPin) ...[
-                      const SizedBox(height: 10),
-                      _ProfileActionButton(
-                        primary: false,
-                        onPressed: savingPin ? null : _removePin,
-                        label: 'PIN o‘chirish',
-                      ),
-                    ],
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 12,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Row(
-                        children: [
+                          const SizedBox(width: 16),
                           Expanded(
-                            child: Text(
-                              biometricEnabled
-                                  ? 'Face ID / Fingerprint yoqilgan'
-                                  : 'Face ID / Fingerprint o‘chirilgan',
-                              style: Theme.of(context).textTheme.bodySmall,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  current.displayName,
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.w700),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  subtitle,
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
                             ),
                           ),
-                          Switch.adaptive(
-                            value: biometricEnabled,
-                            onChanged: hasPin && !savingBiometric
-                                ? (value) => _toggleBiometric(value)
-                                : null,
+                          const SizedBox(width: 12),
+                          _ThemeIconToggle(
+                            isDark: ThemeController.instance.isDark,
                           ),
                         ],
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 18),
+                      _InfoTile(
+                        label: 'Telefon',
+                        value: current.phone,
+                      ),
+                      const SizedBox(height: 10),
+                      _InfoTile(
+                        label: 'Asl ism',
+                        value: current.legalName.isEmpty
+                            ? current.displayName
+                            : current.legalName,
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: nicknameController,
+                        onChanged: (_) => setState(() {}),
+                        decoration: const InputDecoration(
+                          labelText: 'Nickname',
+                          hintText: 'O‘zingizga ko‘rinadigan ism',
+                        ),
+                      ),
+                      if (_hasProfileChanges) ...[
+                        const SizedBox(height: 14),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: savingProfileChanges
+                                ? null
+                                : _saveProfileChanges,
+                            icon: savingProfileChanges
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.check_rounded),
+                            label: const Text('Saqlash'),
+                          ),
+                        ),
+                      ],
+                      if (pendingAvatarBytes != null) ...[
+                        const SizedBox(height: 10),
+                        Text(
+                          'Yangi rasm tanlandi, saqlashni bosing.',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (errorMessage != null) ...[
-              const SizedBox(height: 14),
-              _ProfilePanel(
-                child: Text(errorMessage!),
+              const SizedBox(height: 18),
+              SmoothAppear(
+                delay: const Duration(milliseconds: 60),
+                child: _ProfilePanel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Security',
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        hasPin
+                            ? '4 xonali PIN yoqilgan'
+                            : 'App uchun 4 xonali PIN o‘rnating',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      const SizedBox(height: 14),
+                      _ProfileActionButton(
+                        primary: true,
+                        onPressed: savingPin ? null : _showPinFlow,
+                        label: savingPin
+                            ? 'Saqlanmoqda...'
+                            : hasPin
+                                ? 'PIN almashtirish'
+                                : 'PIN o‘rnatish',
+                      ),
+                      if (hasPin) ...[
+                        const SizedBox(height: 10),
+                        _ProfileActionButton(
+                          primary: false,
+                          onPressed: savingPin ? null : _removePin,
+                          label: 'PIN o‘chirish',
+                        ),
+                      ],
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                biometricEnabled
+                                    ? 'Face ID / Fingerprint yoqilgan'
+                                    : 'Face ID / Fingerprint o‘chirilgan',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ),
+                            Switch.adaptive(
+                              value: biometricEnabled,
+                              onChanged: hasPin && !savingBiometric
+                                  ? (value) => _toggleBiometric(value)
+                                  : null,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
+              if (errorMessage != null) ...[
+                const SizedBox(height: 14),
+                _ProfilePanel(
+                  child: Text(errorMessage!),
+                ),
+              ],
+              const SizedBox(height: 12),
             ],
-            const SizedBox(height: 12),
-          ],
+          ),
         ),
       ),
     );

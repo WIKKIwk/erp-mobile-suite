@@ -1,8 +1,8 @@
-import '../../../../app/app_router.dart';
 import '../../../../core/notifications/notification_unread_store.dart';
 import '../../../../core/session/app_session.dart';
 import '../../../../core/widgets/common_widgets.dart';
 import '../../../../core/widgets/logout_prompt.dart';
+import 'customer_tab_navigation.dart';
 import 'package:flutter/material.dart';
 
 enum CustomerDockTab {
@@ -44,10 +44,13 @@ class CustomerDock extends StatelessWidget {
               active: activeTab == CustomerDockTab.home,
               compact: compact,
               onTap: () {
-                if (activeTab == CustomerDockTab.home) return;
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  AppRoutes.customerHome,
-                  (route) => false,
+                if (activeTab == CustomerDockTab.home) {
+                  return;
+                }
+                navigateToCustomerTab(
+                  context,
+                  from: activeTab!,
+                  to: CustomerDockTab.home,
                 );
               },
             ),
@@ -60,10 +63,13 @@ class CustomerDock extends StatelessWidget {
             showBadge: showBadge,
             compact: compact,
             onTap: () {
-              if (activeTab == CustomerDockTab.notifications) return;
-              Navigator.of(context).pushNamedAndRemoveUntil(
-                AppRoutes.customerNotifications,
-                (route) => false,
+              if (activeTab == CustomerDockTab.notifications) {
+                return;
+              }
+              navigateToCustomerTab(
+                context,
+                from: activeTab!,
+                to: CustomerDockTab.notifications,
               );
             },
           ),
@@ -77,10 +83,13 @@ class CustomerDock extends StatelessWidget {
                   ? () => showLogoutPrompt(context)
                   : null,
               onTap: () {
-                if (activeTab == CustomerDockTab.profile) return;
-                Navigator.of(context).pushNamedAndRemoveUntil(
-                  AppRoutes.profile,
-                  (route) => false,
+                if (activeTab == CustomerDockTab.profile) {
+                  return;
+                }
+                navigateToCustomerTab(
+                  context,
+                  from: activeTab!,
+                  to: CustomerDockTab.profile,
                 );
               },
             ),
