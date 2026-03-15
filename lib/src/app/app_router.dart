@@ -268,7 +268,7 @@ class AppRouter {
       case AppRoutes.adminCreateHub:
         return _buildRoute(settings, const AdminCreateHubScreen());
       case AppRoutes.adminSettings:
-        return _buildRoute(settings, const AdminSettingsScreen());
+        return _buildAdminSettingsRoute(settings, const AdminSettingsScreen());
       case AppRoutes.adminSuppliers:
         return _buildRoute(settings, const AdminSuppliersScreen());
       case AppRoutes.adminSupplierCreate:
@@ -358,6 +358,69 @@ class AppRouter {
           begin: 0.992,
           end: 1,
         ).animate(incoming);
+
+        return SlideTransition(
+          position: slideOut,
+          child: FadeTransition(
+            opacity: fade,
+            child: ScaleTransition(
+              scale: scale,
+              child: SlideTransition(
+                position: slideIn,
+                child: child,
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  static PageRoute<dynamic> _buildAdminSettingsRoute(
+    RouteSettings settings,
+    Widget child,
+  ) {
+    return PageRouteBuilder<dynamic>(
+      settings: settings,
+      transitionDuration: AppMotion.pageEnter,
+      reverseTransitionDuration: AppMotion.pageExit,
+      pageBuilder: (context, animation, secondaryAnimation) => child,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        final Animation<double> fade = CurvedAnimation(
+          parent: animation,
+          curve: AppMotion.emphasizedDecelerate,
+          reverseCurve: AppMotion.emphasizedAccelerate,
+        );
+        final Animation<Offset> slideIn = Tween<Offset>(
+          begin: const Offset(0.06, 0),
+          end: Offset.zero,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: AppMotion.emphasizedDecelerate,
+            reverseCurve: AppMotion.emphasizedAccelerate,
+          ),
+        );
+        final Animation<Offset> slideOut = Tween<Offset>(
+          begin: Offset.zero,
+          end: const Offset(-0.02, 0),
+        ).animate(
+          CurvedAnimation(
+            parent: secondaryAnimation,
+            curve: AppMotion.standard,
+            reverseCurve: AppMotion.standardAccelerate,
+          ),
+        );
+        final Animation<double> scale = Tween<double>(
+          begin: 0.992,
+          end: 1,
+        ).animate(
+          CurvedAnimation(
+            parent: animation,
+            curve: AppMotion.standardDecelerate,
+            reverseCurve: AppMotion.standardAccelerate,
+          ),
+        );
 
         return SlideTransition(
           position: slideOut,

@@ -1,6 +1,6 @@
 import '../../../core/api/mobile_api.dart';
 import '../../../core/widgets/app_shell.dart';
-import '../../../core/widgets/common_widgets.dart';
+import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/admin_dock.dart';
 import 'package:flutter/material.dart';
@@ -72,6 +72,12 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         ),
       );
       _fill(updated);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Sozlamalar saqlandi')),
+      );
     } finally {
       if (mounted) {
         setState(() => saving = false);
@@ -86,67 +92,198 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         icon: Icons.arrow_back_rounded,
         onTap: () => Navigator.of(context).maybePop(),
       ),
-      title: 'Admin Settings',
+      title: 'Admin settings',
       subtitle: '',
+      contentPadding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
       bottom: const AdminDock(activeTab: AdminDockTab.settings),
       child: FutureBuilder<AdminSettings>(
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: CircularProgressIndicator.adaptive());
           }
           if (snapshot.hasError) {
             return Center(
-              child: SoftCard(
-                child: Text('Settings yuklanmadi: ${snapshot.error}'),
+              child: Card.filled(
+                margin: EdgeInsets.zero,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text('Settings yuklanmadi: ${snapshot.error}'),
+                      const SizedBox(height: 12),
+                      FilledButton(
+                        onPressed: () {
+                          setState(() {
+                            _future = MobileApi.instance.adminSettings();
+                          });
+                        },
+                        child: const Text('Qayta urinish'),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             );
           }
 
           final settings = snapshot.data!;
           _fill(settings);
-          return ListView(
-            padding: EdgeInsets.zero,
-            children: [
-              TextField(
-                  controller: erpUrl,
-                  decoration: const InputDecoration(labelText: 'ERP URL')),
-              const SizedBox(height: 12),
-              TextField(
-                  controller: apiKey,
-                  decoration: const InputDecoration(labelText: 'API Key')),
-              const SizedBox(height: 12),
-              TextField(
-                  controller: apiSecret,
-                  decoration: const InputDecoration(labelText: 'API Secret')),
-              const SizedBox(height: 12),
-              TextField(
-                  controller: warehouse,
-                  decoration:
-                      const InputDecoration(labelText: 'Default Warehouse')),
-              const SizedBox(height: 12),
-              TextField(
-                  controller: uom,
-                  decoration: const InputDecoration(labelText: 'Default UOM')),
-              const SizedBox(height: 12),
-              TextField(
-                  controller: werkaPhone,
-                  decoration: const InputDecoration(labelText: 'Werka Phone')),
-              const SizedBox(height: 12),
-              TextField(
-                  controller: werkaName,
-                  decoration: const InputDecoration(labelText: 'Werka Name')),
-              const SizedBox(height: 18),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton(
-                  onPressed: saving ? null : _save,
-                  child: Text(saving ? 'Saqlanmoqda...' : 'Saqlash'),
+
+          return RefreshIndicator.adaptive(
+            onRefresh: () async {
+              final future = MobileApi.instance.adminSettings();
+              setState(() => _future = future);
+              await future;
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+              children: [
+                SmoothAppear(
+                  delay: const Duration(milliseconds: 20),
+                  child: _SettingsSectionCard(
+                    title: 'ERP connection',
+                    subtitle: 'Core integration and stock defaults',
+                    child: Column(
+                      children: [
+                        _SettingsField(
+                          label: 'ERP URL',
+                          controller: erpUrl,
+                        ),
+                        const SizedBox(height: 14),
+                        _SettingsField(
+                          label: 'API Key',
+                          controller: apiKey,
+                        ),
+                        const SizedBox(height: 14),
+                        _SettingsField(
+                          label: 'API Secret',
+                          controller: apiSecret,
+                        ),
+                        const SizedBox(height: 14),
+                        _SettingsField(
+                          label: 'Default Warehouse',
+                          controller: warehouse,
+                        ),
+                        const SizedBox(height: 14),
+                        _SettingsField(
+                          label: 'Default UOM',
+                          controller: uom,
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 16),
+                SmoothAppear(
+                  delay: const Duration(milliseconds: 60),
+                  child: _SettingsSectionCard(
+                    title: 'Werka defaults',
+                    subtitle: 'Contact values used by the mobile flow',
+                    child: Column(
+                      children: [
+                        _SettingsField(
+                          label: 'Werka Phone',
+                          controller: werkaPhone,
+                        ),
+                        const SizedBox(height: 14),
+                        _SettingsField(
+                          label: 'Werka Name',
+                          controller: werkaName,
+                        ),
+                        const SizedBox(height: 18),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: saving ? null : _save,
+                            icon: saving
+                                ? const SizedBox(
+                                    height: 18,
+                                    width: 18,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Icon(Icons.check_rounded),
+                            label: Text(
+                              saving ? 'Saqlanmoqda...' : 'Saqlash',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           );
         },
+      ),
+    );
+  }
+}
+
+class _SettingsSectionCard extends StatelessWidget {
+  const _SettingsSectionCard({
+    required this.title,
+    required this.subtitle,
+    required this.child,
+  });
+
+  final String title;
+  final String subtitle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: theme.textTheme.titleLarge),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: scheme.onSurfaceVariant,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 18),
+            child,
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SettingsField extends StatelessWidget {
+  const _SettingsField({
+    required this.label,
+    required this.controller,
+  });
+
+  final String label;
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
       ),
     );
   }
