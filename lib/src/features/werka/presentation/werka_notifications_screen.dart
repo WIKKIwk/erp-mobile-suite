@@ -302,6 +302,7 @@ class _WerkaNotificationsSection extends StatelessWidget {
     return Card.filled(
       margin: EdgeInsets.zero,
       color: scheme.surfaceContainerLow,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(28),
       ),
