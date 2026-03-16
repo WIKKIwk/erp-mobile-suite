@@ -45,6 +45,7 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: textTheme.titleLarge,
       ),
+      pageTransitionsTheme: _pageTransitionsTheme(),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
@@ -154,6 +155,7 @@ class AppTheme {
         centerTitle: false,
         titleTextStyle: textTheme.titleLarge,
       ),
+      pageTransitionsTheme: _pageTransitionsTheme(),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
@@ -338,4 +340,40 @@ class AppTheme {
 
   static Color primaryButtonForeground(BuildContext context) =>
       Theme.of(context).colorScheme.onPrimary;
+
+  static PageTransitionsTheme _pageTransitionsTheme() {
+    const builder = _FadeOnlyPageTransitionsBuilder();
+    return const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: builder,
+        TargetPlatform.iOS: builder,
+        TargetPlatform.linux: builder,
+        TargetPlatform.macOS: builder,
+        TargetPlatform.windows: builder,
+        TargetPlatform.fuchsia: builder,
+      },
+    );
+  }
+}
+
+class _FadeOnlyPageTransitionsBuilder extends PageTransitionsBuilder {
+  const _FadeOnlyPageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    return FadeTransition(
+      opacity: CurvedAnimation(
+        parent: animation,
+        curve: Easing.standardDecelerate,
+        reverseCurve: Easing.standardAccelerate,
+      ),
+      child: child,
+    );
+  }
 }
