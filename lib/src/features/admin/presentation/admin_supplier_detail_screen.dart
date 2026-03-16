@@ -486,8 +486,7 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
                                           context,
                                           detail,
                                           onRemoveItem: _removeItem,
-                                          removingItemCode:
-                                              _removingItemCode,
+                                          removingItemCode: _removingItemCode,
                                         ),
                                 child: const Text('Ko‘rish'),
                               ),
@@ -720,7 +719,8 @@ Future<void> _showAssignedSupplierItemsSheet(
                                           children: [
                                             Text(
                                               item.name,
-                                              style: theme.textTheme.titleMedium,
+                                              style:
+                                                  theme.textTheme.titleMedium,
                                             ),
                                             const SizedBox(height: 4),
                                             Text(
@@ -734,11 +734,13 @@ Future<void> _showAssignedSupplierItemsSheet(
                                         ),
                                       ),
                                       IconButton(
-                                        onPressed: activeRemovingCode == item.code
+                                        onPressed: activeRemovingCode ==
+                                                item.code
                                             ? null
                                             : () async {
                                                 setModalState(() {
-                                                  activeRemovingCode = item.code;
+                                                  activeRemovingCode =
+                                                      item.code;
                                                 });
                                                 final removed =
                                                     await onRemoveItem(item);
@@ -747,10 +749,12 @@ Future<void> _showAssignedSupplierItemsSheet(
                                                 }
                                                 if (removed) {
                                                   setModalState(() {
-                                                    collapsingCodes.add(item.code);
+                                                    collapsingCodes
+                                                        .add(item.code);
                                                   });
                                                   await Future<void>.delayed(
-                                                    const Duration(milliseconds: 180),
+                                                    const Duration(
+                                                        milliseconds: 180),
                                                   );
                                                   if (!context.mounted) {
                                                     return;
@@ -758,9 +762,11 @@ Future<void> _showAssignedSupplierItemsSheet(
                                                   setModalState(() {
                                                     visibleItems.removeWhere(
                                                       (current) =>
-                                                          current.code == item.code,
+                                                          current.code ==
+                                                          item.code,
                                                     );
-                                                    collapsingCodes.remove(item.code);
+                                                    collapsingCodes
+                                                        .remove(item.code);
                                                     activeRemovingCode = null;
                                                   });
                                                 } else {
@@ -773,7 +779,8 @@ Future<void> _showAssignedSupplierItemsSheet(
                                             ? const SizedBox(
                                                 height: 18,
                                                 width: 18,
-                                                child: CircularProgressIndicator(
+                                                child:
+                                                    CircularProgressIndicator(
                                                   strokeWidth: 2,
                                                 ),
                                               )
