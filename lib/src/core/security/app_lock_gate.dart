@@ -34,7 +34,6 @@ class _AppLockGateState extends State<AppLockGate> {
         final locked = SecurityController.instance.locked;
         if (!locked) {
           _biometricAttempted = false;
-          return widget.child;
         }
 
         if (!_biometricAttempted &&
@@ -49,20 +48,40 @@ class _AppLockGateState extends State<AppLockGate> {
           children: [
             Positioned.fill(
               child: IgnorePointer(
-                ignoring: true,
-                child: TickerMode(
-                  enabled: !locked,
-                  child: widget.child,
-                ),
+                ignoring: locked,
+                child: widget.child,
               ),
             ),
             Positioned.fill(
-              child: Container(
-                color: Theme.of(context).colorScheme.surface,
+              child: IgnorePointer(
+                ignoring: !locked,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 360),
+                  reverseDuration: const Duration(milliseconds: 240),
+                  switchInCurve: Curves.easeOutCubic,
+                  switchOutCurve: Curves.easeInCubic,
+                  transitionBuilder: (child, animation) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: ScaleTransition(
+                        scale: Tween<double>(
+                          begin: 0.985,
+                          end: 1,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: locked
+                      ? const KeyedSubtree(
+                          key: ValueKey<String>('lock-overlay'),
+                          child: _PinUnlockOverlay(),
+                        )
+                      : const SizedBox.shrink(
+                          key: ValueKey<String>('lock-overlay-empty'),
+                        ),
+                ),
               ),
-            ),
-            const Positioned.fill(
-              child: _PinUnlockOverlay(),
             ),
           ],
         );
@@ -150,56 +169,67 @@ class _PinUnlockOverlayState extends State<_PinUnlockOverlay> {
   Widget build(BuildContext context) {
     return Material(
       type: MaterialType.transparency,
-      child: SafeArea(
-        child: Align(
-          alignment: const Alignment(0, 0.12),
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 420),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text(
-                      'App qulfi',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '4 xonali PIN kiriting',
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                    const SizedBox(height: 22),
-                    PinCodeEditor(
-                      controller: _pinController,
-                      onAction: _unlock,
-                      actionLabel: _unlocking ? 'Tekshirilmoqda...' : 'Ochish',
-                      actionIcon: Icons.arrow_forward_rounded,
-                      errorText: _error,
-                      busy: _unlocking,
-                    ),
-                    if (SecurityController
-                        .instance.biometricEnabledForCurrentUser) ...[
-                      const SizedBox(height: 18),
-                      SizedBox(
-                        width: double.infinity,
-                        child: OutlinedButton(
-                          onPressed: _unlocking ? null : _unlockWithBiometric,
-                          child: const Text('Face ID / Fingerprint'),
+      child: Stack(
+        children: [
+          Positioned.fill(
+            child: ColoredBox(
+              color: Theme.of(context).colorScheme.surface,
+            ),
+          ),
+          SafeArea(
+            child: Align(
+              alignment: const Alignment(0, 0.12),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(24),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 420),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'App qulfi',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.headlineMedium,
                         ),
-                      ),
-                    ],
-                  ],
+                        const SizedBox(height: 8),
+                        Text(
+                          '4 xonali PIN kiriting',
+                          textAlign: TextAlign.center,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                        const SizedBox(height: 22),
+                        PinCodeEditor(
+                          controller: _pinController,
+                          onAction: _unlock,
+                          actionLabel:
+                              _unlocking ? 'Tekshirilmoqda...' : 'Ochish',
+                          actionIcon: Icons.arrow_forward_rounded,
+                          errorText: _error,
+                          busy: _unlocking,
+                        ),
+                        if (SecurityController
+                            .instance.biometricEnabledForCurrentUser) ...[
+                          const SizedBox(height: 18),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton(
+                              onPressed:
+                                  _unlocking ? null : _unlockWithBiometric,
+                              child: const Text('Face ID / Fingerprint'),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }

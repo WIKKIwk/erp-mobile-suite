@@ -28,7 +28,8 @@ class PinCodeEditor extends StatefulWidget {
 
 class _PinCodeEditorState extends State<PinCodeEditor> {
   int _animateTick = 0;
-  int? _animatedIndex;
+  int? _insertingIndex;
+  int? _deletingIndex;
   String _lastValue = '';
 
   @override
@@ -61,9 +62,21 @@ class _PinCodeEditorState extends State<PinCodeEditor> {
     }
     if (value.length > _lastValue.length && value.isNotEmpty) {
       _animateTick += 1;
-      _animatedIndex = value.length - 1;
+      _insertingIndex = value.length - 1;
+      _deletingIndex = null;
     } else if (value.length < _lastValue.length) {
-      _animatedIndex = null;
+      _animateTick += 1;
+      _deletingIndex = _lastValue.length - 1;
+      _insertingIndex = null;
+      final deleteTick = _animateTick;
+      Timer(const Duration(milliseconds: 320), () {
+        if (!mounted || _animateTick != deleteTick) {
+          return;
+        }
+        setState(() {
+          _deletingIndex = null;
+        });
+      });
     }
     _lastValue = value;
     if (mounted) {
@@ -108,7 +121,8 @@ class _PinCodeEditorState extends State<PinCodeEditor> {
         Center(
           child: _PinIndicatorRow(
             length: widget.controller.text.length,
-            animatedIndex: _animatedIndex,
+            insertingIndex: _insertingIndex,
+            deletingIndex: _deletingIndex,
             animateTick: _animateTick,
           ),
         ),
@@ -172,12 +186,14 @@ class _PinCodeEditorState extends State<PinCodeEditor> {
 class _PinIndicatorRow extends StatelessWidget {
   const _PinIndicatorRow({
     required this.length,
-    required this.animatedIndex,
+    required this.insertingIndex,
+    required this.deletingIndex,
     required this.animateTick,
   });
 
   final int length;
-  final int? animatedIndex;
+  final int? insertingIndex;
+  final int? deletingIndex;
   final int animateTick;
 
   @override
@@ -188,12 +204,16 @@ class _PinIndicatorRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: List<Widget>.generate(4, (index) {
           final filled = index < length;
-          final animate = filled && animatedIndex == index;
+          final motion = filled && insertingIndex == index
+              ? _PinGlyphMotion.insert
+              : (!filled && deletingIndex == index)
+                  ? _PinGlyphMotion.delete
+                  : _PinGlyphMotion.none;
           return Padding(
             padding: EdgeInsets.only(right: index == 3 ? 0 : 12),
             child: _PinGlyph(
               filled: filled,
-              animate: animate,
+              motion: motion,
               animateTick: animateTick,
               variant: index,
             ),
@@ -204,16 +224,22 @@ class _PinIndicatorRow extends StatelessWidget {
   }
 }
 
+enum _PinGlyphMotion {
+  none,
+  insert,
+  delete,
+}
+
 class _PinGlyph extends StatelessWidget {
   const _PinGlyph({
     required this.filled,
-    required this.animate,
+    required this.motion,
     required this.animateTick,
     required this.variant,
   });
 
   final bool filled;
-  final bool animate;
+  final _PinGlyphMotion motion;
   final int animateTick;
   final int variant;
 
@@ -296,11 +322,11 @@ class _PinGlyph extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
-    if (!filled) {
+    if (!filled && motion != _PinGlyphMotion.delete) {
       return const SizedBox(width: 36, height: 36);
     }
 
-    if (!animate) {
+    if (motion == _PinGlyphMotion.none) {
       return const SizedBox(
         width: 36,
         height: 36,
@@ -311,6 +337,40 @@ class _PinGlyph extends StatelessWidget {
             size: 20,
           ),
         ),
+      );
+    }
+
+    if (motion == _PinGlyphMotion.delete) {
+      return TweenAnimationBuilder<double>(
+        key: ValueKey<String>('glyph-delete-$variant-$animateTick'),
+        tween: Tween(begin: 0, end: 1),
+        duration: const Duration(milliseconds: 340),
+        curve: AppMotion.standardAccelerate,
+        builder: (context, value, _) {
+          final eased = AppMotion.standardAccelerate.transform(value);
+          final size = 20.0 - (12.0 * eased);
+          return SizedBox(
+            width: 36,
+            height: 36,
+            child: Center(
+              child: Opacity(
+                opacity: 1 - eased,
+                child: Transform.rotate(
+                  angle: 0.18 * eased,
+                  child: _GlyphSurface(
+                    shape: ShapeBorder.lerp(
+                      const CircleBorder(),
+                      _midShape(),
+                      eased,
+                    )!,
+                    color: scheme.primary,
+                    size: size,
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
       );
     }
 
