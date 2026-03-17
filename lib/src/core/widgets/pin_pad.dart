@@ -214,7 +214,7 @@ class _PinGlyph extends StatelessWidget {
   final int animateTick;
   final int variant;
 
-  int get _shapeSeed => (animateTick + variant) % 4;
+  int get _shapeSeed => animateTick % 4;
 
   ShapeBorder _startShape() {
     switch (_shapeSeed) {
@@ -229,17 +229,17 @@ class _PinGlyph extends StatelessWidget {
       case 1:
         return const StarBorder.polygon(
           sides: 3,
-          pointRounding: 0.24,
+          pointRounding: 0.12,
         );
       case 2:
         return const StarBorder.polygon(
           sides: 5,
-          pointRounding: 0.18,
+          pointRounding: 0.08,
         );
       default:
         return const StarBorder.polygon(
           sides: 6,
-          pointRounding: 0.16,
+          pointRounding: 0.06,
         );
     }
   }
@@ -254,17 +254,17 @@ class _PinGlyph extends StatelessWidget {
       case 1:
         return const StarBorder.polygon(
           sides: 4,
-          pointRounding: 0.54,
+          pointRounding: 0.32,
         );
       case 2:
         return const StarBorder.polygon(
           sides: 6,
-          pointRounding: 0.44,
+          pointRounding: 0.28,
         );
       default:
         return const StarBorder.polygon(
           sides: 8,
-          pointRounding: 0.42,
+          pointRounding: 0.26,
         );
     }
   }
