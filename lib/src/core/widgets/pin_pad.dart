@@ -182,21 +182,24 @@ class _PinIndicatorRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List<Widget>.generate(4, (index) {
-        final filled = index < length;
-        final animate = filled && animatedIndex == index;
-        return Padding(
-          padding: EdgeInsets.only(right: index == 3 ? 0 : 12),
-          child: _PinGlyph(
-            filled: filled,
-            animate: animate,
-            animateTick: animateTick,
-            variant: index,
-          ),
-        );
-      }),
+    return SizedBox(
+      height: 30,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List<Widget>.generate(4, (index) {
+          final filled = index < length;
+          final animate = filled && animatedIndex == index;
+          return Padding(
+            padding: EdgeInsets.only(right: index == 3 ? 0 : 12),
+            child: _PinGlyph(
+              filled: filled,
+              animate: animate,
+              animateTick: animateTick,
+              variant: index,
+            ),
+          );
+        }),
+      ),
     );
   }
 }
@@ -285,13 +288,20 @@ class _PinGlyph extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     if (!filled) {
-      return const SizedBox(width: 20, height: 20);
+      return const SizedBox(width: 28, height: 28);
     }
 
     if (!animate) {
-      return _GlyphSurface(
-        shape: const CircleBorder(),
-        color: scheme.primary,
+      return const SizedBox(
+        width: 28,
+        height: 28,
+        child: Center(
+          child: _GlyphSurface(
+            shape: CircleBorder(),
+            color: null,
+            size: 20,
+          ),
+        ),
       );
     }
 
@@ -302,15 +312,21 @@ class _PinGlyph extends StatelessWidget {
       curve: AppMotion.standardDecelerate,
       builder: (context, value, _) {
         final eased = AppMotion.standardDecelerate.transform(value);
-        final size = 24.0 - (4.0 * eased);
-        return Transform.rotate(
-          angle: 0.34 * eased,
-          child: Transform.scale(
-            scale: 1.12 - (0.12 * eased),
-            child: _GlyphSurface(
-              shape: _shapeAt(value),
-              color: scheme.primary,
-              size: size,
+        final size = 28.0 - (8.0 * eased);
+        return SizedBox(
+          width: 28,
+          height: 28,
+          child: Center(
+            child: Transform.rotate(
+              angle: 0.34 * eased,
+              child: Transform.scale(
+                scale: 1.08 - (0.08 * eased),
+                child: _GlyphSurface(
+                  shape: _shapeAt(value),
+                  color: scheme.primary,
+                  size: size,
+                ),
+              ),
             ),
           ),
         );
@@ -327,7 +343,7 @@ class _GlyphSurface extends StatelessWidget {
   });
 
   final ShapeBorder shape;
-  final Color color;
+  final Color? color;
   final double size;
 
   @override
@@ -337,7 +353,7 @@ class _GlyphSurface extends StatelessWidget {
       height: size,
       child: DecoratedBox(
         decoration: ShapeDecoration(
-          color: color,
+          color: color ?? Theme.of(context).colorScheme.primary,
           shape: shape,
         ),
       ),
