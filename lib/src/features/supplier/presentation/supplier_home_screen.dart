@@ -1,13 +1,11 @@
 import '../../../app/app_router.dart';
-import '../../../core/api/mobile_api.dart';
-import '../../../core/cache/json_cache_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
-import '../../../core/notifications/supplier_runtime_store.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
+import '../state/supplier_store.dart';
 import 'widgets/supplier_dock.dart';
 import 'package:flutter/material.dart';
 
@@ -20,28 +18,14 @@ class SupplierHomeScreen extends StatefulWidget {
 
 class _SupplierHomeScreenState extends State<SupplierHomeScreen>
     with WidgetsBindingObserver {
-  static const String _cacheKey = 'cache_supplier_home_summary';
-  late Future<SupplierHomeSummary> _summaryFuture;
-  SupplierHomeSummary? _cachedSummary;
   int _refreshVersion = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _summaryFuture = MobileApi.instance.supplierSummary();
-    _loadCache();
+    SupplierStore.instance.bootstrapSummary();
     RefreshHub.instance.addListener(_handlePushRefresh);
-  }
-
-  Future<void> _loadCache() async {
-    final raw = await JsonCacheStore.instance.readMap(_cacheKey);
-    if (raw == null || !mounted) {
-      return;
-    }
-    setState(() {
-      _cachedSummary = SupplierHomeSummary.fromJson(raw);
-    });
   }
 
   @override
@@ -70,12 +54,7 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen>
   }
 
   Future<void> _reload() async {
-    final future = MobileApi.instance.supplierSummary();
-    setState(() {
-      _summaryFuture = future;
-    });
-    final summary = await future;
-    await JsonCacheStore.instance.writeMap(_cacheKey, summary.toJson());
+    await SupplierStore.instance.refreshSummary();
   }
 
   @override
@@ -85,16 +64,13 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen>
       subtitle: '',
       bottom: const SupplierDock(activeTab: SupplierDockTab.home),
       child: AnimatedBuilder(
-        animation: SupplierRuntimeStore.instance,
-        builder: (context, _) => FutureBuilder<SupplierHomeSummary>(
-          future: _summaryFuture,
-          builder: (context, snapshot) {
-            final summary = snapshot.data ?? _cachedSummary;
-            if (snapshot.connectionState != ConnectionState.done &&
-                summary == null) {
+        animation: SupplierStore.instance,
+        builder: (context, _) {
+            final store = SupplierStore.instance;
+            if (store.loadingSummary && !store.loadedSummary) {
               return const Center(child: CircularProgressIndicator());
             }
-            if (snapshot.hasError && summary == null) {
+            if (store.summaryError != null && !store.loadedSummary) {
               return RefreshIndicator.adaptive(
                 onRefresh: _reload,
                 child: ListView(
@@ -110,7 +86,7 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen>
                               style: Theme.of(context).textTheme.titleMedium),
                           const SizedBox(height: 8),
                           Text(
-                            '${snapshot.error}',
+                            '${store.summaryError}',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           const SizedBox(height: 14),
@@ -128,7 +104,7 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen>
                 ),
               );
             }
-            final current = SupplierRuntimeStore.instance.applySummary(summary!);
+            final current = store.summary;
 
             return RefreshIndicator.adaptive(
               onRefresh: _reload,
@@ -141,7 +117,6 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen>
               ),
             );
           },
-        ),
       ),
     );
   }

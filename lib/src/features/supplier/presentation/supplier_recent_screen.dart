@@ -1,11 +1,10 @@
-import '../../../core/api/mobile_api.dart';
 import '../../../app/app_router.dart';
-import '../../../core/cache/json_cache_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
+import '../state/supplier_store.dart';
 import 'supplier_qty_screen.dart';
 import 'widgets/supplier_dock.dart';
 import 'package:flutter/material.dart';
@@ -19,28 +18,14 @@ class SupplierRecentScreen extends StatefulWidget {
 
 class _SupplierRecentScreenState extends State<SupplierRecentScreen>
     with WidgetsBindingObserver {
-  static const String _cacheKey = 'cache_supplier_recent';
-  late Future<List<DispatchRecord>> _itemsFuture;
-  List<DispatchRecord>? _cachedItems;
   int _refreshVersion = 0;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _itemsFuture = MobileApi.instance.supplierHistory();
-    _loadCache();
+    SupplierStore.instance.bootstrapHistory();
     RefreshHub.instance.addListener(_handlePushRefresh);
-  }
-
-  Future<void> _loadCache() async {
-    final raw = await JsonCacheStore.instance.readList(_cacheKey);
-    if (raw == null || !mounted) {
-      return;
-    }
-    setState(() {
-      _cachedItems = raw.map((item) => DispatchRecord.fromJson(item)).toList();
-    });
   }
 
   @override
@@ -69,15 +54,7 @@ class _SupplierRecentScreenState extends State<SupplierRecentScreen>
   }
 
   Future<void> _reload() async {
-    final future = MobileApi.instance.supplierHistory();
-    setState(() {
-      _itemsFuture = future;
-    });
-    final items = await future;
-    await JsonCacheStore.instance.writeList(
-      _cacheKey,
-      items.map((item) => item.toJson()).toList(),
-    );
+    await SupplierStore.instance.refreshHistory();
   }
 
   @override
@@ -86,15 +63,15 @@ class _SupplierRecentScreenState extends State<SupplierRecentScreen>
       title: 'Recent',
       subtitle: '',
       bottom: const SupplierDock(activeTab: SupplierDockTab.recent),
-      child: FutureBuilder<List<DispatchRecord>>(
-        future: _itemsFuture,
-        builder: (context, snapshot) {
-          final items = snapshot.data ?? _cachedItems ?? <DispatchRecord>[];
-          if (snapshot.connectionState != ConnectionState.done &&
-              items.isEmpty) {
+      child: AnimatedBuilder(
+        animation: SupplierStore.instance,
+        builder: (context, _) {
+          final store = SupplierStore.instance;
+          final items = store.historyItems;
+          if (store.loadingHistory && !store.loadedHistory) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError && items.isEmpty) {
+          if (store.historyError != null && !store.loadedHistory) {
             return RefreshIndicator.adaptive(
               onRefresh: _reload,
               child: ListView(
@@ -112,7 +89,7 @@ class _SupplierRecentScreenState extends State<SupplierRecentScreen>
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          '${snapshot.error}',
+                          '${store.historyError}',
                           style: Theme.of(context).textTheme.bodySmall,
                         ),
                         const SizedBox(height: 14),

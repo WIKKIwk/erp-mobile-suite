@@ -1,6 +1,4 @@
 import '../../../app/app_router.dart';
-import '../../../core/api/mobile_api.dart';
-import '../../../core/cache/json_cache_store.dart';
 import '../../../core/notifications/notification_hidden_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/notifications/notification_unread_store.dart';
@@ -9,6 +7,7 @@ import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/common_widgets.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../shared/models/app_models.dart';
+import '../state/supplier_store.dart';
 import 'widgets/supplier_dock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -23,9 +22,7 @@ class SupplierNotificationsScreen extends StatefulWidget {
 
 class _SupplierNotificationsScreenState
     extends State<SupplierNotificationsScreen> with WidgetsBindingObserver {
-  static const String _cacheKey = 'cache_supplier_notifications';
   late Future<List<DispatchRecord>> _itemsFuture;
-  List<DispatchRecord>? _cachedItems;
   Set<String> _highlightedUnreadIds = <String>{};
   int _refreshVersion = 0;
 
@@ -33,22 +30,12 @@ class _SupplierNotificationsScreenState
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    SupplierStore.instance.bootstrapHistory();
     _itemsFuture = _loadAndTrack();
     NotificationHiddenStore.instance.load().then((_) {
       if (mounted) setState(() {});
     });
-    _loadCache();
     RefreshHub.instance.addListener(_handlePushRefresh);
-  }
-
-  Future<void> _loadCache() async {
-    final raw = await JsonCacheStore.instance.readList(_cacheKey);
-    if (raw == null || !mounted) {
-      return;
-    }
-    setState(() {
-      _cachedItems = raw.map((item) => DispatchRecord.fromJson(item)).toList();
-    });
   }
 
   Future<void> _clearAll() async {
@@ -72,7 +59,7 @@ class _SupplierNotificationsScreenState
     if (confirmed != true) {
       return;
     }
-    final current = _cachedItems ?? await _itemsFuture;
+    final current = SupplierStore.instance.historyItems;
     await NotificationHiddenStore.instance.hideAll(
       profile: AppSession.instance.profile,
       ids: current.map((item) => item.id),
@@ -85,7 +72,6 @@ class _SupplierNotificationsScreenState
       return;
     }
     setState(() {
-      _cachedItems = const [];
       _highlightedUnreadIds.clear();
       _itemsFuture = Future.value(const <DispatchRecord>[]);
     });
@@ -134,7 +120,8 @@ class _SupplierNotificationsScreenState
   }
 
   Future<List<DispatchRecord>> _loadAndTrack() async {
-    final items = await MobileApi.instance.supplierHistory();
+    await SupplierStore.instance.refreshHistory();
+    final items = SupplierStore.instance.historyItems;
     final hidden = NotificationHiddenStore.instance.hiddenIdsForProfile(
       AppSession.instance.profile,
     );
@@ -158,10 +145,6 @@ class _SupplierNotificationsScreenState
         _highlightedUnreadIds = highlighted;
       });
     }
-    await JsonCacheStore.instance.writeList(
-      _cacheKey,
-      items.map((item) => item.toJson()).toList(),
-    );
     return items;
   }
 
@@ -199,7 +182,8 @@ class _SupplierNotificationsScreenState
           final hidden = NotificationHiddenStore.instance.hiddenIdsForProfile(
             AppSession.instance.profile,
           );
-          final items = (snapshot.data ?? _cachedItems ?? <DispatchRecord>[])
+          final items = (snapshot.data ??
+                  SupplierStore.instance.historyItems)
               .where((item) => !hidden.contains(item.id))
               .toList();
           final orderedItems = [

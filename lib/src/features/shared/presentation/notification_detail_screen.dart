@@ -1,10 +1,10 @@
 import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
 import '../../../core/notifications/notification_unread_store.dart';
-import '../../../core/notifications/supplier_runtime_store.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../supplier/presentation/widgets/supplier_dock.dart';
+import '../../supplier/state/supplier_store.dart';
 import '../../werka/presentation/widgets/werka_dock.dart';
 import '../models/app_models.dart';
 import 'package:flutter/material.dart';
@@ -279,7 +279,7 @@ class _NotificationDetailScreenState extends State<NotificationDetailScreen> {
         approve: approve,
         reason: reason,
       );
-      SupplierRuntimeStore.instance.recordUnannouncedDecision(
+      SupplierStore.instance.recordUnannouncedDecision(
         fromStatus: current.record.status,
         toStatus: updated.record.status,
       );
