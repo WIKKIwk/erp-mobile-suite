@@ -1,4 +1,5 @@
 import '../../../core/api/mobile_api.dart';
+import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/widgets/app_shell.dart';
 import 'widgets/customer_dock.dart';
 import '../../shared/models/app_models.dart';
@@ -126,6 +127,7 @@ class _CustomerDeliveryDetailScreenState
       setState(() {
         _future = Future<CustomerDeliveryDetail>.value(updated);
       });
+      RefreshHub.instance.emit('customer');
       Navigator.of(context).pop(true);
     } catch (error) {
       if (!mounted) return;
