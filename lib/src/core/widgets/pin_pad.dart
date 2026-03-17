@@ -28,9 +28,12 @@ class PinCodeEditor extends StatefulWidget {
 }
 
 class _PinCodeEditorState extends State<PinCodeEditor> {
+  final math.Random _random = math.Random();
   int _animateTick = 0;
   int? _insertingIndex;
   int? _deletingIndex;
+  _PinShapeKind? _deletingShape;
+  List<_PinShapeKind> _shapeCycle = const [];
   String _lastValue = '';
 
   @override
@@ -62,12 +65,19 @@ class _PinCodeEditorState extends State<PinCodeEditor> {
       return;
     }
     if (value.length > _lastValue.length && value.isNotEmpty) {
+      if (_shapeCycle.length != 4) {
+        _shapeCycle = _generateUniqueShapes();
+      }
       _animateTick += 1;
       _insertingIndex = value.length - 1;
       _deletingIndex = null;
+      _deletingShape = null;
     } else if (value.length < _lastValue.length) {
       _animateTick += 1;
       _deletingIndex = _lastValue.length - 1;
+      if (_deletingIndex! >= 0 && _deletingIndex! < _shapeCycle.length) {
+        _deletingShape = _shapeCycle[_deletingIndex!];
+      }
       _insertingIndex = null;
       final deleteTick = _animateTick;
       Timer(const Duration(milliseconds: 320), () {
@@ -76,13 +86,22 @@ class _PinCodeEditorState extends State<PinCodeEditor> {
         }
         setState(() {
           _deletingIndex = null;
+          _deletingShape = null;
         });
       });
+      if (value.isEmpty) {
+        _shapeCycle = const [];
+      }
     }
     _lastValue = value;
     if (mounted) {
       setState(() {});
     }
+  }
+
+  List<_PinShapeKind> _generateUniqueShapes() {
+    final pool = _PinShapeKind.values.toList()..shuffle(_random);
+    return pool.take(4).toList(growable: false);
   }
 
   bool get _canSubmit => widget.controller.text.length == 4 && !widget.busy;
@@ -124,6 +143,8 @@ class _PinCodeEditorState extends State<PinCodeEditor> {
             length: widget.controller.text.length,
             insertingIndex: _insertingIndex,
             deletingIndex: _deletingIndex,
+            deletingShape: _deletingShape,
+            shapeCycle: _shapeCycle,
             animateTick: _animateTick,
           ),
         ),
@@ -189,12 +210,16 @@ class _PinIndicatorRow extends StatelessWidget {
     required this.length,
     required this.insertingIndex,
     required this.deletingIndex,
+    required this.deletingShape,
+    required this.shapeCycle,
     required this.animateTick,
   });
 
   final int length;
   final int? insertingIndex;
   final int? deletingIndex;
+  final _PinShapeKind? deletingShape;
+  final List<_PinShapeKind> shapeCycle;
   final int animateTick;
 
   @override
@@ -210,6 +235,9 @@ class _PinIndicatorRow extends StatelessWidget {
               : (!filled && deletingIndex == index)
                   ? _PinGlyphMotion.delete
                   : _PinGlyphMotion.none;
+          final shapeKind = filled
+              ? (index < shapeCycle.length ? shapeCycle[index] : null)
+              : (deletingIndex == index ? deletingShape : null);
           return Padding(
             padding: EdgeInsets.only(right: index == 3 ? 0 : 12),
             child: _PinGlyph(
@@ -217,6 +245,7 @@ class _PinIndicatorRow extends StatelessWidget {
               motion: motion,
               animateTick: animateTick,
               variant: index,
+              shapeKind: shapeKind,
             ),
           );
         }),
@@ -231,100 +260,139 @@ enum _PinGlyphMotion {
   delete,
 }
 
+enum _PinShapeKind {
+  clover,
+  arrow,
+  square,
+  pill,
+  pentagon,
+  diamond,
+}
+
 class _PinGlyph extends StatelessWidget {
   const _PinGlyph({
     required this.filled,
     required this.motion,
     required this.animateTick,
     required this.variant,
+    required this.shapeKind,
   });
 
   final bool filled;
   final _PinGlyphMotion motion;
   final int animateTick;
   final int variant;
-
-  int get _shapeSeed => animateTick % 4;
+  final _PinShapeKind? shapeKind;
 
   ShapeBorder _startShape() {
-    switch (_shapeSeed) {
-      case 0:
+    switch (shapeKind) {
+      case _PinShapeKind.clover:
         return const _OrganicBlobBorder(
-          lobes: 2,
-          amplitude: 0.11,
-          secondaryAmplitude: 0.0,
-          rotation: 0.0,
-          scaleX: 0.94,
-          scaleY: 0.86,
-        );
-      case 1:
-        return const _OrganicBlobBorder(
-          lobes: 3,
-          amplitude: 0.10,
+          lobes: 4,
+          amplitude: 0.12,
           secondaryAmplitude: 0.0,
           rotation: 0.0,
           scaleX: 0.9,
-          scaleY: 0.88,
+          scaleY: 0.9,
         );
-      case 2:
+      case _PinShapeKind.arrow:
         return const _OrganicBlobBorder(
-          lobes: 4,
-          amplitude: 0.08,
+          lobes: 3,
+          amplitude: 0.13,
           secondaryAmplitude: 0.0,
           rotation: 0.0,
-          scaleX: 0.92,
-          scaleY: 0.92,
+          scaleX: 0.9,
+          scaleY: 0.94,
         );
-      default:
+      case _PinShapeKind.square:
+        return RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(9),
+        );
+      case _PinShapeKind.pill:
         return const _OrganicBlobBorder(
           lobes: 2,
-          amplitude: 0.05,
+          amplitude: 0.09,
           secondaryAmplitude: 0.0,
           rotation: 0.0,
-          scaleX: 0.98,
+          scaleX: 0.9,
           scaleY: 0.98,
         );
+      case _PinShapeKind.pentagon:
+        return const _OrganicBlobBorder(
+          lobes: 5,
+          amplitude: 0.06,
+          secondaryAmplitude: 0.0,
+          rotation: 0.0,
+          scaleX: 0.9,
+          scaleY: 0.9,
+        );
+      case _PinShapeKind.diamond:
+        return const _OrganicBlobBorder(
+          lobes: 4,
+          amplitude: 0.035,
+          secondaryAmplitude: 0.0,
+          rotation: math.pi / 4,
+          scaleX: 0.84,
+          scaleY: 0.98,
+        );
+      case null:
+        return const CircleBorder();
     }
   }
 
   ShapeBorder _midShape() {
-    switch (_shapeSeed) {
-      case 0:
+    switch (shapeKind) {
+      case _PinShapeKind.clover:
         return const _OrganicBlobBorder(
-          lobes: 2,
-          amplitude: 0.06,
+          lobes: 4,
+          amplitude: 0.07,
           secondaryAmplitude: 0.0,
           rotation: 0.0,
-          scaleX: 0.97,
-          scaleY: 0.93,
+          scaleX: 0.94,
+          scaleY: 0.94,
         );
-      case 1:
+      case _PinShapeKind.arrow:
         return const _OrganicBlobBorder(
           lobes: 3,
-          amplitude: 0.05,
+          amplitude: 0.07,
+          secondaryAmplitude: 0.0,
+          rotation: 0.0,
+          scaleX: 0.94,
+          scaleY: 0.95,
+        );
+      case _PinShapeKind.square:
+        return RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        );
+      case _PinShapeKind.pill:
+        return const _OrganicBlobBorder(
+          lobes: 2,
+          amplitude: 0.055,
           secondaryAmplitude: 0.0,
           rotation: 0.0,
           scaleX: 0.95,
-          scaleY: 0.93,
+          scaleY: 0.99,
         );
-      case 2:
+      case _PinShapeKind.pentagon:
+        return const _OrganicBlobBorder(
+          lobes: 5,
+          amplitude: 0.04,
+          secondaryAmplitude: 0.0,
+          rotation: 0.0,
+          scaleX: 0.95,
+          scaleY: 0.95,
+        );
+      case _PinShapeKind.diamond:
         return const _OrganicBlobBorder(
           lobes: 4,
-          amplitude: 0.045,
+          amplitude: 0.02,
           secondaryAmplitude: 0.0,
-          rotation: 0.0,
-          scaleX: 0.97,
-          scaleY: 0.97,
+          rotation: math.pi / 4,
+          scaleX: 0.9,
+          scaleY: 1.0,
         );
-      default:
-        return const _OrganicBlobBorder(
-          lobes: 2,
-          amplitude: 0.03,
-          secondaryAmplitude: 0.0,
-          rotation: 0.0,
-          scaleX: 0.995,
-          scaleY: 0.995,
-        );
+      case null:
+        return const CircleBorder();
     }
   }
 
