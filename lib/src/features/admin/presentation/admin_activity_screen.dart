@@ -1,10 +1,9 @@
-import '../../../core/api/mobile_api.dart';
-import '../../../core/cache/json_cache_store.dart';
 import '../../../core/notifications/notification_hidden_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../shared/models/app_models.dart';
+import '../state/admin_store.dart';
 import 'widgets/admin_dock.dart';
 import 'package:flutter/material.dart';
 
@@ -16,30 +15,16 @@ class AdminActivityScreen extends StatefulWidget {
 }
 
 class _AdminActivityScreenState extends State<AdminActivityScreen> {
-  static const String _cacheKey = 'cache_admin_activity';
-  late Future<List<DispatchRecord>> _future;
-  List<DispatchRecord>? _cachedItems;
   int _refreshVersion = 0;
 
   @override
   void initState() {
     super.initState();
-    _future = MobileApi.instance.adminActivity();
+    AdminStore.instance.bootstrapActivity();
     NotificationHiddenStore.instance.load().then((_) {
       if (mounted) setState(() {});
     });
-    _loadCache();
     RefreshHub.instance.addListener(_handlePushRefresh);
-  }
-
-  Future<void> _loadCache() async {
-    final raw = await JsonCacheStore.instance.readList(_cacheKey);
-    if (raw == null || !mounted) {
-      return;
-    }
-    setState(() {
-      _cachedItems = raw.map((item) => DispatchRecord.fromJson(item)).toList();
-    });
   }
 
   Future<void> _clearAll() async {
@@ -72,7 +57,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
     if (confirmed != true) {
       return;
     }
-    final current = _cachedItems ?? await _future;
+    final current = AdminStore.instance.activityItems;
     await NotificationHiddenStore.instance.hideAll(
       profile: AppSession.instance.profile,
       ids: current.map((item) => item.id),
@@ -81,8 +66,6 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
       return;
     }
     setState(() {
-      _cachedItems = const [];
-      _future = Future.value(const <DispatchRecord>[]);
     });
   }
 
@@ -104,15 +87,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
   }
 
   Future<void> _reload() async {
-    final future = MobileApi.instance.adminActivity();
-    setState(() {
-      _future = future;
-    });
-    final items = await future;
-    await JsonCacheStore.instance.writeList(
-      _cacheKey,
-      items.map((item) => item.toJson()).toList(),
-    );
+    await AdminStore.instance.refreshActivity();
   }
 
   @override
@@ -128,28 +103,28 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
         ),
       ],
       bottom: const AdminDock(activeTab: AdminDockTab.activity),
-      child: FutureBuilder<List<DispatchRecord>>(
-        future: _future,
+      child: AnimatedBuilder(
+        animation: AdminStore.instance,
         builder: (context, snapshot) {
+          final store = AdminStore.instance;
           final hidden = NotificationHiddenStore.instance.hiddenIdsForProfile(
             AppSession.instance.profile,
           );
           final items =
-              (snapshot.data ?? _cachedItems ?? const <DispatchRecord>[])
+              (store.activityItems)
                   .where((item) => !hidden.contains(item.id))
                   .toList();
-          if (snapshot.connectionState != ConnectionState.done &&
-              items.isEmpty) {
+          if (store.loadingActivity && !store.loadedActivity && items.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError && items.isEmpty) {
+          if (store.activityError != null && !store.loadedActivity && items.isEmpty) {
             return Center(
               child: Card.filled(
                 margin: EdgeInsets.zero,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('Harakatlar yuklanmadi: ${snapshot.error}'),
+                    Text('Harakatlar yuklanmadi: ${store.activityError}'),
                     const SizedBox(height: 12),
                     FilledButton(
                       onPressed: _reload,

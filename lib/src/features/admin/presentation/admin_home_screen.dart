@@ -1,10 +1,8 @@
 import '../../../app/app_router.dart';
-import '../../../core/api/mobile_api.dart';
-import '../../../core/cache/json_cache_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
-import '../../shared/models/app_models.dart';
+import '../state/admin_store.dart';
 import 'widgets/admin_dock.dart';
 import 'package:flutter/material.dart';
 
@@ -16,27 +14,13 @@ class AdminHomeScreen extends StatefulWidget {
 }
 
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
-  static const String _cacheKey = 'cache_admin_summary';
-  late Future<AdminSupplierSummary> _summaryFuture;
-  AdminSupplierSummary? _cachedSummary;
   int _refreshVersion = 0;
 
   @override
   void initState() {
     super.initState();
-    _summaryFuture = MobileApi.instance.adminSupplierSummary();
-    _loadCache();
+    AdminStore.instance.bootstrapSummary();
     RefreshHub.instance.addListener(_handlePushRefresh);
-  }
-
-  Future<void> _loadCache() async {
-    final raw = await JsonCacheStore.instance.readMap(_cacheKey);
-    if (raw == null || !mounted) {
-      return;
-    }
-    setState(() {
-      _cachedSummary = AdminSupplierSummary.fromJson(raw);
-    });
   }
 
   @override
@@ -57,12 +41,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
   }
 
   Future<void> _reload() async {
-    final future = MobileApi.instance.adminSupplierSummary();
-    setState(() {
-      _summaryFuture = future;
-    });
-    final summary = await future;
-    await JsonCacheStore.instance.writeMap(_cacheKey, summary.toJson());
+    await AdminStore.instance.refreshSummary();
   }
 
   Future<void> _openAndReload(String routeName) async {
@@ -80,15 +59,14 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
       subtitle: '',
       contentPadding: const EdgeInsets.fromLTRB(12, 0, 14, 0),
       bottom: const AdminDock(activeTab: AdminDockTab.home),
-      child: FutureBuilder<AdminSupplierSummary>(
-        future: _summaryFuture,
-        builder: (context, snapshot) {
-          final summary = snapshot.data ?? _cachedSummary;
-          if (snapshot.connectionState != ConnectionState.done &&
-              summary == null) {
+      child: AnimatedBuilder(
+        animation: AdminStore.instance,
+        builder: (context, _) {
+          final store = AdminStore.instance;
+          if (store.loadingSummary && !store.loadedSummary) {
             return const Center(child: CircularProgressIndicator());
           }
-          if (snapshot.hasError && summary == null) {
+          if (store.summaryError != null && !store.loadedSummary) {
             return Center(
               child: Card.filled(
                 margin: EdgeInsets.zero,
@@ -97,7 +75,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text('Admin summary yuklanmadi: ${snapshot.error}'),
+                      Text('Admin summary yuklanmadi: ${store.summaryError}'),
                       const SizedBox(height: 12),
                       FilledButton(
                         onPressed: _reload,
@@ -110,7 +88,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
             );
           }
 
-          final summaryValue = summary!;
+          final summaryValue = store.summary;
           return RefreshIndicator(
             onRefresh: _reload,
             child: ListView(
@@ -136,9 +114,9 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                     ),
                   ),
                 ],
-              ],
-            ),
-          );
+                ],
+              ),
+            );
         },
       ),
     );
