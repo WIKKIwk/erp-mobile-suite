@@ -9,6 +9,19 @@ class CustomerDeliveryRuntimeStore extends ChangeNotifier {
 
   final Map<String, _CustomerDeliveryMutation> _mutations = {};
 
+  void recordIncoming(DispatchRecord record) {
+    final id = record.id.trim();
+    if (id.isEmpty) {
+      return;
+    }
+    _mutations[id] = _CustomerDeliveryMutation(
+      before: null,
+      updated: record,
+      createdAt: DateTime.now(),
+    );
+    notifyListeners();
+  }
+
   void recordTransition({
     required DispatchRecord before,
     required DispatchRecord after,
@@ -18,7 +31,7 @@ class CustomerDeliveryRuntimeStore extends ChangeNotifier {
       return;
     }
     _mutations[id] = _CustomerDeliveryMutation(
-      fromStatus: before.status,
+      before: before,
       updated: after,
       createdAt: DateTime.now(),
     );
@@ -50,15 +63,17 @@ class CustomerDeliveryRuntimeStore extends ChangeNotifier {
     var rejected = summary.rejectedCount;
 
     for (final mutation in _activeMutations()) {
-      switch (mutation.fromStatus) {
-        case DispatchStatus.pending:
-          pending -= 1;
-        case DispatchStatus.accepted:
-          confirmed -= 1;
-        case DispatchStatus.rejected:
-          rejected -= 1;
-        default:
-          break;
+      if (mutation.before case final before?) {
+        switch (before.status) {
+          case DispatchStatus.pending:
+            pending -= 1;
+          case DispatchStatus.accepted:
+            confirmed -= 1;
+          case DispatchStatus.rejected:
+            rejected -= 1;
+          default:
+            break;
+        }
       }
 
       switch (mutation.updated.status) {
@@ -151,12 +166,12 @@ class CustomerDeliveryRuntimeStore extends ChangeNotifier {
 
 class _CustomerDeliveryMutation {
   const _CustomerDeliveryMutation({
-    required this.fromStatus,
+    required this.before,
     required this.updated,
     required this.createdAt,
   });
 
-  final DispatchStatus fromStatus;
+  final DispatchRecord? before;
   final DispatchRecord updated;
   final DateTime createdAt;
 }
