@@ -298,13 +298,13 @@ class _PinGlyph extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       key: ValueKey<String>('glyph-$variant-$animateTick'),
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 1480),
+      duration: const Duration(milliseconds: 1680),
       curve: AppMotion.standardDecelerate,
       builder: (context, value, _) {
         final eased = AppMotion.standardDecelerate.transform(value);
         final size = 24.0 - (4.0 * eased);
         return Transform.rotate(
-          angle: 0.85 * eased,
+          angle: 0.34 * eased,
           child: Transform.scale(
             scale: 1.12 - (0.12 * eased),
             child: _GlyphSurface(
