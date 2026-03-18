@@ -144,27 +144,14 @@ class _CustomerStatusDetailScreenState
                           physics: const AlwaysScrollableScrollPhysics(),
                           padding: const EdgeInsets.only(bottom: 110),
                           children: [
-                            Card.filled(
-                              margin: EdgeInsets.zero,
-                              color: scheme.surfaceContainerLow,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
+                            for (int index = 0; index < items.length; index++) ...[
+                              _CustomerStatusRecordCard(
+                                record: items[index],
+                                onTap: () => _openDetail(items[index].id),
                               ),
-                              child: Column(
-                                children: [
-                                  for (int index = 0;
-                                      index < items.length;
-                                      index++) ...[
-                                    _CustomerStatusRecordRow(
-                                      record: items[index],
-                                      onTap: () => _openDetail(items[index].id),
-                                    ),
-                                    if (index != items.length - 1)
-                                      const Divider(height: 1, thickness: 1),
-                                  ],
-                                ],
-                              ),
-                            ),
+                              if (index != items.length - 1)
+                                const SizedBox(height: 12),
+                            ],
                           ],
                         ),
                       );
@@ -187,8 +174,8 @@ class _CustomerStatusDetailScreenState
   }
 }
 
-class _CustomerStatusRecordRow extends StatelessWidget {
-  const _CustomerStatusRecordRow({
+class _CustomerStatusRecordCard extends StatelessWidget {
+  const _CustomerStatusRecordCard({
     required this.record,
     required this.onTap,
   });
@@ -199,42 +186,53 @@ class _CustomerStatusRecordRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    record.itemName,
-                    style: theme.textTheme.titleLarge,
+    final scheme = Theme.of(context).colorScheme;
+    final shape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(28),
+    );
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerLow,
+      clipBehavior: Clip.antiAlias,
+      shape: shape,
+      child: InkWell(
+        customBorder: shape,
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      record.itemName,
+                      style: theme.textTheme.titleLarge,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 12),
+                  const SizedBox(width: 12),
+                  Text(
+                    record.createdLabel,
+                    style: theme.textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Text(
+                '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
+                style: theme.textTheme.headlineMedium,
+              ),
+              if (record.note.trim().isNotEmpty) ...[
+                const SizedBox(height: 8),
                 Text(
-                  record.createdLabel,
+                  record.note,
                   style: theme.textTheme.bodySmall,
                 ),
               ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
-              style: theme.textTheme.headlineMedium,
-            ),
-            if (record.note.trim().isNotEmpty) ...[
-              const SizedBox(height: 8),
-              Text(
-                record.note,
-                style: theme.textTheme.bodySmall,
-              ),
             ],
-          ],
+          ),
         ),
       ),
     );
