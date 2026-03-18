@@ -23,6 +23,13 @@ class SupplierStatusBreakdownScreen extends StatefulWidget {
 
 class _SupplierStatusBreakdownScreenState
     extends State<SupplierStatusBreakdownScreen> {
+  bool _isApprovedUnannounced(DispatchRecord item) {
+    final note = item.note.trim().toLowerCase();
+    return item.eventType == 'werka_unannounced_approved' ||
+        note.startsWith('aytilmagan mol tasdiqlandi') ||
+        note.startsWith('unannounced item approved');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -108,12 +115,10 @@ class _SupplierStatusBreakdownScreenState
             final accepted = store.historyItems.where(
               (item) => item.status == DispatchStatus.accepted,
             );
-            final acceptedByWerka = accepted
-                .where((item) => item.eventType != 'werka_unannounced_approved')
-                .length;
-            final approvedUnannounced = accepted
-                .where((item) => item.eventType == 'werka_unannounced_approved')
-                .length;
+            final acceptedByWerka =
+                accepted.where((item) => !_isApprovedUnannounced(item)).length;
+            final approvedUnannounced =
+                accepted.where(_isApprovedUnannounced).length;
             return RefreshIndicator(
               onRefresh: _reload,
               child: ListView(

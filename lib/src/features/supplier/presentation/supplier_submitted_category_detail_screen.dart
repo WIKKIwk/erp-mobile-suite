@@ -34,6 +34,13 @@ class SupplierSubmittedCategoryDetailScreen extends StatefulWidget {
 
 class _SupplierSubmittedCategoryDetailScreenState
     extends State<SupplierSubmittedCategoryDetailScreen> {
+  bool _isApprovedUnannounced(DispatchRecord item) {
+    final note = item.note.trim().toLowerCase();
+    return item.eventType == 'werka_unannounced_approved' ||
+        note.startsWith('aytilmagan mol tasdiqlandi') ||
+        note.startsWith('unannounced item approved');
+  }
+
   @override
   void initState() {
     super.initState();
@@ -59,13 +66,9 @@ class _SupplierSubmittedCategoryDetailScreenState
     );
     switch (widget.args.category) {
       case SupplierSubmittedCategory.acceptedByWerka:
-        return all
-            .where((item) => item.eventType != 'werka_unannounced_approved')
-            .toList();
+        return all.where((item) => !_isApprovedUnannounced(item)).toList();
       case SupplierSubmittedCategory.approvedUnannounced:
-        return all
-            .where((item) => item.eventType == 'werka_unannounced_approved')
-            .toList();
+        return all.where(_isApprovedUnannounced).toList();
     }
   }
 
