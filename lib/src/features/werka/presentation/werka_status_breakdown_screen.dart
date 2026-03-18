@@ -255,7 +255,7 @@ class _WerkaBreakdownRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return PressableScale(
-      borderRadius: (isFirst || isLast) ? 28 : 0,
+      borderRadius: (isFirst || isLast) ? 24 : 0,
       onTap: onTap,
       child: SizedBox(
         width: double.infinity,
