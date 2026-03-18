@@ -1,5 +1,6 @@
 import 'device_permissions_bootstrap.dart';
 import '../localization/app_localizations.dart';
+import '../localization/locale_controller.dart';
 import '../widgets/pin_pad.dart';
 import 'security_controller.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +31,10 @@ class _AppLockGateState extends State<AppLockGate> {
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: SecurityController.instance,
+      animation: Listenable.merge([
+        SecurityController.instance,
+        LocaleController.instance,
+      ]),
       builder: (context, _) {
         final locked = SecurityController.instance.locked;
         if (!locked) {

@@ -120,7 +120,7 @@ class AppLocalizations {
       : 'Clear all notifications?';
   String get notificationsLoadFailed =>
       isUzbek ? 'Bildirishnomalar yuklanmadi' : 'Failed to load notifications';
-  String get recentTitle => isUzbek ? 'Recent' : 'Recent';
+  String get recentTitle => isUzbek ? 'So‘nggi harakatlar' : 'Recent';
   String get recentSubtitle => isUzbek
       ? 'Avvalgi harakatni prefill bilan qayta ishlating'
       : 'Reuse previous actions with prefill';
