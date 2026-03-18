@@ -50,32 +50,51 @@ class _CustomerDeliveryDetailScreenState
         builder: (context) {
           return BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: AlertDialog(
-              title: Text(l10n.rejectTitle),
-              content: TextField(
-                controller: controller,
-                minLines: 2,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  hintText: l10n.optionalReasonHint,
+            child: Dialog(
+              insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(22),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.rejectTitle,
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: controller,
+                      minLines: 2,
+                      maxLines: 4,
+                      decoration: InputDecoration(
+                        hintText: l10n.optionalReasonHint,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            onPressed: () => Navigator.of(context).pop(false),
+                            child: Text(l10n.no),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            onPressed: () => Navigator.of(context).pop(true),
+                            child: Text(l10n.yes),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              actions: [
-                SizedBox(
-                  width: 110,
-                  child: OutlinedButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: Text(l10n.no),
-                  ),
-                ),
-                SizedBox(
-                  width: 110,
-                  child: FilledButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: Text(l10n.yes),
-                  ),
-                ),
-              ],
             ),
           );
         },
