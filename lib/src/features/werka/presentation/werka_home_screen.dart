@@ -1,4 +1,5 @@
 import '../../../app/app_router.dart';
+import '../../../core/localization/app_localizations.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/notifications/notification_unread_store.dart';
 import '../../../core/session/app_session.dart';
@@ -61,7 +62,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
   @override
   Widget build(BuildContext context) {
     return AppShell(
-      title: 'Werka',
+      title: context.l10n.werkaRoleName,
       subtitle: '',
       actions: [
         AnimatedBuilder(

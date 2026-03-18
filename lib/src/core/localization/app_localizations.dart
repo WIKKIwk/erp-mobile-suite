@@ -24,11 +24,11 @@ class AppLocalizations {
 
   String get appTitle => isUzbek ? 'Accord' : 'Accord';
   String get profileTitle => isUzbek ? 'Profil' : 'Profile';
-  String get werkaAccount => isUzbek ? 'Werka akkaunti' : 'Werka account';
+  String get werkaAccount => isUzbek ? 'Omborchi akkaunti' : 'Werka account';
   String get supplierAccount =>
-      isUzbek ? 'Supplier akkaunti' : 'Supplier account';
+      isUzbek ? 'Ta\'minotchi akkaunti' : 'Supplier account';
   String get customerAccount =>
-      isUzbek ? 'Customer akkaunti' : 'Customer account';
+      isUzbek ? 'Haridor akkaunti' : 'Customer account';
   String get adminAccount => isUzbek ? 'Admin akkaunti' : 'Admin account';
   String get nicknameSaveFailed =>
       isUzbek ? 'Nickname saqlanmadi' : 'Nickname was not saved';
@@ -90,15 +90,15 @@ class AppLocalizations {
   String get confirmTitle => isUzbek ? 'Tasdiqlash' : 'Confirm';
   String get qtyRequired => isUzbek ? 'Miqdor kiriting' : 'Enter quantity';
   String get amountLabel => isUzbek ? 'Miqdor' : 'Quantity';
-  String get customerLabel => isUzbek ? 'Customer' : 'Customer';
-  String get supplierLabel => isUzbek ? 'Supplier' : 'Supplier';
+  String get customerLabel => isUzbek ? 'Haridor' : 'Customer';
+  String get supplierLabel => isUzbek ? 'Ta\'minotchi' : 'Supplier';
   String get itemLabel => isUzbek ? 'Mol' : 'Item';
-  String get selectCustomer => isUzbek ? 'Customer tanlang' : 'Select customer';
-  String get searchCustomer =>
-      isUzbek ? 'Customer qidiring' : 'Search customer';
-  String get selectSupplier => isUzbek ? 'Supplier tanlang' : 'Select supplier';
+  String get selectCustomer => isUzbek ? 'Haridor tanlang' : 'Select customer';
+  String get searchCustomer => isUzbek ? 'Haridor qidiring' : 'Search customer';
+  String get selectSupplier =>
+      isUzbek ? 'Ta\'minotchi tanlang' : 'Select supplier';
   String get searchSupplier =>
-      isUzbek ? 'Supplier qidiring' : 'Search supplier';
+      isUzbek ? 'Ta\'minotchi qidiring' : 'Search supplier';
   String get selectItem => isUzbek ? 'Mol tanlang' : 'Select item';
   String get searchItem => isUzbek ? 'Mol qidiring' : 'Search item';
   String get createHubTitle => isUzbek ? 'Qayd' : 'Create';
@@ -106,10 +106,10 @@ class AppLocalizations {
       isUzbek ? 'Aytilmagan mol' : 'Unannounced item';
   String get customerIssueTitle => isUzbek ? 'Mol jo‘natish' : 'Send item';
   String get unannouncedDescription => isUzbek
-      ? 'Supplier, mol va miqdorni bir oqimda tanlang'
+      ? 'Ta\'minotchi, mol va miqdorni bir oqimda tanlang'
       : 'Choose supplier, item, and quantity in one flow';
   String get customerIssueDescription => isUzbek
-      ? 'Customerga jo‘natma yaratish oqimi'
+      ? 'Haridorga jo‘natma yaratish oqimi'
       : 'Flow for creating a shipment to a customer';
   String get notificationsTitle =>
       isUzbek ? 'Bildirishnomalar' : 'Notifications';
@@ -146,9 +146,9 @@ class AppLocalizations {
       : 'No records in this status yet.';
   String get receiptsSuffix => isUzbek ? 'ta receipt' : 'receipts';
   String get sentToCustomer =>
-      isUzbek ? 'customerga yuborilgan' : 'sent to customer';
+      isUzbek ? 'haridorga yuborilgan' : 'sent to customer';
   String get receivedFromSupplier =>
-      isUzbek ? 'supplierdan qabul qilingan' : 'received from supplier';
+      isUzbek ? 'ta\'minotchidan qabul qilingan' : 'received from supplier';
   String get acceptedFromQtyPrefix => isUzbek ? 'Qabul' : 'Accepted';
   String get createFlowBack => isUzbek ? 'Qaydga qaytish' : 'Back to create';
   String get pendingListBack =>
@@ -157,19 +157,19 @@ class AppLocalizations {
   String get createdSuccess => isUzbek ? 'Qayd qilindi' : 'Created';
   String get receivedSuccess => isUzbek ? 'Qabul qilindi' : 'Received';
   String get customerApproved =>
-      isUzbek ? 'Customer tasdiqlagan' : 'Customer approved';
+      isUzbek ? 'Haridor tasdiqlagan' : 'Customer approved';
   String get customerRejected =>
-      isUzbek ? 'Customer rad etgan' : 'Customer rejected';
+      isUzbek ? 'Haridor rad etgan' : 'Customer rejected';
   String get partiallyCompleted =>
       isUzbek ? 'Qisman yakunlangan' : 'Partially completed';
   String get cancelled => isUzbek ? 'Bekor qilingan' : 'Cancelled';
   String get waitingCustomerResponse =>
-      isUzbek ? 'Customer javobi kutilmoqda' : 'Waiting for customer response';
+      isUzbek ? 'Haridor javobi kutilmoqda' : 'Waiting for customer response';
   String get draft => isUzbek ? 'Draft' : 'Draft';
   String get noExtraNote =>
       isUzbek ? 'Qo‘shimcha izoh yo‘q.' : 'No additional note.';
   String get customerShipmentTitle =>
-      isUzbek ? 'Customer jo‘natmasi' : 'Customer shipment';
+      isUzbek ? 'Haridor jo‘natmasi' : 'Customer shipment';
   String get statusLabel => isUzbek ? 'Status' : 'Status';
   String get dateLabel => isUzbek ? 'Sana' : 'Date';
   String get detailsStateTitle => isUzbek ? 'Holat' : 'State';
@@ -192,10 +192,10 @@ class AppLocalizations {
   String acceptedQtyLabel(num qty, String uom) =>
       '$acceptedFromQtyPrefix: ${qty.toStringAsFixed(0)} $uom';
   String customerShipmentPendingNote() => isUzbek
-      ? 'Bu jo‘natma Werka tomonidan customerga yuborilgan. Qaytarish yoki tasdiqlash customer tomonidan qilinadi.'
+      ? 'Bu jo‘natma omborchi tomonidan haridorga yuborilgan. Qaytarish yoki tasdiqlash haridor tomonidan qilinadi.'
       : 'This shipment was sent by Werka to the customer. Any rejection or approval must be done by the customer.';
   String sentToCustomerLine(num qty, String uom) => isUzbek
-      ? '${qty.toStringAsFixed(2)} $uom customerga jo‘natildi'
+      ? '${qty.toStringAsFixed(2)} $uom haridorga jo‘natildi'
       : '${qty.toStringAsFixed(2)} $uom sent to customer';
   String createdLine(num qty, String uom) => isUzbek
       ? '${qty.toStringAsFixed(2)} $uom qayd qilindi'
@@ -207,11 +207,15 @@ class AppLocalizations {
       ? 'Mol jo‘natish bo‘lmadi: $error'
       : 'Sending item failed: $error';
   String unannouncedSuppliersFailed(Object error) => isUzbek
-      ? 'Supplierlar yuklanmadi: $error'
+      ? 'Ta\'minotchilar yuklanmadi: $error'
       : 'Suppliers failed to load: $error';
   String customersLoadFailed(Object error) => isUzbek
-      ? 'Customerlar yuklanmadi: $error'
+      ? 'Haridorlar yuklanmadi: $error'
       : 'Customers failed to load: $error';
+
+  String get werkaRoleName => isUzbek ? 'Omborchi' : 'Werka';
+  String get supplierAckTitle =>
+      isUzbek ? 'Ta\'minotchi tasdiqladi' : 'Supplier acknowledged';
 }
 
 class _AppLocalizationsDelegate

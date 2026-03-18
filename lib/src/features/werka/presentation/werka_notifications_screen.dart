@@ -403,7 +403,7 @@ class _WerkaNotificationRow extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    _notificationTitle(record),
+                    _notificationTitle(context, record),
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                 ),
@@ -443,9 +443,9 @@ class _WerkaNotificationRow extends StatelessWidget {
   }
 }
 
-String _notificationTitle(DispatchRecord record) {
+String _notificationTitle(BuildContext context, DispatchRecord record) {
   if (record.eventType == 'supplier_ack') {
-    return 'Supplier tasdiqladi';
+    return context.l10n.supplierAckTitle;
   }
   switch (record.status) {
     case DispatchStatus.pending:
