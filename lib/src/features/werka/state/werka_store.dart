@@ -38,8 +38,14 @@ class WerkaStore extends ChangeNotifier {
   bool get loadedHistory => _loadedHistory;
   Object? get homeError => _homeError;
   Object? get historyError => _historyError;
-  WerkaHomeSummary get summary =>
-      WerkaRuntimeStore.instance.applySummary(_summary);
+  WerkaHomeSummary get summary {
+    final adjusted = WerkaRuntimeStore.instance.applySummary(_summary);
+    return WerkaHomeSummary(
+      pendingCount: pendingItems.length,
+      confirmedCount: adjusted.confirmedCount,
+      returnedCount: adjusted.returnedCount,
+    );
+  }
   List<DispatchRecord> get pendingItems =>
       WerkaRuntimeStore.instance.applyPendingItems(_pendingItems);
   List<DispatchRecord> get historyItems => _historyItems;
