@@ -27,6 +27,12 @@ class _CustomerDeliveryDetailScreenState
   late Future<CustomerDeliveryDetail> _future;
   bool _submitting = false;
 
+  List<String> _rejectReasons(AppLocalizations l10n) => <String>[
+        l10n.rejectReasonDefective,
+        l10n.rejectReasonWrongItem,
+        l10n.rejectReasonQtyMismatch,
+      ];
+
   @override
   void initState() {
     super.initState();
@@ -44,66 +50,128 @@ class _CustomerDeliveryDetailScreenState
     final l10n = context.l10n;
     String reason = '';
     if (!approve) {
-      final controller = TextEditingController();
+      final commentController = TextEditingController();
+      String? selectedReason;
       final bool? confirmed = await showDialog<bool>(
         context: context,
         barrierColor: Colors.black.withValues(alpha: 0.28),
         builder: (context) {
-          return BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Dialog(
-              insetPadding: const EdgeInsets.symmetric(horizontal: 28),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(28),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(22),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      l10n.rejectTitle,
-                      style: Theme.of(context).textTheme.headlineMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    TextField(
-                      controller: controller,
-                      minLines: 2,
-                      maxLines: 4,
-                      decoration: InputDecoration(
-                        hintText: l10n.optionalReasonHint,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Row(
+          final reasons = _rejectReasons(l10n);
+          return StatefulBuilder(
+            builder: (context, setLocalState) {
+              final canConfirm = (selectedReason ?? '').trim().isNotEmpty;
+              return BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: Dialog(
+                  insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(22),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.of(context).pop(false),
-                            child: Text(l10n.no),
+                        Text(
+                          l10n.rejectTitle,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                        ),
+                        const SizedBox(height: 16),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            l10n.reasonLabel,
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: FilledButton(
-                            onPressed: () => Navigator.of(context).pop(true),
-                            child: Text(l10n.yes),
+                        const SizedBox(height: 8),
+                        ...reasons.map(
+                          (item) => InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              setLocalState(() {
+                                selectedReason =
+                                    selectedReason == item ? null : item;
+                              });
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 10),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    selectedReason == item
+                                        ? Icons.check_circle_rounded
+                                        : Icons.radio_button_unchecked_rounded,
+                                    size: 22,
+                                  ),
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Text(
+                                      item,
+                                      style:
+                                          Theme.of(context).textTheme.bodyLarge,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: commentController,
+                          minLines: 2,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            labelText: l10n.extraCommentLabel,
+                            hintText: l10n.optionalReasonHint,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: OutlinedButton(
+                                onPressed: () => Navigator.of(context).pop(false),
+                                child: Text(l10n.no),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: FilledButton(
+                                onPressed: canConfirm
+                                    ? () => Navigator.of(context).pop(true)
+                                    : null,
+                                child: Text(l10n.yes),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
+              );
+            },
           );
         },
       );
       if (confirmed != true) {
         return;
       }
-      reason = controller.text.trim();
+      if ((selectedReason ?? '').trim().isEmpty) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l10n.rejectReasonRequired)),
+        );
+        return;
+      }
+      reason = selectedReason!.trim();
+      final extraComment = commentController.text.trim();
+      if (extraComment.isNotEmpty) {
+        reason = '$reason. $extraComment';
+      }
     } else {
       final bool? confirmed = await showM3ConfirmDialog(
         context: context,

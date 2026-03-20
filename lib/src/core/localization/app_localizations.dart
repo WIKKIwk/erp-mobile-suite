@@ -382,6 +382,18 @@ class AppLocalizations {
   String get noteTitle => _t('Izoh', 'Note', 'Примечание');
   String get responseTitle => _t('Javob', 'Response', 'Ответ');
   String get rejectTitle => _t('Rad etish', 'Reject', 'Отклонить');
+  String get reasonLabel => _t('Sabab', 'Reason', 'Причина');
+  String get rejectReasonRequired => _t(
+      'Rad etish uchun sabab tanlang',
+      'Select a reason before rejecting',
+      'Выберите причину перед отклонением');
+  String get rejectReasonDefective =>
+      _t('Yaroqsiz', 'Defective', 'Брак');
+  String get rejectReasonWrongItem =>
+      _t('Noto‘g‘ri mahsulot', 'Wrong item', 'Неверный товар');
+  String get rejectReasonQtyMismatch =>
+      _t('Miqdor noto‘g‘ri', 'Quantity mismatch', 'Неверное количество');
+  String get extraCommentLabel => _t('Izoh', 'Comment', 'Комментарий');
   String get optionalReasonHint =>
       _t('Sabab (ixtiyoriy)', 'Reason (optional)', 'Причина (необязательно)');
   String get confirmQuestion => _t(

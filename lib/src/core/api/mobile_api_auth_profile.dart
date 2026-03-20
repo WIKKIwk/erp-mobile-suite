@@ -43,16 +43,28 @@ extension MobileApiAuthProfile on MobileApi {
     required String tokenValue,
     required String platform,
   }) async {
+    final trimmedToken = tokenValue.trim();
+    final profile = AppSession.instance.profile;
+    debugPrint(
+      'push register request role=${profile?.role.name ?? 'none'} '
+      'ref=${profile?.ref ?? ''} '
+      'platform=${platform.trim()} '
+      'token=${maskPushToken(trimmedToken)}',
+    );
     final response = await _sendAuthorized(
       () => http.post(
         Uri.parse('$baseUrl/v1/mobile/push/token'),
         headers: _headers(requireToken())
           ..['Content-Type'] = 'application/json',
         body: jsonEncode({
-          'token': tokenValue,
+          'token': trimmedToken,
           'platform': platform,
         }),
       ),
+    );
+    debugPrint(
+      'push register response status=${response.statusCode} '
+      'token=${maskPushToken(trimmedToken)}',
     );
     if (response.statusCode != 200) {
       throw Exception('Push token register failed');
@@ -64,6 +76,9 @@ extension MobileApiAuthProfile on MobileApi {
     if (token == null || token.isEmpty) {
       return;
     }
+    debugPrint(
+      'push unregister request token=${maskPushToken(tokenValue.trim())}',
+    );
     await http.delete(
       Uri.parse('$baseUrl/v1/mobile/push/token')
           .replace(queryParameters: {'token': tokenValue}),

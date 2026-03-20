@@ -28,6 +28,7 @@ class PushMessagingService {
       return;
     }
 
+    debugPrint('push initialize start');
     await Firebase.initializeApp();
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     await FirebaseMessaging.instance.requestPermission();
@@ -35,6 +36,9 @@ class PushMessagingService {
     await syncCurrentToken();
 
     FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+      debugPrint(
+        'push token refresh token=${maskPushToken(token)}',
+      );
       if (AppSession.instance.isLoggedIn) {
         await MobileApi.instance.registerPushToken(
           tokenValue: token,
@@ -91,32 +95,52 @@ class PushMessagingService {
     });
 
     _initialized = true;
+    debugPrint('push initialize complete');
   }
 
   Future<void> syncCurrentToken() async {
+    final profile = AppSession.instance.profile;
+    debugPrint(
+      'push sync start logged_in=${AppSession.instance.isLoggedIn} '
+      'role=${profile?.role.name ?? 'none'} '
+      'ref=${profile?.ref ?? ''}',
+    );
     if (defaultTargetPlatform != TargetPlatform.android ||
         !AppSession.instance.isLoggedIn) {
+      debugPrint('push sync skipped: unsupported platform or not logged in');
       return;
     }
     final token = await FirebaseMessaging.instance.getToken();
     if (token == null || token.trim().isEmpty) {
+      debugPrint('push sync skipped: Firebase token is empty');
       return;
     }
+    debugPrint(
+      'push sync obtained token=${maskPushToken(token)}',
+    );
     await MobileApi.instance.registerPushToken(
       tokenValue: token,
       platform: 'android',
+    );
+    debugPrint(
+      'push sync stored token=${maskPushToken(token)}',
     );
   }
 
   Future<void> unregisterCurrentToken() async {
     if (defaultTargetPlatform != TargetPlatform.android ||
         !AppSession.instance.isLoggedIn) {
+      debugPrint('push unregister skipped: unsupported platform or not logged in');
       return;
     }
     final token = await FirebaseMessaging.instance.getToken();
     if (token == null || token.trim().isEmpty) {
+      debugPrint('push unregister skipped: Firebase token is empty');
       return;
     }
+    debugPrint(
+      'push unregister token=${maskPushToken(token)}',
+    );
     await MobileApi.instance.unregisterPushToken(token);
   }
 }

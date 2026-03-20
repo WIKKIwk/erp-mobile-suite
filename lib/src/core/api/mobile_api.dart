@@ -3,6 +3,7 @@ import '../notifications/push_messaging_service.dart';
 import '../session/app_session.dart';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +12,17 @@ part 'mobile_api_auth_profile.dart';
 part 'mobile_api_customer.dart';
 part 'mobile_api_supplier_notifications.dart';
 part 'mobile_api_werka.dart';
+
+String maskPushToken(String token) {
+  final trimmed = token.trim();
+  if (trimmed.isEmpty) {
+    return '<empty>';
+  }
+  if (trimmed.length <= 12) {
+    return trimmed;
+  }
+  return '${trimmed.substring(0, 6)}...${trimmed.substring(trimmed.length - 6)}';
+}
 
 class MobileApi {
   MobileApi._();
