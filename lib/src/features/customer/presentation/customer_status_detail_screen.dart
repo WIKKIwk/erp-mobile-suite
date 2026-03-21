@@ -23,8 +23,6 @@ class CustomerStatusDetailScreen extends StatefulWidget {
 
 class _CustomerStatusDetailScreenState
     extends State<CustomerStatusDetailScreen> {
-  bool _didMutate = false;
-
   @override
   void initState() {
     super.initState();
@@ -41,7 +39,6 @@ class _CustomerStatusDetailScreenState
       arguments: deliveryNoteID,
     );
     if (changed == true) {
-      _didMutate = true;
       await _reload();
     }
   }
@@ -62,129 +59,120 @@ class _CustomerStatusDetailScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) {
-          return;
-        }
-        Navigator.of(context).pop(_didMutate);
-      },
-      child: Scaffold(
-        extendBody: true,
-        backgroundColor: AppTheme.shellStart(context),
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      height: 52,
-                      width: 52,
-                      child: IconButton.filledTonal(
-                        onPressed: () => Navigator.of(context).pop(_didMutate),
-                        icon: const Icon(Icons.arrow_back_rounded, size: 28),
-                      ),
+    return Scaffold(
+      extendBody: true,
+      backgroundColor: AppTheme.shellStart(context),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+              child: Row(
+                children: [
+                  SizedBox(
+                    height: 52,
+                    width: 52,
+                    child: IconButton.filledTonal(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      icon: const Icon(Icons.arrow_back_rounded, size: 28),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        _title,
-                        style: theme.textTheme.headlineMedium,
-                      ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      _title,
+                      style: theme.textTheme.headlineMedium,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 0, 16, 0),
-                  child: AnimatedBuilder(
-                    animation: CustomerStore.instance,
-                    builder: (context, _) {
-                      final store = CustomerStore.instance;
-                      if (store.loading && !store.loaded) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
-                      }
-                      if (store.error != null && !store.loaded) {
-                        return Center(
-                          child: Card.filled(
-                            margin: EdgeInsets.zero,
-                            color: scheme.surfaceContainerLow,
-                            child: Padding(
-                              padding: const EdgeInsets.all(18),
-                              child: Text('${store.error}'),
-                            ),
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 16, 0),
+                child: AnimatedBuilder(
+                  animation: CustomerStore.instance,
+                  builder: (context, _) {
+                    final store = CustomerStore.instance;
+                    if (store.loading && !store.loaded) {
+                      return const Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (store.error != null && !store.loaded) {
+                      return Center(
+                        child: Card.filled(
+                          margin: EdgeInsets.zero,
+                          color: scheme.surfaceContainerLow,
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Text('${store.error}'),
                           ),
-                        );
-                      }
-                      final items = store.itemsForKind(widget.kind);
-                      if (items.isEmpty) {
-                        return Center(
-                          child: Card.filled(
-                            margin: EdgeInsets.zero,
-                            color: scheme.surfaceContainerLow,
-                            child: Padding(
-                              padding: const EdgeInsets.all(18),
-                              child: Text(
-                                context.l10n.noRecordsYet,
-                                style: theme.textTheme.titleMedium,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      return AppRefreshIndicator(
-                        onRefresh: _reload,
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          padding: const EdgeInsets.only(bottom: 110),
-                          children: [
-                            Card.filled(
-                              margin: EdgeInsets.zero,
-                              color: scheme.surfaceContainerLow,
-                              clipBehavior: Clip.antiAlias,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                              child: Column(
-                                children: [
-                                  for (int index = 0;
-                                      index < items.length;
-                                      index++) ...[
-                                    _CustomerStatusRecordRow(
-                                      record: items[index],
-                                      isFirst: index == 0,
-                                      isLast: index == items.length - 1,
-                                      onTap: () => _openDetail(items[index].id),
-                                    ),
-                                    if (index != items.length - 1)
-                                      const Divider(height: 1, thickness: 1),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ],
                         ),
                       );
-                    },
-                  ),
+                    }
+                    final items = store.itemsForKind(widget.kind);
+                    if (items.isEmpty) {
+                      return Center(
+                        child: Card.filled(
+                          margin: EdgeInsets.zero,
+                          color: scheme.surfaceContainerLow,
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Text(
+                              context.l10n.noRecordsYet,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    return AppRefreshIndicator(
+                      onRefresh: _reload,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.only(bottom: 110),
+                        children: [
+                          Card.filled(
+                            margin: EdgeInsets.zero,
+                            color: scheme.surfaceContainerLow,
+                            clipBehavior: Clip.antiAlias,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(28),
+                            ),
+                            child: Column(
+                              children: [
+                                for (int index = 0;
+                                    index < items.length;
+                                    index++) ...[
+                                  _CustomerStatusRecordRow(
+                                    record: items[index],
+                                    isFirst: index == 0,
+                                    isLast: index == items.length - 1,
+                                    onTap: () => _openDetail(items[index].id),
+                                  ),
+                                  if (index != items.length - 1)
+                                    const Divider(height: 1, thickness: 1),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        bottomNavigationBar: const SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: CustomerDock(activeTab: null),
-          ),
+      ),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: CustomerDock(activeTab: null),
         ),
       ),
     );

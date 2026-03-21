@@ -44,6 +44,8 @@ import '../features/werka/presentation/werka_unannounced_supplier_screen.dart';
 import '../features/werka/presentation/werka_status_detail_screen.dart';
 import '../features/werka/presentation/werka_status_breakdown_screen.dart';
 import '../features/werka/presentation/werka_success_screen.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {
@@ -300,6 +302,14 @@ class AppRouter {
   }
 
   static PageRoute<dynamic> _buildRoute(RouteSettings settings, Widget child) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      return CupertinoPageRoute<dynamic>(
+        settings: settings,
+        builder: (context) {
+          return child;
+        },
+      );
+    }
     return MaterialPageRoute<dynamic>(
       settings: settings,
       builder: (context) {
@@ -312,6 +322,14 @@ class AppRouter {
     RouteSettings settings,
     Widget child,
   ) {
+    if (!kIsWeb && defaultTargetPlatform == TargetPlatform.iOS) {
+      return CupertinoPageRoute<dynamic>(
+        settings: settings,
+        builder: (context) {
+          return child;
+        },
+      );
+    }
     return MaterialPageRoute<dynamic>(
       settings: settings,
       builder: (context) {

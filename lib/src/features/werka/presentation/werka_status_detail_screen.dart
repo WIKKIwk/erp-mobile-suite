@@ -22,8 +22,6 @@ class WerkaStatusDetailScreen extends StatefulWidget {
 }
 
 class _WerkaStatusDetailScreenState extends State<WerkaStatusDetailScreen> {
-  bool _didMutate = false;
-
   @override
   void initState() {
     super.initState();
@@ -55,134 +53,127 @@ class _WerkaStatusDetailScreenState extends State<WerkaStatusDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        Navigator.of(context).pop(_didMutate);
-      },
-      child: Scaffold(
-        extendBody: true,
-        backgroundColor: AppTheme.shellStart(context),
-        body: SafeArea(
-          bottom: false,
-          child: Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
-                child: Row(
-                  children: [
-                    SizedBox(
-                      height: 52,
-                      width: 52,
-                      child: IconButton.filledTonal(
-                        onPressed: () => Navigator.of(context).pop(_didMutate),
-                        icon: const Icon(Icons.arrow_back_rounded, size: 28),
-                      ),
+    return Scaffold(
+      extendBody: true,
+      backgroundColor: AppTheme.shellStart(context),
+      body: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+              child: Row(
+                children: [
+                  SizedBox(
+                    height: 52,
+                    width: 52,
+                    child: IconButton.filledTonal(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      icon: const Icon(Icons.arrow_back_rounded, size: 28),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Text(
-                        _title,
-                        style: theme.textTheme.headlineMedium,
-                      ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Text(
+                      _title,
+                      style: theme.textTheme.headlineMedium,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 0, 16, 0),
-                  child: AnimatedBuilder(
-                    animation: WerkaStore.instance,
-                    builder: (context, _) {
-                      final store = WerkaStore.instance;
-                      if (store.loadingDetail(
-                              widget.args.kind, widget.args.supplierRef) &&
-                          store
-                              .detailItems(
-                                  widget.args.kind, widget.args.supplierRef)
-                              .isEmpty) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      final error = store.detailError(
-                          widget.args.kind, widget.args.supplierRef);
-                      if (error != null &&
-                          store
-                              .detailItems(
-                                  widget.args.kind, widget.args.supplierRef)
-                              .isEmpty) {
-                        return Center(
-                          child: Card.filled(
-                            margin: EdgeInsets.zero,
-                            color: scheme.surfaceContainerLow,
-                            child: Padding(
-                              padding: const EdgeInsets.all(18),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(context.l10n
-                                      .recordsLoadFailedWith(error)),
-                                  const SizedBox(height: 12),
-                                  FilledButton(
-                                    onPressed: _reload,
-                                    child: Text(context.l10n.retry),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      final items = store.detailItems(
-                          widget.args.kind, widget.args.supplierRef);
-                      if (items.isEmpty) {
-                        return Center(
-                          child: Card.filled(
-                            margin: EdgeInsets.zero,
-                            color: scheme.surfaceContainerLow,
-                            child: Padding(
-                              padding: const EdgeInsets.all(18),
-                              child: Text(
-                                context.l10n.noRecordsYet,
-                                style: theme.textTheme.titleMedium,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-
-                      return AppRefreshIndicator(
-                        onRefresh: _reload,
-                        child: ListView(
-                          padding: const EdgeInsets.only(bottom: 110),
-                          children: [
-                            for (int index = 0; index < items.length; index++) ...[
-                              _WerkaStatusRecordCard(
-                                record: items[index],
-                                onTap: () => _openRecord(items[index]),
-                              ),
-                              if (index != items.length - 1)
+            ),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(14, 0, 16, 0),
+                child: AnimatedBuilder(
+                  animation: WerkaStore.instance,
+                  builder: (context, _) {
+                    final store = WerkaStore.instance;
+                    if (store.loadingDetail(
+                            widget.args.kind, widget.args.supplierRef) &&
+                        store
+                            .detailItems(
+                                widget.args.kind, widget.args.supplierRef)
+                            .isEmpty) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final error = store.detailError(
+                        widget.args.kind, widget.args.supplierRef);
+                    if (error != null &&
+                        store
+                            .detailItems(
+                                widget.args.kind, widget.args.supplierRef)
+                            .isEmpty) {
+                      return Center(
+                        child: Card.filled(
+                          margin: EdgeInsets.zero,
+                          color: scheme.surfaceContainerLow,
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(context.l10n
+                                    .recordsLoadFailedWith(error)),
                                 const SizedBox(height: 12),
-                            ],
-                          ],
+                                FilledButton(
+                                  onPressed: _reload,
+                                  child: Text(context.l10n.retry),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       );
-                    },
-                  ),
+                    }
+
+                    final items = store.detailItems(
+                        widget.args.kind, widget.args.supplierRef);
+                    if (items.isEmpty) {
+                      return Center(
+                        child: Card.filled(
+                          margin: EdgeInsets.zero,
+                          color: scheme.surfaceContainerLow,
+                          child: Padding(
+                            padding: const EdgeInsets.all(18),
+                            child: Text(
+                              context.l10n.noRecordsYet,
+                              style: theme.textTheme.titleMedium,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    return AppRefreshIndicator(
+                      onRefresh: _reload,
+                      child: ListView(
+                        padding: const EdgeInsets.only(bottom: 110),
+                        children: [
+                          for (int index = 0; index < items.length; index++) ...[
+                            _WerkaStatusRecordCard(
+                              record: items[index],
+                              onTap: () => _openRecord(items[index]),
+                            ),
+                            if (index != items.length - 1)
+                              const SizedBox(height: 12),
+                          ],
+                        ],
+                      ),
+                    );
+                  },
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
-        bottomNavigationBar: const SafeArea(
-          top: false,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
-            child: WerkaDock(activeTab: null),
-          ),
+      ),
+      bottomNavigationBar: const SafeArea(
+        top: false,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: WerkaDock(activeTab: null),
         ),
       ),
     );
@@ -202,11 +193,11 @@ class _WerkaStatusDetailScreenState extends State<WerkaStatusDetailScreen> {
         AppRoutes.werkaDetail,
         arguments: record,
       )
-          .then((changed) {
-        if (changed == true) {
-          _didMutate = true;
-          _reload();
+          .then((_) {
+        if (!mounted) {
+          return;
         }
+        _reload();
       });
       return;
     }

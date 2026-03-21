@@ -177,15 +177,21 @@ class _WerkaStatusBreakdownScreenState
                                     entry: items[index],
                                     metricLabel: _metricLabel(items[index]),
                                     isLast: index == items.length - 1,
-                                    onTap: () =>
-                                        Navigator.of(context).pushNamed(
-                                      AppRoutes.werkaStatusDetail,
-                                      arguments: WerkaStatusDetailArgs(
-                                        kind: widget.kind,
-                                        supplierRef: items[index].supplierRef,
-                                        supplierName: items[index].supplierName,
-                                      ),
-                                    ),
+                                    onTap: () async {
+                                      await Navigator.of(context).pushNamed(
+                                        AppRoutes.werkaStatusDetail,
+                                        arguments: WerkaStatusDetailArgs(
+                                          kind: widget.kind,
+                                          supplierRef: items[index].supplierRef,
+                                          supplierName:
+                                              items[index].supplierName,
+                                        ),
+                                      );
+                                      if (!context.mounted) {
+                                        return;
+                                      }
+                                      await _reload();
+                                    },
                                   ),
                                   if (index != items.length - 1)
                                     Divider(
