@@ -337,11 +337,11 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
       return false;
     }
     if (notification is ScrollStartNotification) {
-      return notification.dragDetails != null;
+      return false;
     }
     final dragDelta = _extractDragDelta(notification);
     if (dragDelta == null) {
-      return notification is ScrollEndNotification;
+      return false;
     }
     return dragDelta > 0.0;
   }
