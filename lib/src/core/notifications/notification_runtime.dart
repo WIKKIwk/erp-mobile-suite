@@ -1,8 +1,9 @@
-import '../api/mobile_api.dart';
-import 'refresh_hub.dart';
 import 'notification_unread_store.dart';
 import '../session/app_session.dart';
+import '../../features/customer/state/customer_store.dart';
 import '../../features/shared/models/app_models.dart';
+import '../../features/supplier/state/supplier_store.dart';
+import '../../features/werka/state/werka_store.dart';
 import 'local_notification_service.dart';
 import 'dart:async';
 import 'dart:convert';
@@ -81,11 +82,7 @@ class _NotificationRuntimeState extends State<NotificationRuntime>
       }
       _lastUserKey = userKey;
 
-      final records = profile.role == UserRole.supplier
-          ? await MobileApi.instance.supplierHistory()
-          : profile.role == UserRole.werka
-              ? await MobileApi.instance.werkaHistory()
-              : await MobileApi.instance.customerHistory();
+      final records = await _loadCanonicalRecords(profile);
 
       await NotificationUnreadStore.instance.retainForProfile(
         profile: profile,
@@ -118,14 +115,6 @@ class _NotificationRuntimeState extends State<NotificationRuntime>
             profile: profile,
             ids: [record.id],
           );
-          RefreshHub.instance.emit(
-            profile.role == UserRole.supplier
-                ? 'supplier'
-                : profile.role == UserRole.werka
-                    ? 'werka'
-                    : 'customer',
-          );
-          RefreshHub.instance.emit('admin');
           await LocalNotificationService.instance.showDispatchNotification(
             role: profile.role,
             record: record,
@@ -148,6 +137,24 @@ class _NotificationRuntimeState extends State<NotificationRuntime>
       record.sentQty.toStringAsFixed(4),
       record.acceptedQty.toStringAsFixed(4),
     ].join('|');
+  }
+
+  Future<List<DispatchRecord>> _loadCanonicalRecords(
+    SessionProfile profile,
+  ) async {
+    switch (profile.role) {
+      case UserRole.supplier:
+        await SupplierStore.instance.refreshHistory();
+        return SupplierStore.instance.historyItems;
+      case UserRole.werka:
+        await WerkaStore.instance.refreshHistory();
+        return WerkaStore.instance.historyItems;
+      case UserRole.customer:
+        await CustomerStore.instance.refresh();
+        return CustomerStore.instance.historyItems;
+      case UserRole.admin:
+        return const <DispatchRecord>[];
+    }
   }
 
   bool _shouldSurfaceForCurrentProfile(
