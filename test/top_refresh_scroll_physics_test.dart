@@ -7,7 +7,7 @@ void main() {
 
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('allows top pull-to-refresh underscroll on short content', () {
+  test('blocks visible top underscroll on short content', () {
     final metrics = FixedScrollMetrics(
       minScrollExtent: 0,
       maxScrollExtent: 0,
@@ -18,7 +18,7 @@ void main() {
     );
 
     expect(physics.shouldAcceptUserOffset(metrics), isTrue);
-    expect(physics.applyBoundaryConditions(metrics, -40), 0.0);
+    expect(physics.applyBoundaryConditions(metrics, -40), -40.0);
   });
 
   test('blocks bottom overscroll on short content', () {
@@ -34,7 +34,7 @@ void main() {
     expect(physics.applyBoundaryConditions(metrics, 40), 40);
   });
 
-  test('caps top pull-to-refresh overscroll distance', () {
+  test('continues blocking deeper top underscroll', () {
     final metrics = FixedScrollMetrics(
       minScrollExtent: 0,
       maxScrollExtent: 0,
@@ -44,7 +44,7 @@ void main() {
       devicePixelRatio: 1,
     );
 
-    expect(physics.applyBoundaryConditions(metrics, -88), 0.0);
-    expect(physics.applyBoundaryConditions(metrics, -140), -52.0);
+    expect(physics.applyBoundaryConditions(metrics, -88), -88.0);
+    expect(physics.applyBoundaryConditions(metrics, -140), -140.0);
   });
 }
