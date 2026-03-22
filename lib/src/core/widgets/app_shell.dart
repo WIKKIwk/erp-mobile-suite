@@ -217,6 +217,7 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
   ScrollPosition? _lastPosition;
   double _pullExtent = 0.0;
   bool _refreshing = false;
+  bool _topLockActive = false;
 
   static const double _edgeTolerance = 0.5;
 
@@ -262,10 +263,13 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
       _refreshing = true;
       _pullExtent = 0.0;
     });
+    _topLockActive = true;
+    _startTopLock();
     _settleTopEdge(forceJump: true);
     try {
       await widget.onRefresh();
     } finally {
+      _topLockActive = false;
       if (mounted) {
         setState(() {
           _refreshing = false;
@@ -280,6 +284,26 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
         });
       }
     }
+  }
+
+  void _startTopLock() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_topLockActive) {
+        return;
+      }
+      final position = _lastPosition;
+      if (position != null && position.hasPixels) {
+        final target = position.minScrollExtent;
+        if ((position.pixels - target).abs() > _edgeTolerance) {
+          try {
+            position.jumpTo(target);
+          } catch (_) {}
+        }
+      }
+      if (_topLockActive) {
+        _startTopLock();
+      }
+    });
   }
 
   void _setPullExtent(double nextExtent) {
