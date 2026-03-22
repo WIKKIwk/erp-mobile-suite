@@ -135,7 +135,6 @@ private final class AccordLiquidDockHostController: UITabBarController, UITabBar
 
     let args = call.arguments as? [String: Any] ?? [:]
     let visible = args["visible"] as? Bool ?? false
-    NSLog("accord_dock updateDock visible=%@ items=%lu", visible ? "true" : "false", ((args["items"] as? [[String: Any]]) ?? []).count)
     tabBar.isHidden = !visible
     tabBar.isUserInteractionEnabled = visible
     if !visible {
@@ -240,7 +239,6 @@ private final class AccordLiquidDockHostController: UITabBarController, UITabBar
       return
     }
     let item = items[selectedIndex]
-    NSLog("accord_dock tap id=%@", item.id)
     _attachFlutterContentIfPossible()
     channel.invokeMethod("tap", arguments: ["id": item.id])
   }
@@ -276,7 +274,6 @@ private final class AccordLiquidDockHostController: UITabBarController, UITabBar
       guard item.allowLongPress else {
         return
       }
-      NSLog("accord_dock longPress id=%@", item.id)
       channel.invokeMethod("longPress", arguments: ["id": item.id])
       return
     }

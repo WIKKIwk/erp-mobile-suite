@@ -27,8 +27,8 @@ class _IOSDockRuntimeState extends State<IOSDockRuntime>
       MethodChannel('accord_liquid_dock_runtime');
 
   _IOSDockConfig? _lastConfig;
+  String? _lastSignature;
   Timer? _retryTimer;
-  int _retryCount = 0;
 
   @override
   void initState() {
@@ -49,24 +49,21 @@ class _IOSDockRuntimeState extends State<IOSDockRuntime>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _sendDockPayload(_lastConfig);
-      _scheduleRetryBurst();
+      _scheduleRetryResend();
     }
   }
 
   Future<void> _handleMethodCall(MethodCall call) async {
     final config = _lastConfig;
     if (config == null) {
-      debugPrint('accord_dock flutter call ignored method=${call.method}');
       return;
     }
     final args = (call.arguments as Map<dynamic, dynamic>? ??
         const <dynamic, dynamic>{});
     final id = '${args['id'] ?? ''}'.trim();
     if (id.isEmpty) {
-      debugPrint('accord_dock flutter call empty method=${call.method}');
       return;
     }
-    debugPrint('accord_dock flutter call method=${call.method} id=$id');
     switch (call.method) {
       case 'tap':
         config.handleTap(id);
@@ -78,9 +75,15 @@ class _IOSDockRuntimeState extends State<IOSDockRuntime>
   }
 
   void _syncDock(_IOSDockConfig? config) {
+    final nextSignature = _signatureFor(config);
+    if (_lastSignature == nextSignature) {
+      _lastConfig = config;
+      return;
+    }
     _lastConfig = config;
+    _lastSignature = nextSignature;
     _sendDockPayload(config);
-    _scheduleRetryBurst();
+    _scheduleRetryResend();
   }
 
   void _sendDockPayload(_IOSDockConfig? config) {
@@ -100,28 +103,35 @@ class _IOSDockRuntimeState extends State<IOSDockRuntime>
                 )
                 .toList(),
           };
-    debugPrint(
-      'accord_dock flutter sync visible=${config != null} '
-      'route=${AppRouteTracker.instance.currentRouteName} '
-      'items=${config?.items.length ?? 0}',
-    );
     _channel.invokeMethod<void>('updateDock', payload);
   }
 
-  void _scheduleRetryBurst() {
+  void _scheduleRetryResend() {
     _retryTimer?.cancel();
-    _retryCount = 0;
-    _retryTimer = Timer.periodic(const Duration(milliseconds: 250), (timer) {
+    _retryTimer = Timer(const Duration(milliseconds: 180), () {
       if (!mounted) {
-        timer.cancel();
         return;
       }
-      _retryCount += 1;
       _sendDockPayload(_lastConfig);
-      if (_retryCount >= 8) {
-        timer.cancel();
-      }
     });
+  }
+
+  String _signatureFor(_IOSDockConfig? config) {
+    if (config == null) {
+      return 'hidden';
+    }
+    final buffer = StringBuffer('visible');
+    for (final item in config.items) {
+      buffer
+        ..write('|')
+        ..write(item.id)
+        ..write(':')
+        ..write(item.active ? '1' : '0')
+        ..write(item.primary ? '1' : '0')
+        ..write(item.showBadge ? '1' : '0')
+        ..write(item.allowLongPress ? '1' : '0');
+    }
+    return buffer.toString();
   }
 
   @override
