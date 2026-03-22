@@ -214,12 +214,18 @@ class AppRefreshIndicator extends StatefulWidget {
 class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
   static const double _triggerDistance = 72.0;
   static const double _maxPullDistance = 108.0;
-  ScrollPosition? _activePosition;
+  final ScrollController _scrollController = ScrollController();
   double _pullExtent = 0.0;
   bool _refreshing = false;
   bool _topLockActive = false;
 
   static const double _edgeTolerance = 0.5;
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   bool _isNearTop(ScrollMetrics metrics) {
     return metrics.extentBefore <= _edgeTolerance &&
@@ -236,10 +242,6 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
   }
 
   bool _matchesRefreshContext(ScrollNotification notification) {
-    final notificationContext = notification.context;
-    if (notificationContext != null) {
-      _activePosition = Scrollable.maybeOf(notificationContext)?.position;
-    }
     if (!widget.notificationPredicate(notification)) {
       return false;
     }
@@ -291,8 +293,8 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
       if (!mounted || !_topLockActive) {
         return;
       }
-      final position = _activePosition;
-      if (position != null && position.hasPixels) {
+      if (_scrollController.hasClients) {
+        final position = _scrollController.position;
         final target = position.minScrollExtent;
         if ((position.pixels - target).abs() > _edgeTolerance) {
           try {
@@ -318,10 +320,10 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
 
   void _settleTopEdge({bool forceJump = false}) {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final position = _activePosition;
-      if (!mounted || position == null || !position.hasPixels) {
+      if (!mounted || !_scrollController.hasClients) {
         return;
       }
+      final position = _scrollController.position;
       final target = position.minScrollExtent;
       final distance = position.pixels - target;
       if (distance.abs() <= _edgeTolerance) {
@@ -353,8 +355,8 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
     }
 
     if (_refreshing) {
-      final position = _activePosition;
-      if (position != null && position.hasPixels) {
+      if (_scrollController.hasClients) {
+        final position = _scrollController.position;
         final target = position.minScrollExtent;
         if ((position.pixels - target).abs() > _edgeTolerance) {
           try {
@@ -406,51 +408,54 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
         ? widget.edgeOffset + 12.0
         : widget.edgeOffset + (widget.displacement * progress) - 28.0;
 
-    return NotificationListener<ScrollNotification>(
-      onNotification: _handleScrollNotification,
-      child: Stack(
-        children: [
-          widget.child,
-          if (visible)
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: IgnorePointer(
-                ignoring: true,
-                child: Transform.translate(
-                  offset: Offset(0, translateY),
-                  child: Align(
-                    alignment: Alignment.topCenter,
-                    child: AnimatedOpacity(
-                      duration: AppMotion.fast,
-                      opacity: visible ? 1 : 0,
-                      child: Container(
-                        height: 36,
-                        width: 36,
-                        decoration: BoxDecoration(
-                          color: scheme.surfaceContainerHigh,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.10),
-                              blurRadius: 10,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        padding: const EdgeInsets.all(8),
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.4,
-                          value: _refreshing ? null : progress,
+    return PrimaryScrollController(
+      controller: _scrollController,
+      child: NotificationListener<ScrollNotification>(
+        onNotification: _handleScrollNotification,
+        child: Stack(
+          children: [
+            widget.child,
+            if (visible)
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: IgnorePointer(
+                  ignoring: true,
+                  child: Transform.translate(
+                    offset: Offset(0, translateY),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: AnimatedOpacity(
+                        duration: AppMotion.fast,
+                        opacity: visible ? 1 : 0,
+                        child: Container(
+                          height: 36,
+                          width: 36,
+                          decoration: BoxDecoration(
+                            color: scheme.surfaceContainerHigh,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.10),
+                                blurRadius: 10,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          padding: const EdgeInsets.all(8),
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.4,
+                            value: _refreshing ? null : progress,
+                          ),
                         ),
                       ),
                     ),
                   ),
                 ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
