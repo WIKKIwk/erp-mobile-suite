@@ -244,7 +244,7 @@ class AppRefreshIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return RefreshIndicator.adaptive(
+    return RefreshIndicator(
       onRefresh: onRefresh,
       displacement: displacement,
       edgeOffset: edgeOffset,
