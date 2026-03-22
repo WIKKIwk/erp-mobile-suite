@@ -55,7 +55,7 @@ private final class AccordLiquidDockOverlayView: UIView, UITabBarDelegate {
     super.init(frame: .zero)
     translatesAutoresizingMaskIntoConstraints = false
     backgroundColor = .clear
-    isUserInteractionEnabled = false
+    isUserInteractionEnabled = true
     isHidden = true
     setup()
     channel.setMethodCallHandler { [weak self] call, result in
@@ -72,6 +72,7 @@ private final class AccordLiquidDockOverlayView: UIView, UITabBarDelegate {
     addSubview(tabBar)
     tabBar.translatesAutoresizingMaskIntoConstraints = false
     tabBar.isUserInteractionEnabled = true
+    tabBar.clipsToBounds = false
     tabBar.delegate = self
     tabBar.tintColor = UIColor.white.withAlphaComponent(0.98)
     tabBar.unselectedItemTintColor = UIColor.white.withAlphaComponent(0.72)
@@ -113,9 +114,21 @@ private final class AccordLiquidDockOverlayView: UIView, UITabBarDelegate {
     layer.zPosition = 999
     tabBar.layer.zPosition = 1000
 
+    let tap = UITapGestureRecognizer(target: self, action: #selector(handleTabBarTap(_:)))
+    tap.cancelsTouchesInView = false
+    tabBar.addGestureRecognizer(tap)
+
     let longPress = UILongPressGestureRecognizer(target: self, action: #selector(handleTabBarLongPress(_:)))
     longPress.minimumPressDuration = 0.65
+    longPress.cancelsTouchesInView = false
     tabBar.addGestureRecognizer(longPress)
+  }
+
+  override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+    guard !isHidden else { return false }
+    let tabPoint = convert(point, to: tabBar)
+    let hitBounds = tabBar.bounds.insetBy(dx: -18, dy: -14)
+    return hitBounds.contains(tabPoint)
   }
 
   private func handle(call: FlutterMethodCall, result: FlutterResult) {
@@ -127,7 +140,7 @@ private final class AccordLiquidDockOverlayView: UIView, UITabBarDelegate {
     let args = call.arguments as? [String: Any] ?? [:]
     let visible = args["visible"] as? Bool ?? false
     isHidden = !visible
-    isUserInteractionEnabled = visible
+    tabBar.isUserInteractionEnabled = visible
     if !visible {
       items = []
       tabBar.items = []
@@ -198,12 +211,15 @@ private final class AccordLiquidDockOverlayView: UIView, UITabBarDelegate {
     channel.invokeMethod("tap", arguments: ["id": items[item.tag].id])
   }
 
+  @objc private func handleTabBarTap(_ recognizer: UITapGestureRecognizer) {
+    guard recognizer.state == .ended else { return }
+    invokeTap(at: recognizer.location(in: tabBar))
+  }
+
   @objc private func handleTabBarLongPress(_ recognizer: UILongPressGestureRecognizer) {
     guard recognizer.state == .began else { return }
     let location = recognizer.location(in: tabBar)
-    let buttons = tabBar.subviews
-      .compactMap { $0 as? UIControl }
-      .sorted { $0.frame.minX < $1.frame.minX }
+    let buttons = dockButtons()
 
     for (index, button) in buttons.enumerated() where button.frame.contains(location) {
       guard items.indices.contains(index) else { continue }
@@ -213,5 +229,20 @@ private final class AccordLiquidDockOverlayView: UIView, UITabBarDelegate {
       }
       return
     }
+  }
+
+  private func invokeTap(at location: CGPoint) {
+    let buttons = dockButtons()
+    for (index, button) in buttons.enumerated() where button.frame.contains(location) {
+      guard items.indices.contains(index) else { continue }
+      channel.invokeMethod("tap", arguments: ["id": items[index].id])
+      return
+    }
+  }
+
+  private func dockButtons() -> [UIControl] {
+    tabBar.subviews
+      .compactMap { $0 as? UIControl }
+      .sorted { $0.frame.minX < $1.frame.minX }
   }
 }
