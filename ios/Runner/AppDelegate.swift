@@ -70,11 +70,12 @@ private struct AccordLiquidDockItem: Hashable {
   let allowLongPress: Bool
 }
 
-private final class AccordLiquidDockView: UIView {
+private final class AccordLiquidDockView: UIView, UITabBarDelegate {
   private let channel: FlutterMethodChannel
   private let compact: Bool
   private let tightToEdges: Bool
   private let items: [AccordLiquidDockItem]
+  private let systemTabBar = UITabBar()
   private let hostView = UIView()
   private let blurView = UIVisualEffectView(effect: UIBlurEffect(style: .systemUltraThinMaterialDark))
   private let tintView = UIView()
@@ -114,6 +115,8 @@ private final class AccordLiquidDockView: UIView {
   }
 
   private func setupViewHierarchy() {
+    setupSystemTabBarView()
+    return
 #if compiler(>=6.2)
     if #available(iOS 26.0, *) {
       setupOriginalLiquidGlassView()
@@ -238,6 +241,135 @@ private final class AccordLiquidDockView: UIView {
     for layer in sheenView.layer.sublayers ?? [] {
       layer.frame = sheenView.bounds
       layer.cornerRadius = borderView.layer.cornerRadius
+    }
+  }
+
+  private func setupSystemTabBarView() {
+    let horizontalInset: CGFloat = tightToEdges ? 12 : 18
+    let itemWidth: CGFloat = compact ? 58 : 64
+    let itemSpacing: CGFloat = compact ? 4 : 8
+    let desiredWidth = (CGFloat(items.count) * itemWidth) +
+      (CGFloat(max(items.count - 1, 0)) * itemSpacing) + 32
+
+    backgroundColor = .clear
+    isOpaque = false
+
+    addSubview(systemTabBar)
+    systemTabBar.translatesAutoresizingMaskIntoConstraints = false
+    systemTabBar.delegate = self
+    systemTabBar.itemPositioning = .centered
+    systemTabBar.itemWidth = itemWidth
+    systemTabBar.itemSpacing = itemSpacing
+    systemTabBar.tintColor = UIColor.white.withAlphaComponent(0.98)
+    systemTabBar.unselectedItemTintColor = UIColor.white.withAlphaComponent(0.72)
+    systemTabBar.layer.cornerRadius = compact ? 28 : 30
+    systemTabBar.layer.cornerCurve = .continuous
+    systemTabBar.layer.masksToBounds = true
+
+    if #available(iOS 15.0, *) {
+      let appearance = UITabBarAppearance()
+      appearance.configureWithDefaultBackground()
+      appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
+      appearance.backgroundColor = UIColor.white.withAlphaComponent(0.04)
+      appearance.shadowColor = .clear
+      configureTabBarItemAppearance(appearance.stackedLayoutAppearance)
+      configureTabBarItemAppearance(appearance.inlineLayoutAppearance)
+      configureTabBarItemAppearance(appearance.compactInlineLayoutAppearance)
+      systemTabBar.standardAppearance = appearance
+      systemTabBar.scrollEdgeAppearance = appearance
+    }
+
+    systemTabBar.items = items.enumerated().map { index, item in
+      let tabBarItem = UITabBarItem(
+        title: nil,
+        image: UIImage(systemName: iconName(for: item, selected: false)),
+        selectedImage: UIImage(systemName: iconName(for: item, selected: true))
+      )
+      tabBarItem.tag = index
+      tabBarItem.badgeValue = item.showBadge ? " " : nil
+      tabBarItem.badgeColor = UIColor(red: 1.0, green: 0.25, blue: 0.28, alpha: 1.0)
+      tabBarItem.imageInsets = UIEdgeInsets(top: 10, left: 0, bottom: -10, right: 0)
+      tabBarItem.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 1000)
+      return tabBarItem
+    }
+
+    if let activeIndex = items.firstIndex(where: { $0.active }),
+       let activeItem = systemTabBar.items?[activeIndex] {
+      systemTabBar.selectedItem = activeItem
+    }
+
+    let longPress = UILongPressGestureRecognizer(
+      target: self,
+      action: #selector(handleTabBarLongPress(_:))
+    )
+    longPress.minimumPressDuration = 0.65
+    systemTabBar.addGestureRecognizer(longPress)
+
+    NSLayoutConstraint.activate([
+      systemTabBar.centerXAnchor.constraint(equalTo: centerXAnchor),
+      systemTabBar.bottomAnchor.constraint(equalTo: bottomAnchor),
+      systemTabBar.widthAnchor.constraint(equalToConstant: desiredWidth),
+      systemTabBar.heightAnchor.constraint(equalToConstant: compact ? 64 : 68),
+      systemTabBar.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: horizontalInset),
+      systemTabBar.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -horizontalInset),
+    ])
+  }
+
+  private func configureTabBarItemAppearance(_ appearance: UITabBarItemAppearance) {
+    appearance.normal.iconColor = UIColor.white.withAlphaComponent(0.72)
+    appearance.selected.iconColor = UIColor.white.withAlphaComponent(0.98)
+    appearance.normal.badgeBackgroundColor = UIColor(red: 1.0, green: 0.25, blue: 0.28, alpha: 1.0)
+    appearance.selected.badgeBackgroundColor = UIColor(red: 1.0, green: 0.25, blue: 0.28, alpha: 1.0)
+  }
+
+  private func iconName(for item: AccordLiquidDockItem, selected: Bool) -> String {
+    switch item.id {
+      case "home":
+        return selected ? "house.fill" : "house"
+      case "notifications":
+        return selected ? "bell.fill" : "bell"
+      case "profile":
+        return selected ? "person.crop.circle.fill" : "person.crop.circle"
+      case "recent":
+        return selected ? "clock.fill" : "clock"
+      case "suppliers":
+        return selected ? "person.2.fill" : "person.2"
+      case "activity":
+        return selected ? "waveform.path.ecg.rectangle.fill" : "waveform.path.ecg.rectangle"
+      case "create":
+        return item.primary ? "plus.circle.fill" : "plus"
+      default:
+        return selected ? "circle.fill" : "circle"
+    }
+  }
+
+  func tabBar(_ tabBar: UITabBar, didSelect item: UITabBarItem) {
+    let index = item.tag
+    guard items.indices.contains(index) else {
+      return
+    }
+    channel.invokeMethod("tap", arguments: ["id": items[index].id])
+  }
+
+  @objc
+  private func handleTabBarLongPress(_ recognizer: UILongPressGestureRecognizer) {
+    guard recognizer.state == .began else {
+      return
+    }
+    let location = recognizer.location(in: systemTabBar)
+    let buttons = systemTabBar.subviews
+      .compactMap { $0 as? UIControl }
+      .sorted { $0.frame.minX < $1.frame.minX }
+
+    for (index, button) in buttons.enumerated() where button.frame.contains(location) {
+      guard items.indices.contains(index) else {
+        continue
+      }
+      let item = items[index]
+      if item.allowLongPress {
+        channel.invokeMethod("longPress", arguments: ["id": item.id])
+      }
+      return
     }
   }
 
