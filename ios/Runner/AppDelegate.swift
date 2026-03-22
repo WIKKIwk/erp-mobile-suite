@@ -257,16 +257,29 @@ private final class AccordLiquidDockView: UIView, UITabBarDelegate {
     addSubview(systemTabBar)
     systemTabBar.translatesAutoresizingMaskIntoConstraints = false
     systemTabBar.delegate = self
-    systemTabBar.itemPositioning = .centered
-    systemTabBar.itemWidth = itemWidth
-    systemTabBar.itemSpacing = itemSpacing
     systemTabBar.tintColor = UIColor.white.withAlphaComponent(0.98)
     systemTabBar.unselectedItemTintColor = UIColor.white.withAlphaComponent(0.72)
-    systemTabBar.layer.cornerRadius = compact ? 28 : 30
-    systemTabBar.layer.cornerCurve = .continuous
-    systemTabBar.layer.masksToBounds = true
-
-    if #available(iOS 15.0, *) {
+    if #available(iOS 26.0, *) {
+      systemTabBar.itemPositioning = .automatic
+      systemTabBar.backgroundImage = UIImage()
+      systemTabBar.shadowImage = UIImage()
+      if #available(iOS 15.0, *) {
+        let appearance = UITabBarAppearance()
+        appearance.configureWithDefaultBackground()
+        appearance.shadowColor = .clear
+        configureTabBarItemAppearance(appearance.stackedLayoutAppearance)
+        configureTabBarItemAppearance(appearance.inlineLayoutAppearance)
+        configureTabBarItemAppearance(appearance.compactInlineLayoutAppearance)
+        systemTabBar.standardAppearance = appearance
+        systemTabBar.scrollEdgeAppearance = appearance
+      }
+    } else if #available(iOS 15.0, *) {
+      systemTabBar.itemPositioning = .centered
+      systemTabBar.itemWidth = itemWidth
+      systemTabBar.itemSpacing = itemSpacing
+      systemTabBar.layer.cornerRadius = compact ? 28 : 30
+      systemTabBar.layer.cornerCurve = .continuous
+      systemTabBar.layer.masksToBounds = true
       let appearance = UITabBarAppearance()
       appearance.configureWithDefaultBackground()
       appearance.backgroundEffect = UIBlurEffect(style: .systemUltraThinMaterialDark)
@@ -277,6 +290,15 @@ private final class AccordLiquidDockView: UIView, UITabBarDelegate {
       configureTabBarItemAppearance(appearance.compactInlineLayoutAppearance)
       systemTabBar.standardAppearance = appearance
       systemTabBar.scrollEdgeAppearance = appearance
+    } else {
+      systemTabBar.itemPositioning = .centered
+      systemTabBar.itemWidth = itemWidth
+      systemTabBar.itemSpacing = itemSpacing
+      systemTabBar.layer.cornerRadius = compact ? 28 : 30
+      systemTabBar.layer.cornerCurve = .continuous
+      systemTabBar.layer.masksToBounds = true
+      systemTabBar.barStyle = .black
+      systemTabBar.isTranslucent = true
     }
 
     systemTabBar.items = items.enumerated().map { index, item in

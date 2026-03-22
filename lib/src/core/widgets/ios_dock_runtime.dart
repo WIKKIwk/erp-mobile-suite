@@ -116,18 +116,21 @@ class _IOSDockConfig {
                   AppRoutes.customerHome,
                   (route) => false,
                 );
+                return;
               case 'notifications':
                 if (active == 'notifications') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.customerNotifications,
                   (route) => false,
                 );
+                return;
               case 'profile':
                 if (active == 'profile') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.profile,
                   (route) => false,
                 );
+                return;
             }
           },
           handleLongPress: (context, id) {
@@ -179,27 +182,32 @@ class _IOSDockConfig {
                   AppRoutes.supplierHome,
                   (route) => false,
                 );
+                return;
               case 'notifications':
                 if (active == 'notifications') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.supplierNotifications,
                   (route) => false,
                 );
+                return;
               case 'create':
                 if (active == 'create') return;
                 appNavigatorKey.currentState?.pushNamed(AppRoutes.supplierItemPicker);
+                return;
               case 'recent':
                 if (active == 'recent') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.supplierRecent,
                   (route) => false,
                 );
+                return;
               case 'profile':
                 if (active == 'profile') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.profile,
                   (route) => false,
                 );
+                return;
             }
           },
           handleLongPress: (context, id) {
@@ -251,27 +259,32 @@ class _IOSDockConfig {
                   AppRoutes.werkaHome,
                   (route) => false,
                 );
+                return;
               case 'notifications':
                 if (active == 'notifications') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.werkaNotifications,
                   (route) => false,
                 );
+                return;
               case 'create':
                 if (active == 'create') return;
                 appNavigatorKey.currentState?.pushNamed(AppRoutes.werkaCreateHub);
+                return;
               case 'recent':
                 if (active == 'recent') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.werkaRecent,
                   (route) => false,
                 );
+                return;
               case 'profile':
                 if (active == 'profile') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.profile,
                   (route) => false,
                 );
+                return;
             }
           },
           handleLongPress: (context, id) {
@@ -325,30 +338,35 @@ class _IOSDockConfig {
                   AppRoutes.adminHome,
                   (route) => false,
                 );
+                return;
               case 'suppliers':
                 if (active == 'suppliers') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.adminSuppliers,
                   (route) => false,
                 );
+                return;
               case 'create':
                 if (active == 'create') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.adminCreateHub,
                   (route) => false,
                 );
+                return;
               case 'activity':
                 if (active == 'activity') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.adminActivity,
                   (route) => false,
                 );
+                return;
               case 'profile':
                 if (active == 'profile') return;
                 appNavigatorKey.currentState?.pushNamedAndRemoveUntil(
                   AppRoutes.profile,
                   (route) => false,
                 );
+                return;
             }
           },
           handleLongPress: (context, id) {

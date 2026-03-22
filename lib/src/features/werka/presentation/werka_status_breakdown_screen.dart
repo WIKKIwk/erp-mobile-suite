@@ -5,6 +5,7 @@ import '../../../core/widgets/app_shell.dart';
 import '../../shared/models/app_models.dart';
 import '../state/werka_store.dart';
 import 'widgets/werka_dock.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class WerkaStatusBreakdownScreen extends StatefulWidget {
@@ -72,6 +73,7 @@ class _WerkaStatusBreakdownScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final usesGlobalIOSDock = !kIsWeb && defaultTargetPlatform == TargetPlatform.iOS;
     return Scaffold(
       extendBody: true,
       backgroundColor: AppTheme.shellStart(context),
@@ -217,13 +219,15 @@ class _WerkaStatusBreakdownScreenState
           ],
         ),
       ),
-      bottomNavigationBar: const SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20),
-          child: WerkaDock(activeTab: null),
-        ),
-      ),
+      bottomNavigationBar: usesGlobalIOSDock
+          ? null
+          : const SafeArea(
+              top: false,
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: WerkaDock(activeTab: null),
+              ),
+            ),
     );
   }
 }
