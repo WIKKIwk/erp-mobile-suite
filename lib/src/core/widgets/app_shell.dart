@@ -286,7 +286,11 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
       if ((position.pixels - target).abs() <= _edgeTolerance) {
         return;
       }
-      position.jumpTo(target);
+      position.animateTo(
+        target,
+        duration: AppMotion.medium,
+        curve: AppMotion.emphasizedDecelerate,
+      );
     });
   }
 
