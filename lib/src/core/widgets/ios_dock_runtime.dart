@@ -61,6 +61,12 @@ class _IOSDockRuntimeState extends State<IOSDockRuntime> {
 
   void _syncDock(_IOSDockConfig? config) {
     _lastConfig = config;
+    debugPrint(
+      'ios_dock_runtime sync route=${AppRouteTracker.instance.currentRouteName ?? '<null>'} '
+      'role=${AppSession.instance.profile?.role.name ?? '<none>'} '
+      'visible=${config != null} '
+      'items=${config?.items.length ?? 0}',
+    );
     final payload = config == null
         ? <String, Object?>{'visible': false}
         : <String, Object?>{

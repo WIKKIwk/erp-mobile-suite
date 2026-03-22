@@ -10,10 +10,13 @@ class SceneDelegate: FlutterSceneDelegate {
     options connectionOptions: UIScene.ConnectionOptions
   ) {
     super.scene(scene, willConnectTo: session, options: connectionOptions)
+    NSLog("accord_dock scene willConnectTo called")
     guard let window,
           let flutterViewController = window.rootViewController as? FlutterViewController else {
+      NSLog("accord_dock scene setup failed: window or FlutterViewController missing")
       return
     }
+    NSLog("accord_dock scene setup success: creating window controller")
     dockController = AccordLiquidDockWindowController(
       window: window,
       messenger: flutterViewController.binaryMessenger
@@ -34,6 +37,7 @@ private final class AccordLiquidDockWindowController {
 
   init(window: UIWindow, messenger: FlutterBinaryMessenger) {
     overlayView = AccordLiquidDockOverlayView(messenger: messenger)
+    NSLog("accord_dock overlay controller init")
     window.addSubview(overlayView)
     NSLayoutConstraint.activate([
       overlayView.leadingAnchor.constraint(equalTo: window.leadingAnchor),
@@ -56,6 +60,7 @@ private final class AccordLiquidDockOverlayView: UIView, UITabBarDelegate {
     backgroundColor = .clear
     isHidden = true
     setup()
+    NSLog("accord_dock overlay view init, channel ready")
     channel.setMethodCallHandler { [weak self] call, result in
       self?.handle(call: call, result: result)
     }
@@ -120,6 +125,9 @@ private final class AccordLiquidDockOverlayView: UIView, UITabBarDelegate {
 
     let args = call.arguments as? [String: Any] ?? [:]
     let visible = args["visible"] as? Bool ?? false
+    NSLog("accord_dock updateDock visible=%{public}@ rawItems=%{public}ld",
+          String(describing: visible),
+          ((args["items"] as? [[String: Any]]) ?? []).count)
     isHidden = !visible
     if !visible {
       items = []
