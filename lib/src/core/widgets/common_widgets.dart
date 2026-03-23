@@ -485,18 +485,18 @@ class _DockButtonState extends State<DockButton> {
                     children: [
                       if (!widget.primary)
                         AnimatedOpacity(
-                          duration: AppMotion.medium,
-                          curve: AppMotion.smooth,
+                          duration: const Duration(milliseconds: 240),
+                          curve: Curves.easeInOutCubic,
                           opacity: _showActiveIndicator ? 1 : 0,
                           child: AnimatedScale(
-                            duration: AppMotion.medium,
-                            curve: Curves.easeOutBack,
-                            scale: _showActiveIndicator ? 1 : 0.72,
+                            duration: const Duration(milliseconds: 260),
+                            curve: Curves.easeInOutCubic,
+                            scale: _showActiveIndicator ? 1 : 0.84,
                             child: AnimatedContainer(
-                              duration: AppMotion.medium,
-                              curve: AppMotion.smooth,
+                              duration: const Duration(milliseconds: 260),
+                              curve: Curves.easeInOutCubic,
                               height: 42,
-                              width: widget.active ? 68 : 42,
+                              width: 68,
                               decoration: BoxDecoration(
                                 color: widget.active
                                     ? scheme.secondaryContainer
