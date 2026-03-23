@@ -41,16 +41,21 @@ Current `Delivery Note` state mapping:
   - `1` = submitted
   - `2` = returned
 - `accord_customer_state`
-  - `0` = pending
-  - `1` = confirmed
+  - `1` = pending
   - `2` = rejected
+  - `3` = confirmed
 - `accord_customer_reason`
 - `accord_delivery_actor`
+- `accord_ui_status`
+  - `pending`
+  - `confirm`
+  - `rejected`
 
 Notes:
 
 - `accord_delivery_actor` still exists as a `Data` field in the live ERP environment, even though it is used with integer semantics
 - customer delivery comments can now be discussed through ERPNext `Delivery Note` comments while state truth remains in the ERP fields above
+- customer `reject` is a real ERP return action now, not just a UI label change
 
 ## Architecture
 
@@ -192,6 +197,8 @@ Customer flow includes:
 - pending / confirmed / rejected states
 - shipment detail
 - approve / reject actions
+- approve keeps the original `Delivery Note`
+- reject creates a real return `Delivery Note` against the original one
 - rejection with either a structured reason or a meaningful free-text reason
 - discussion entry points for accepted and rejected delivery outcomes
 - notifications
