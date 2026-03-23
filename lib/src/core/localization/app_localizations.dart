@@ -84,10 +84,10 @@ class AppLocalizations {
   String get languageBody => _t('Ilova tilini tanlang',
       'Choose the app language', 'Выберите язык приложения');
   String get themeTitle => _t('Tema', 'Theme', 'Тема');
-  String get themeBody => _t('Ilova ko‘rinishini tanlang',
-      'Choose the app appearance', 'Выберите оформление приложения');
-  String get lightThemeLabel => _t('Yorug‘', 'Light', 'Светлая');
-  String get darkThemeLabel => _t('Tungi', 'Dark', 'Тёмная');
+  String get themeBody => _t('Rang uslubini tanlang',
+      'Choose the color style', 'Выберите цветовой стиль');
+  String get themeClassicLabel => _t('Klassik', 'Classic', 'Классика');
+  String get themeEarthLabel => _t('Qumli', 'Earthy', 'Песочная');
   String get uzbek => _t('O‘zbekcha', 'Uzbek', 'Узбекский');
   String get english => _t('English', 'English', 'Английский');
   String get russian => _t('Ruscha', 'Russian', 'Русский');

@@ -546,7 +546,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                         const SizedBox(height: 16),
                         _ThemePreferenceRow(
-                          isDark: ThemeController.instance.isDark,
+                          variant: ThemeController.instance.variant,
                         ),
                         const SizedBox(height: 24),
                         Divider(
@@ -758,10 +758,10 @@ class _LanguagePreferenceRow extends StatelessWidget {
 
 class _ThemePreferenceRow extends StatelessWidget {
   const _ThemePreferenceRow({
-    required this.isDark,
+    required this.variant,
   });
 
-  final bool isDark;
+  final AppThemeVariant variant;
 
   @override
   Widget build(BuildContext context) {
@@ -770,7 +770,7 @@ class _ThemePreferenceRow extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(18),
       onTap: () async {
-        final picked = await showModalBottomSheet<ThemeMode>(
+        final picked = await showModalBottomSheet<AppThemeVariant>(
           context: context,
           useSafeArea: true,
           backgroundColor: Colors.transparent,
@@ -802,21 +802,21 @@ class _ThemePreferenceRow extends StatelessWidget {
                         const SizedBox(height: 14),
                         ListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: Text(l10n.lightThemeLabel),
-                          trailing: !isDark
+                          title: Text(l10n.themeClassicLabel),
+                          trailing: variant == AppThemeVariant.classic
                               ? Icon(Icons.check_rounded, color: scheme.primary)
                               : null,
                           onTap: () =>
-                              Navigator.of(context).pop(ThemeMode.light),
+                              Navigator.of(context).pop(AppThemeVariant.classic),
                         ),
                         ListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: Text(l10n.darkThemeLabel),
-                          trailing: isDark
+                          title: Text(l10n.themeEarthLabel),
+                          trailing: variant == AppThemeVariant.earthy
                               ? Icon(Icons.check_rounded, color: scheme.primary)
                               : null,
                           onTap: () =>
-                              Navigator.of(context).pop(ThemeMode.dark),
+                              Navigator.of(context).pop(AppThemeVariant.earthy),
                         ),
                       ],
                     ),
@@ -829,7 +829,7 @@ class _ThemePreferenceRow extends StatelessWidget {
         if (picked == null) {
           return;
         }
-        await ThemeController.instance.setThemeMode(picked);
+        await ThemeController.instance.setVariant(picked);
       },
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -860,7 +860,9 @@ class _ThemePreferenceRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(999),
             ),
             child: Text(
-              isDark ? l10n.darkThemeLabel : l10n.lightThemeLabel,
+              variant == AppThemeVariant.classic
+                  ? l10n.themeClassicLabel
+                  : l10n.themeEarthLabel,
               style: Theme.of(context).textTheme.labelLarge,
             ),
           ),

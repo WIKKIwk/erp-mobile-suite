@@ -1,8 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+import 'theme_controller.dart';
+
 class AppTheme {
-  static ThemeData dark() {
+  static ThemeData dark([AppThemeVariant variant = AppThemeVariant.earthy]) {
+    final colorScheme = switch (variant) {
+      AppThemeVariant.classic => _classicDarkScheme(),
+      AppThemeVariant.earthy => _earthyDarkScheme(),
+    };
+    final textTheme = _textTheme(
+      base: GoogleFonts.robotoTextTheme(ThemeData.dark().textTheme),
+      ink: colorScheme.onSurface,
+      muted: colorScheme.onSurfaceVariant,
+    );
+
+    return _buildTheme(
+      brightness: Brightness.dark,
+      colorScheme: colorScheme,
+      textTheme: textTheme,
+      inputFillColor: colorScheme.surfaceContainerHigh,
+    );
+  }
+
+  static ThemeData light([AppThemeVariant variant = AppThemeVariant.earthy]) {
+    final colorScheme = switch (variant) {
+      AppThemeVariant.classic => _classicLightScheme(),
+      AppThemeVariant.earthy => _earthyLightScheme(),
+    };
+    final textTheme = _textTheme(
+      base: GoogleFonts.robotoTextTheme(ThemeData.light().textTheme),
+      ink: colorScheme.onSurface,
+      muted: colorScheme.onSurfaceVariant,
+    );
+
+    return _buildTheme(
+      brightness: Brightness.light,
+      colorScheme: colorScheme,
+      textTheme: textTheme,
+      inputFillColor: colorScheme.surfaceContainerHighest,
+    );
+  }
+
+  static ColorScheme _earthyDarkScheme() {
     const seed = Color(0xFF8A7650);
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seed,
@@ -32,87 +72,10 @@ class AppTheme {
       outline: const Color(0xFF9C9276),
       outlineVariant: const Color(0xFF5C5342),
     );
-    final textTheme = _textTheme(
-      base: GoogleFonts.robotoTextTheme(ThemeData.dark().textTheme),
-      ink: colorScheme.onSurface,
-      muted: colorScheme.onSurfaceVariant,
-    );
-
-    return ThemeData(
-      useMaterial3: true,
-      brightness: Brightness.dark,
-      colorScheme: colorScheme,
-      scaffoldBackgroundColor: colorScheme.surface,
-      cardColor: colorScheme.surfaceContainerLow,
-      dividerColor: colorScheme.outlineVariant,
-      textTheme: textTheme,
-      appBarTheme: AppBarTheme(
-        backgroundColor: Colors.transparent,
-        foregroundColor: colorScheme.onSurface,
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: textTheme.titleLarge,
-      ),
-      pageTransitionsTheme: _pageTransitionsTheme(),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          minimumSize: const Size.fromHeight(56),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          backgroundColor: colorScheme.primary,
-          foregroundColor: colorScheme.onPrimary,
-          minimumSize: const Size.fromHeight(56),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: colorScheme.onSurface,
-          minimumSize: const Size.fromHeight(56),
-          side: BorderSide(color: colorScheme.outline),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          textStyle: textTheme.labelLarge,
-        ),
-      ),
-      chipTheme: ChipThemeData(
-        backgroundColor: colorScheme.surfaceContainerHigh,
-        selectedColor: colorScheme.secondaryContainer,
-        secondarySelectedColor: colorScheme.secondaryContainer,
-        disabledColor: colorScheme.surfaceContainerLow,
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-        labelStyle: textTheme.bodyMedium!,
-        secondaryLabelStyle: textTheme.bodyMedium!.copyWith(
-          color: colorScheme.onSecondaryContainer,
-        ),
-        shape: RoundedRectangleBorder(
-          side: BorderSide(color: colorScheme.outlineVariant),
-          borderRadius: BorderRadius.circular(14),
-        ),
-      ),
-      inputDecorationTheme: _inputDecorationTheme(
-        fillColor: colorScheme.surfaceContainerHigh,
-        hintColor: colorScheme.onSurfaceVariant,
-        focusColor: colorScheme.primary,
-        enabledBorderColor: colorScheme.outlineVariant,
-        textColor: colorScheme.onSurface,
-      ),
-    );
+    return colorScheme;
   }
 
-  static ThemeData light() {
+  static ColorScheme _earthyLightScheme() {
     const seed = Color(0xFF8A7650);
     final colorScheme = ColorScheme.fromSeed(
       seedColor: seed,
@@ -142,15 +105,76 @@ class AppTheme {
       outline: const Color(0xFF8F8468),
       outlineVariant: const Color(0xFFC8BEA2),
     );
-    final textTheme = _textTheme(
-      base: GoogleFonts.robotoTextTheme(ThemeData.light().textTheme),
-      ink: colorScheme.onSurface,
-      muted: colorScheme.onSurfaceVariant,
-    );
+    return colorScheme;
+  }
 
+  static ColorScheme _classicDarkScheme() {
+    const seed = Color(0xFF8FA8E8);
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.dark,
+    ).copyWith(
+      surface: const Color(0xFF1C1B1F),
+      onSurface: const Color(0xFFE6E1E5),
+      surfaceDim: const Color(0xFF141218),
+      surfaceBright: const Color(0xFF35343A),
+      surfaceContainerLowest: const Color(0xFF0F0D13),
+      surfaceContainerLow: const Color(0xFF222127),
+      surfaceContainer: const Color(0xFF28262D),
+      surfaceContainerHigh: const Color(0xFF302D35),
+      surfaceContainerHighest: const Color(0xFF39363E),
+      outline: const Color(0xFF938F99),
+      outlineVariant: const Color(0xFF5A5560),
+      secondaryContainer: const Color(0xFF3A4559),
+      onSecondaryContainer: const Color(0xFFDCE3F9),
+      primaryContainer: const Color(0xFF324670),
+      onPrimaryContainer: const Color(0xFFD8E2FF),
+    );
+    return colorScheme;
+  }
+
+  static ColorScheme _classicLightScheme() {
+    const seed = Color(0xFF324670);
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: const Color(0xFF324670),
+      onPrimary: const Color(0xFFFFFFFF),
+      primaryContainer: const Color(0xFFD8E2FF),
+      onPrimaryContainer: const Color(0xFF1A2D4D),
+      secondary: const Color(0xFF53627F),
+      onSecondary: const Color(0xFFFFFFFF),
+      secondaryContainer: const Color(0xFFDCE3F9),
+      onSecondaryContainer: const Color(0xFF25324A),
+      tertiary: const Color(0xFF5D5D72),
+      onTertiary: const Color(0xFFFFFFFF),
+      tertiaryContainer: const Color(0xFFE3E1F2),
+      onTertiaryContainer: const Color(0xFF2B2938),
+      surface: const Color(0xFFF4F6FA),
+      onSurface: const Color(0xFF1A1C22),
+      surfaceDim: const Color(0xFFD1D6E0),
+      surfaceBright: const Color(0xFFFFFFFF),
+      surfaceContainerLowest: const Color(0xFFFFFFFF),
+      surfaceContainerLow: const Color(0xFFEAEFF7),
+      surfaceContainer: const Color(0xFFE2E8F1),
+      surfaceContainerHigh: const Color(0xFFDAE1EC),
+      surfaceContainerHighest: const Color(0xFFD1D9E6),
+      outline: const Color(0xFF727887),
+      outlineVariant: const Color(0xFFB5BECC),
+    );
+    return colorScheme;
+  }
+
+  static ThemeData _buildTheme({
+    required Brightness brightness,
+    required ColorScheme colorScheme,
+    required TextTheme textTheme,
+    required Color inputFillColor,
+  }) {
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: brightness,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: colorScheme.surface,
       cardColor: colorScheme.surfaceContainerLow,
@@ -213,7 +237,7 @@ class AppTheme {
         ),
       ),
       inputDecorationTheme: _inputDecorationTheme(
-        fillColor: colorScheme.surfaceContainerHighest,
+        fillColor: inputFillColor,
         hintColor: colorScheme.onSurfaceVariant,
         focusColor: colorScheme.primary,
         enabledBorderColor: colorScheme.outlineVariant,

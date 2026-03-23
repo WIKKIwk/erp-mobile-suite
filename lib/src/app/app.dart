@@ -51,8 +51,8 @@ class ErpnextStockMobileApp extends StatelessWidget {
               child: wrapped,
             );
           },
-          theme: AppTheme.light(),
-          darkTheme: AppTheme.dark(),
+          theme: AppTheme.light(ThemeController.instance.variant),
+          darkTheme: AppTheme.dark(ThemeController.instance.variant),
           themeMode: ThemeController.instance.themeMode,
           scrollBehavior: const MaterialScrollBehavior().copyWith(
             scrollbars: false,
