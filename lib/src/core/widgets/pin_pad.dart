@@ -439,14 +439,14 @@ class _PinGlyph extends StatelessWidget {
   }
 
   ShapeBorder _shapeAt(double t) {
-    if (t < 0.34) {
+    if (t < 0.46) {
       return _startShape();
     }
-    if (t < 0.62) {
-      final local = AppMotion.standardDecelerate.transform((t - 0.34) / 0.28);
+    if (t < 0.78) {
+      final local = AppMotion.standardDecelerate.transform((t - 0.46) / 0.32);
       return ShapeBorder.lerp(_startShape(), _midShape(), local)!;
     }
-    final local = AppMotion.standardDecelerate.transform((t - 0.62) / 0.38);
+    final local = AppMotion.standardDecelerate.transform((t - 0.78) / 0.22);
     return ShapeBorder.lerp(_midShape(), _settledShape(), local)!;
   }
 
@@ -455,11 +455,11 @@ class _PinGlyph extends StatelessWidget {
       final local = AppMotion.standardDecelerate.transform(t / 0.18);
       return 20.0 + (18.0 * local);
     }
-    if (t < 0.34) {
+    if (t < 0.46) {
       final local = AppMotion.standardDecelerate.transform((t - 0.18) / 0.16);
       return 38.0 - (2.0 * local);
     }
-    final local = AppMotion.standardDecelerate.transform((t - 0.34) / 0.66);
+    final local = AppMotion.standardDecelerate.transform((t - 0.46) / 0.54);
     return 34.0 - (14.0 * local);
   }
 
@@ -521,7 +521,7 @@ class _PinGlyph extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       key: ValueKey<String>('glyph-$variant-$animateTick'),
       tween: Tween(begin: 0, end: 1),
-      duration: const Duration(milliseconds: 1880),
+      duration: const Duration(milliseconds: 2280),
       curve: AppMotion.standardDecelerate,
       builder: (context, value, _) {
         final eased = AppMotion.standardDecelerate.transform(value);
