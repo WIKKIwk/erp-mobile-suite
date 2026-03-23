@@ -558,11 +558,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                           l10n.securityTitle,
                           style: Theme.of(context).textTheme.titleLarge,
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          hasPin ? l10n.pinEnabled : l10n.pinDisabled,
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
                         const SizedBox(height: 14),
                         _ProfileActionButton(
                           primary: true,
