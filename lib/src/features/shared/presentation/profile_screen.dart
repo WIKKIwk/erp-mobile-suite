@@ -20,6 +20,7 @@ import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -496,6 +497,10 @@ class _ProfileScreenState extends State<ProfileScreen>
                                 ],
                               ),
                             ),
+                            const SizedBox(width: 12),
+                            _ThemeIconToggle(
+                              isDark: ThemeController.instance.isDark,
+                            ),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -536,12 +541,12 @@ class _ProfileScreenState extends State<ProfileScreen>
                           ),
                         ],
                         const SizedBox(height: 18),
-                        _ThemePreferenceRow(
-                          isDark: ThemeController.instance.isDark,
-                        ),
-                        const SizedBox(height: 16),
                         _LanguagePreferenceRow(
                           currentLocale: LocaleController.instance.locale,
+                        ),
+                        const SizedBox(height: 16),
+                        _ThemePreferenceRow(
+                          isDark: ThemeController.instance.isDark,
                         ),
                         const SizedBox(height: 24),
                         Divider(
@@ -860,6 +865,90 @@ class _ThemePreferenceRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ThemeIconToggle extends StatelessWidget {
+  const _ThemeIconToggle({
+    required this.isDark,
+  });
+
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ThemeIconButton(
+      asset: isDark
+          ? 'assets/icons/contrast-2-fill.svg'
+          : 'assets/icons/sun-fill.svg',
+      onTap: () => ThemeController.instance.setThemeMode(
+        isDark ? ThemeMode.light : ThemeMode.dark,
+      ),
+    );
+  }
+}
+
+class _ThemeIconButton extends StatelessWidget {
+  const _ThemeIconButton({
+    required this.asset,
+    required this.onTap,
+  });
+
+  final String asset;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 260),
+        curve: Curves.easeInOutCubic,
+        height: 44,
+        width: 44,
+        decoration: BoxDecoration(
+          color: AppTheme.actionSurface(context),
+          shape: BoxShape.circle,
+          border: Border.all(color: AppTheme.cardBorder(context)),
+        ),
+        alignment: Alignment.center,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 320),
+          switchInCurve: Curves.easeInOutCubic,
+          switchOutCurve: Curves.easeInOutCubic,
+          transitionBuilder: (child, animation) {
+            if (animation.status == AnimationStatus.reverse) {
+              return FadeTransition(
+                opacity: animation,
+                child: child,
+              );
+            }
+            final turns = Tween<double>(
+              begin: 0.15,
+              end: 0,
+            ).animate(animation);
+            return RotationTransition(
+              turns: turns,
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            );
+          },
+          child: SvgPicture.asset(
+            asset,
+            key: ValueKey<String>(asset),
+            width: 22,
+            height: 22,
+            colorFilter: ColorFilter.mode(
+              Theme.of(context).colorScheme.onSurface,
+              BlendMode.srcIn,
+            ),
+          ),
+        ),
       ),
     );
   }
