@@ -1,5 +1,6 @@
 import '../theme/app_motion.dart';
 import '../theme/app_theme.dart';
+import 'app_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
 class AppShell extends StatelessWidget {
@@ -478,9 +479,18 @@ class _AppRefreshIndicatorState extends State<AppRefreshIndicator> {
                             ],
                           ),
                           padding: const EdgeInsets.all(8),
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.4,
-                            value: _refreshing ? null : progress,
+                          child: AnimatedScale(
+                            duration: motionDuration,
+                            curve: motionCurve,
+                            scale: _refreshing ? 1 : (0.72 + (0.28 * progress)),
+                            child: AnimatedOpacity(
+                              duration: AppMotion.fast,
+                              opacity: _refreshing ? 1 : (0.35 + (0.65 * progress)),
+                              child: const AppLoadingIndicator(
+                                size: 20,
+                                glyphSize: 10,
+                              ),
+                            ),
                           ),
                         ),
                       ),
