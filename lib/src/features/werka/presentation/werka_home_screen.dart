@@ -2,8 +2,8 @@ import '../../../app/app_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/notifications/notification_unread_store.dart';
+import '../../../core/theme/app_motion.dart';
 import '../../../core/session/app_session.dart';
-import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/app_shell.dart';
@@ -174,24 +174,30 @@ class _WerkaSummaryCard extends StatelessWidget {
     return SmoothAppear(
       child: Card.filled(
         margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
         color: scheme.surfaceContainerLow,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
-          side: BorderSide(
-            color: AppTheme.cardBorder(context).withValues(alpha: 0.75),
-          ),
         ),
         child: Column(
           children: [
             _WerkaSummaryRow(
               label: context.l10n.pendingStatus,
               value: summary.pendingCount.toString(),
+              highlighted: true,
+              isFirst: true,
               onTap: () => Navigator.of(context).pushNamed(
                 AppRoutes.werkaStatusBreakdown,
                 arguments: WerkaStatusKind.pending,
               ),
             ),
-            const _WerkaSummaryDivider(),
+            Divider(
+              height: 1,
+              thickness: 1,
+              indent: 18,
+              endIndent: 18,
+              color: scheme.outlineVariant.withValues(alpha: 0.55),
+            ),
             _WerkaSummaryRow(
               label: context.l10n.confirmedStatus,
               value: summary.confirmedCount.toString(),
@@ -200,10 +206,17 @@ class _WerkaSummaryCard extends StatelessWidget {
                 arguments: WerkaStatusKind.confirmed,
               ),
             ),
-            const _WerkaSummaryDivider(),
+            Divider(
+              height: 1,
+              thickness: 1,
+              indent: 18,
+              endIndent: 18,
+              color: scheme.outlineVariant.withValues(alpha: 0.55),
+            ),
             _WerkaSummaryRow(
               label: context.l10n.returnedStatus,
               value: summary.returnedCount.toString(),
+              isLast: true,
               onTap: () => Navigator.of(context).pushNamed(
                 AppRoutes.werkaStatusBreakdown,
                 arguments: WerkaStatusKind.returned,
@@ -221,62 +234,105 @@ class _WerkaSummaryRow extends StatelessWidget {
     required this.label,
     required this.value,
     required this.onTap,
+    this.highlighted = false,
+    this.isFirst = false,
+    this.isLast = false,
   });
 
   final String label;
   final String value;
   final VoidCallback onTap;
+  final bool highlighted;
+  final bool isFirst;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final borderRadius = BorderRadius.only(
+      topLeft: Radius.circular(isFirst ? 28 : 0),
+      topRight: Radius.circular(isFirst ? 28 : 0),
+      bottomLeft: Radius.circular(isLast ? 28 : 0),
+      bottomRight: Radius.circular(isLast ? 28 : 0),
+    );
     return PressableScale(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: theme.textTheme.titleLarge,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: borderRadius,
+          onTap: onTap,
+          child: AnimatedContainer(
+            duration: AppMotion.medium,
+            curve: AppMotion.smooth,
+            color: highlighted ? scheme.surfaceContainer : Colors.transparent,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Row(
+                      children: [
+                        if (highlighted) ...[
+                          Container(
+                            width: 4,
+                            height: 24,
+                            decoration: BoxDecoration(
+                              color: scheme.primary,
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                        ],
+                        Text(label, style: theme.textTheme.titleMedium),
+                      ],
+                    ),
+                  ),
+                  FilledButton.tonal(
+                    onPressed: onTap,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(44, 40),
+                      padding: const EdgeInsets.symmetric(horizontal: 14),
+                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      visualDensity: VisualDensity.compact,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: AnimatedSwitcher(
+                      duration: AppMotion.medium,
+                      switchInCurve: AppMotion.smooth,
+                      switchOutCurve: AppMotion.smooth,
+                      transitionBuilder: (child, animation) {
+                        return FadeTransition(
+                          opacity: animation,
+                          child: SlideTransition(
+                            position: Tween<Offset>(
+                              begin: const Offset(0, 0.12),
+                              end: Offset.zero,
+                            ).animate(animation),
+                            child: child,
+                          ),
+                        );
+                      },
+                      child: Text(
+                        value,
+                        key: ValueKey<String>(value),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Icon(
+                    Icons.chevron_right_rounded,
+                    size: 22,
+                    color: scheme.onSurfaceVariant,
+                  ),
+                ],
               ),
             ),
-            Container(
-              constraints: const BoxConstraints(minWidth: 58),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                value,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.titleLarge?.copyWith(
-                  fontSize: 28,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
-    );
-  }
-}
-
-class _WerkaSummaryDivider extends StatelessWidget {
-  const _WerkaSummaryDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return Divider(
-      height: 1,
-      thickness: 1,
-      indent: 18,
-      endIndent: 18,
-      color: AppTheme.cardBorder(context).withValues(alpha: 0.7),
     );
   }
 }
@@ -291,48 +347,59 @@ class _WerkaPendingSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final bool isDark = theme.brightness == Brightness.dark;
     return SmoothAppear(
       delay: const Duration(milliseconds: 90),
       offset: const Offset(0, 18),
       child: Card.filled(
         margin: EdgeInsets.zero,
         color: scheme.surfaceContainerLow,
+        clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(28),
-          side: BorderSide(
-            color: AppTheme.cardBorder(context).withValues(alpha: 0.75),
-          ),
         ),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: scheme.surfaceContainer,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(28),
-                  topRight: Radius.circular(28),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Text(
+                  context.l10n.inProgressItemsTitle,
+                  style: theme.textTheme.titleLarge,
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(18, 16, 18, 14),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      context.l10n.inProgressItemsTitle,
-                      style: Theme.of(context).textTheme.titleLarge,
-                    ),
-                  ),
-                ],
+              const SizedBox(height: 14),
+              Card.filled(
+                margin: EdgeInsets.zero,
+                color: isDark ? const Color(0xFF2A2931) : scheme.surfaceContainer,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Column(
+                  children: [
+                    for (int index = 0; index < items.length; index++) ...[
+                      _WerkaPendingRow(
+                        record: items[index],
+                        isFirst: index == 0,
+                        isLast: index == items.length - 1,
+                      ),
+                      if (index != items.length - 1)
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          indent: 16,
+                          endIndent: 16,
+                          color: scheme.outlineVariant.withValues(alpha: 0.55),
+                        ),
+                    ],
+                  ],
+                ),
               ),
-            ),
-            const Divider(height: 1, thickness: 1),
-            for (int index = 0; index < items.length; index++)
-              _WerkaPendingRow(
-                record: items[index],
-                hasBottomBorder: index != items.length - 1,
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -342,15 +409,18 @@ class _WerkaPendingSection extends StatelessWidget {
 class _WerkaPendingRow extends StatelessWidget {
   const _WerkaPendingRow({
     required this.record,
-    required this.hasBottomBorder,
+    required this.isFirst,
+    required this.isLast,
   });
 
   final DispatchRecord record;
-  final bool hasBottomBorder;
+  final bool isFirst;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return PressableScale(
       onTap: () => Navigator.of(context).pushNamed(
         record.isDeliveryNote
@@ -360,53 +430,70 @@ class _WerkaPendingRow extends StatelessWidget {
       ),
       child: SizedBox(
         width: double.infinity,
-        child: Container(
-          decoration: BoxDecoration(
-            border: hasBottomBorder
-                ? Border(
-                    bottom: BorderSide(
-                      color: AppTheme.cardBorder(context),
-                      width: 1,
-                    ),
-                  )
-                : null,
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      record.itemName,
-                      style: theme.textTheme.titleLarge,
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      record.supplierName,
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.only(
+              topLeft: Radius.circular(isFirst ? 24 : 0),
+              topRight: Radius.circular(isFirst ? 24 : 0),
+              bottomLeft: Radius.circular(isLast ? 24 : 0),
+              bottomRight: Radius.circular(isLast ? 24 : 0),
+            ),
+            onTap: () => Navigator.of(context).pushNamed(
+              record.isDeliveryNote
+                  ? AppRoutes.werkaCustomerDeliveryDetail
+                  : AppRoutes.werkaDetail,
+              arguments: record,
+            ),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+              child: Row(
                 children: [
-                  Text(
-                    '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
-                    style: theme.textTheme.titleMedium,
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          record.itemName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          record.supplierName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    record.createdLabel,
-                    style: theme.textTheme.bodySmall,
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Text(
+                        '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        record.createdLabel,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
-            ],
+            ),
           ),
         ),
       ),
