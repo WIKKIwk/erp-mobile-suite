@@ -202,15 +202,10 @@ class _SupplierRecentScreenState extends State<SupplierRecentScreen>
                                             ),
                                             const SizedBox(height: 6),
                                             Text(
-                                              record.itemCode,
+                                              '${record.sentQty.toStringAsFixed(0)} ${record.uom}',
                                               style: Theme.of(context)
                                                   .textTheme
-                                                  .bodySmall
-                                                  ?.copyWith(
-                                                    color: Theme.of(context)
-                                                        .colorScheme
-                                                        .onSurfaceVariant,
-                                                  ),
+                                                  .bodyMedium,
                                             ),
                                             if (record.amount > 0) ...[
                                               const SizedBox(height: 4),
