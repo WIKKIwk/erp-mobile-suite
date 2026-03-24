@@ -647,9 +647,22 @@ class _NotificationSummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final detailRows = <({String label, String value})>[
+      (label: 'Supplier', value: record.supplierName),
+      (label: 'Mahsulot', value: '${record.itemCode} • ${record.itemName}'),
+      (
+        label: 'Jo‘natilgan',
+        value: '${record.sentQty.toStringAsFixed(2)} ${record.uom}',
+      ),
+      (
+        label: 'Qabul qilingan',
+        value: '${record.acceptedQty.toStringAsFixed(2)} ${record.uom}',
+      ),
+    ];
     return Card.filled(
       margin: EdgeInsets.zero,
       color: scheme.surfaceContainerLow,
+      clipBehavior: Clip.antiAlias,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(28),
       ),
@@ -670,26 +683,32 @@ class _NotificationSummaryCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 18),
-            Text('Supplier', style: theme.textTheme.bodySmall),
-            const SizedBox(height: 6),
-            _NotificationDetailField(value: record.supplierName),
-            const SizedBox(height: 14),
-            Text('Mahsulot', style: theme.textTheme.bodySmall),
-            const SizedBox(height: 6),
-            _NotificationDetailField(
-              value: '${record.itemCode} • ${record.itemName}',
-            ),
-            const SizedBox(height: 14),
-            Text('Jo‘natilgan', style: theme.textTheme.bodySmall),
-            const SizedBox(height: 6),
-            _NotificationDetailField(
-              value: '${record.sentQty.toStringAsFixed(2)} ${record.uom}',
-            ),
-            const SizedBox(height: 14),
-            Text('Qabul qilingan', style: theme.textTheme.bodySmall),
-            const SizedBox(height: 6),
-            _NotificationDetailField(
-              value: '${record.acceptedQty.toStringAsFixed(2)} ${record.uom}',
+            Card.filled(
+              margin: EdgeInsets.zero,
+              color: scheme.surfaceContainer,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: Column(
+                children: [
+                  for (int index = 0; index < detailRows.length; index++) ...[
+                    _NotificationInfoRow(
+                      label: detailRows[index].label,
+                      value: detailRows[index].value,
+                      isFirst: index == 0,
+                      isLast: index == detailRows.length - 1,
+                    ),
+                    if (index != detailRows.length - 1)
+                      Divider(
+                        height: 1,
+                        thickness: 1,
+                        indent: 16,
+                        endIndent: 16,
+                        color: scheme.outlineVariant.withValues(alpha: 0.55),
+                      ),
+                  ],
+                ],
+              ),
             ),
           ],
         ),
@@ -729,25 +748,53 @@ class _NotificationNoteCard extends StatelessWidget {
   }
 }
 
-class _NotificationDetailField extends StatelessWidget {
-  const _NotificationDetailField({
+class _NotificationInfoRow extends StatelessWidget {
+  const _NotificationInfoRow({
+    required this.label,
     required this.value,
+    required this.isFirst,
+    required this.isLast,
   });
 
+  final String label;
   final String value;
+  final bool isFirst;
+  final bool isLast;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(isFirst ? 24 : 0),
+          topRight: Radius.circular(isFirst ? 24 : 0),
+          bottomLeft: Radius.circular(isLast ? 24 : 0),
+          bottomRight: Radius.circular(isLast ? 24 : 0),
+        ),
       ),
-      child: Text(
-        value,
-        style: Theme.of(context).textTheme.titleMedium,
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: scheme.onSurfaceVariant,
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Flexible(
+            child: Text(
+              value,
+              textAlign: TextAlign.right,
+              style: theme.textTheme.titleMedium,
+            ),
+          ),
+        ],
       ),
     );
   }
