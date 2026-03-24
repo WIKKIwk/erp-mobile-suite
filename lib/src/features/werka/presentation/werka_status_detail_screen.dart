@@ -1,6 +1,7 @@
 import '../../../app/app_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../shared/models/app_models.dart';
@@ -96,7 +97,7 @@ class _WerkaStatusDetailScreenState extends State<WerkaStatusDetailScreen> {
                             .detailItems(
                                 widget.args.kind, widget.args.supplierRef)
                             .isEmpty) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const Center(child: AppLoadingIndicator());
                     }
                     final error = store.detailError(
                         widget.args.kind, widget.args.supplierRef);

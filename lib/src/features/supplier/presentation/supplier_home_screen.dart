@@ -4,6 +4,7 @@ import '../../../core/notifications/notification_unread_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/session/app_session.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -109,7 +110,7 @@ class _SupplierHomeScreenState extends State<SupplierHomeScreen>
         builder: (context, _) {
           final store = SupplierStore.instance;
           if (store.loadingHistory && !store.loadedHistory) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           if (store.historyError != null && !store.loadedHistory) {
             return AppRefreshIndicator(

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../../../app/app_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/notifications/refresh_hub.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../shared/models/app_models.dart';
@@ -101,7 +102,7 @@ class _SupplierRecentScreenState extends State<SupplierRecentScreen>
           final store = SupplierStore.instance;
           final items = store.historyItems;
           if (store.loadingHistory && !store.loadedHistory) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           if (store.historyError != null && !store.loadedHistory) {
             return AppRefreshIndicator(

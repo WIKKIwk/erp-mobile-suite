@@ -1,5 +1,6 @@
 import '../../../app/app_router.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../shared/models/app_models.dart';
 import '../state/supplier_store.dart';
@@ -63,7 +64,7 @@ class _SupplierStatusDetailScreenState
               store
                   .detailItems(widget.args.kind, widget.args.itemCode)
                   .isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           final error =
               store.detailError(widget.args.kind, widget.args.itemCode);

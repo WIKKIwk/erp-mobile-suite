@@ -2,6 +2,7 @@ import '../../../core/notifications/notification_hidden_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/m3_confirm_dialog.dart';
@@ -97,7 +98,7 @@ class _AdminActivityScreenState extends State<AdminActivityScreen> {
               .where((item) => !hidden.contains(item.id))
               .toList();
           if (store.loadingActivity && !store.loadedActivity && items.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           if (store.activityError != null &&
               !store.loadedActivity &&

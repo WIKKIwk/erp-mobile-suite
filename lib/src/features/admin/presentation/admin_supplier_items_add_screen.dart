@@ -1,4 +1,5 @@
 import '../../../core/api/mobile_api.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/m3_confirm_dialog.dart';
 import '../../shared/models/app_models.dart';
@@ -98,7 +99,7 @@ class _AdminSupplierItemsAddScreenState
       subtitle: '',
       bottom: const AdminDock(activeTab: AdminDockTab.suppliers),
       child: loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: AppLoadingIndicator())
           : ItemsTable(
               items: items,
               actionIcon: Icons.add_rounded,

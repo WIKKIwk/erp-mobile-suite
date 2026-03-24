@@ -1,5 +1,6 @@
 import '../../../core/api/mobile_api.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -102,7 +103,7 @@ class _AdminSettingsScreenState extends State<AdminSettingsScreen> {
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator.adaptive());
+            return const Center(child: AppLoadingIndicator());
           }
           if (snapshot.hasError) {
             return AppRetryState(

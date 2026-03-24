@@ -4,6 +4,7 @@ import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/notifications/notification_unread_store.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/session/app_session.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/app_shell.dart';
@@ -112,7 +113,7 @@ class _WerkaHomeScreenState extends State<WerkaHomeScreen>
               builder: (context, _) {
                 final store = WerkaStore.instance;
                 if (store.loadingHome && !store.loadedHome) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: AppLoadingIndicator());
                 }
                 if (store.homeError != null && !store.loadedHome) {
                   return AppRefreshIndicator(

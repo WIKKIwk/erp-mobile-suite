@@ -2,6 +2,7 @@ import '../../../app/app_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/theme/app_motion.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
 import '../../../core/widgets/top_refresh_scroll_physics.dart';
@@ -80,7 +81,7 @@ class _CustomerHomeScreenState extends State<CustomerHomeScreen> {
       builder: (context, _) {
         final store = CustomerStore.instance;
         if (store.loading && !store.loaded) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Center(child: AppLoadingIndicator());
         }
         if (store.error != null && !store.loaded) {
           return Center(

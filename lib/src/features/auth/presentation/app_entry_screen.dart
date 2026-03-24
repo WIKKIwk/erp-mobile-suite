@@ -1,5 +1,6 @@
 import '../../../core/api/mobile_api.dart';
 import '../../../core/session/app_session.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import 'login_screen.dart';
 import 'package:flutter/material.dart';
@@ -74,7 +75,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
         child: _navigated
             ? const SizedBox.shrink()
             : _booting
-                ? const CircularProgressIndicator.adaptive()
+                ? const AppLoadingIndicator()
                 : const SizedBox.shrink(),
       ),
     );

@@ -2,6 +2,7 @@ import '../../../app/app_router.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/notifications/refresh_hub.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -68,7 +69,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         builder: (context, _) {
           final store = AdminStore.instance;
           if (store.loadingSummary && !store.loadedSummary) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           if (store.summaryError != null && !store.loadedSummary) {
             return AppRetryState(onRetry: _reload);

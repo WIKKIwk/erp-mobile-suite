@@ -1,5 +1,6 @@
 import '../../../app/app_router.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../shared/models/app_models.dart';
 import '../state/supplier_store.dart';
@@ -103,7 +104,7 @@ class _SupplierStatusBreakdownScreenState
           if (widget.kind == SupplierStatusKind.pending ||
               widget.kind == SupplierStatusKind.submitted) {
             if (store.loadingHistory && !store.loadedHistory) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(child: AppLoadingIndicator());
             }
             if (store.historyError != null && !store.loadedHistory) {
               return Center(
@@ -207,7 +208,7 @@ class _SupplierStatusBreakdownScreenState
           }
           if (store.loadingBreakdown(widget.kind) &&
               store.breakdownItems(widget.kind).isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           final error = store.breakdownError(widget.kind);
           if (error != null && store.breakdownItems(widget.kind).isEmpty) {

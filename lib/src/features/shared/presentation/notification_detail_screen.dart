@@ -2,6 +2,7 @@ import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
 import '../../../core/notifications/notification_unread_store.dart';
 import '../../../core/session/app_session.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../supplier/presentation/widgets/supplier_dock.dart';
@@ -344,7 +345,7 @@ class _NotificationDetailScreenState extends State<NotificationDetailScreen> {
             : role == UserRole.werka
                 ? const WerkaDock(activeTab: null)
                 : null,
-        child: const Center(child: CircularProgressIndicator()),
+        child: const Center(child: AppLoadingIndicator()),
       );
     }
     return AppShell(
@@ -361,7 +362,7 @@ class _NotificationDetailScreenState extends State<NotificationDetailScreen> {
         future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           if (snapshot.hasError) {
             return AppRetryState(

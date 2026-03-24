@@ -3,6 +3,7 @@ import '../../../core/api/mobile_api.dart';
 import '../../../core/theme/app_motion.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/search/search_normalizer.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -100,7 +101,7 @@ class _SupplierItemPickerScreenState extends State<SupplierItemPickerScreen>
               future: itemsFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState != ConnectionState.done) {
-                  return const Center(child: CircularProgressIndicator());
+                  return const Center(child: AppLoadingIndicator());
                 }
 
                 if (snapshot.hasError) {

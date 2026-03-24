@@ -5,6 +5,7 @@ import '../../../core/notifications/notification_unread_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/theme/app_motion.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/m3_confirm_dialog.dart';
 import '../../../core/widgets/motion_widgets.dart';
@@ -197,7 +198,7 @@ class _CustomerNotificationsScreenState
         ];
 
         if (store.loading && !store.loaded && items.isEmpty) {
-          return const Center(child: CircularProgressIndicator.adaptive());
+          return const Center(child: AppLoadingIndicator());
         }
         if (store.error != null && !store.loaded && items.isEmpty) {
           return AppRefreshIndicator(

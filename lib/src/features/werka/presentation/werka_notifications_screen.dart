@@ -7,6 +7,7 @@ import '../../../core/notifications/notification_hidden_store.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/notifications/notification_unread_store.dart';
 import '../../../core/session/app_session.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/m3_confirm_dialog.dart';
@@ -246,7 +247,7 @@ class _WerkaNotificationsScreenState extends State<WerkaNotificationsScreen>
             ...items.where((item) => !_highlightedUnreadIds.contains(item.id)),
           ];
           if (store.loadingHistory && !store.loadedHistory && items.isEmpty) {
-            return const Center(child: CircularProgressIndicator());
+            return const Center(child: AppLoadingIndicator());
           }
           if (store.historyError != null && !store.loadedHistory && items.isEmpty) {
             return AppRefreshIndicator(

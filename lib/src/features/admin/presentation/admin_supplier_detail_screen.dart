@@ -1,5 +1,6 @@
 import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/m3_confirm_dialog.dart';
@@ -220,7 +221,7 @@ class _AdminSupplierDetailScreenState extends State<AdminSupplierDetailScreen> {
         future: _detailFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState != ConnectionState.done) {
-            return const Center(child: CircularProgressIndicator.adaptive());
+            return const Center(child: AppLoadingIndicator());
           }
           if (snapshot.hasError) {
             return Center(

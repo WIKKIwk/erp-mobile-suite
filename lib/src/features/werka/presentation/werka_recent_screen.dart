@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../../../app/app_router.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/notifications/refresh_hub.dart';
+import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../shared/models/app_models.dart';
@@ -178,7 +179,7 @@ class _WerkaRecentScreenState extends State<WerkaRecentScreen>
     final store = WerkaStore.instance;
     final items = widget.loader == null ? store.historyItems : _testItems;
     if (widget.loader == null && store.loadingHistory && !store.loadedHistory) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(child: AppLoadingIndicator());
     }
     if (widget.loader == null &&
         store.historyError != null &&
