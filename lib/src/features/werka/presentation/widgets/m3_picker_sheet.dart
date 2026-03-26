@@ -196,56 +196,67 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
                                     child: visible
                                         ? Column(
                                             mainAxisSize: MainAxisSize.min,
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.stretch,
                                             children: [
-                                              InkWell(
-                                                borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(
-                                                    isFirst ? 24 : 0,
+                                              SizedBox(
+                                                width: double.infinity,
+                                                child: InkWell(
+                                                  borderRadius:
+                                                      BorderRadius.only(
+                                                    topLeft: Radius.circular(
+                                                      isFirst ? 24 : 0,
+                                                    ),
+                                                    topRight: Radius.circular(
+                                                      isFirst ? 24 : 0,
+                                                    ),
+                                                    bottomLeft: Radius.circular(
+                                                      isLast ? 24 : 0,
+                                                    ),
+                                                    bottomRight: Radius.circular(
+                                                      isLast ? 24 : 0,
+                                                    ),
                                                   ),
-                                                  topRight: Radius.circular(
-                                                    isFirst ? 24 : 0,
-                                                  ),
-                                                  bottomLeft: Radius.circular(
-                                                    isLast ? 24 : 0,
-                                                  ),
-                                                  bottomRight: Radius.circular(
-                                                    isLast ? 24 : 0,
-                                                  ),
-                                                ),
-                                                onTap: () =>
-                                                    widget.onSelected(item),
-                                                child: Padding(
-                                                  padding: const EdgeInsets.symmetric(
-                                                    horizontal: 18,
-                                                    vertical: 16,
-                                                  ),
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment
-                                                            .start,
-                                                    children: [
-                                                      Text(
-                                                        widget.itemTitle(item),
-                                                        style: theme
-                                                            .textTheme.titleLarge
-                                                            ?.copyWith(
-                                                          fontWeight:
-                                                              FontWeight.w700,
-                                                        ),
-                                                      ),
-                                                      if (subtitle.isNotEmpty) ...[
-                                                        const SizedBox(height: 6),
+                                                  onTap: () =>
+                                                      widget.onSelected(item),
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                      horizontal: 18,
+                                                      vertical: 16,
+                                                    ),
+                                                    child: Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
                                                         Text(
-                                                          subtitle,
+                                                          widget.itemTitle(item),
                                                           style: theme
-                                                              .textTheme.bodySmall
+                                                              .textTheme
+                                                              .titleLarge
                                                               ?.copyWith(
-                                                            color: scheme
-                                                                .onSurfaceVariant,
+                                                            fontWeight:
+                                                                FontWeight.w700,
                                                           ),
                                                         ),
+                                                        if (subtitle
+                                                            .isNotEmpty) ...[
+                                                          const SizedBox(
+                                                              height: 6),
+                                                          Text(
+                                                            subtitle,
+                                                            style: theme
+                                                                .textTheme
+                                                                .bodySmall
+                                                                ?.copyWith(
+                                                              color: scheme
+                                                                  .onSurfaceVariant,
+                                                            ),
+                                                          ),
+                                                        ],
                                                       ],
-                                                    ],
+                                                    ),
                                                   ),
                                                 ),
                                               ),
