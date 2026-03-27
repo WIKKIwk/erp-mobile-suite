@@ -151,7 +151,8 @@ class _CustomerDeliveryDetailScreenState
                           children: [
                             Expanded(
                               child: OutlinedButton(
-                                onPressed: () => Navigator.of(context).pop(false),
+                                onPressed: () =>
+                                    Navigator.of(context).pop(false),
                                 child: Text(l10n.no),
                               ),
                             ),
@@ -419,6 +420,8 @@ class _CustomerDeliveryDetailScreenState
     switch (status) {
       case DispatchStatus.accepted:
         return AppLocalizations.of(context).approvedLabel;
+      case DispatchStatus.partial:
+        return AppLocalizations.of(context).partiallyCompleted;
       case DispatchStatus.rejected:
         return AppLocalizations.of(context).rejectedStatusLabel;
       default:

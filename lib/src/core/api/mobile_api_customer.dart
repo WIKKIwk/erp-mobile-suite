@@ -75,19 +75,38 @@ extension MobileApiCustomer on MobileApi {
 
   Future<CustomerDeliveryDetail> customerRespondDelivery({
     required String deliveryNoteID,
-    required bool approve,
+    bool? approve,
+    CustomerDeliveryResponseMode? mode,
+    double? acceptedQty,
+    double? returnedQty,
     String reason = '',
+    String comment = '',
   }) async {
+    final body = <String, dynamic>{
+      'delivery_note_id': deliveryNoteID,
+      'reason': reason,
+    };
+    if (approve != null) {
+      body['approve'] = approve;
+    }
+    if (mode != null) {
+      body['mode'] = customerDeliveryResponseModeApiValue(mode);
+    }
+    if (acceptedQty != null) {
+      body['accepted_qty'] = acceptedQty;
+    }
+    if (returnedQty != null) {
+      body['returned_qty'] = returnedQty;
+    }
+    if (comment.trim().isNotEmpty) {
+      body['comment'] = comment.trim();
+    }
     final response = await _sendAuthorized(
       () => http.post(
         Uri.parse('$baseUrl/v1/mobile/customer/respond'),
         headers: _headers(requireToken())
           ..['Content-Type'] = 'application/json',
-        body: jsonEncode({
-          'delivery_note_id': deliveryNoteID,
-          'approve': approve,
-          'reason': reason,
-        }),
+        body: jsonEncode(body),
       ),
     );
     if (response.statusCode != 200) {

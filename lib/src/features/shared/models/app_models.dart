@@ -257,6 +257,26 @@ enum CustomerStatusKind {
   rejected,
 }
 
+enum CustomerDeliveryResponseMode {
+  acceptAll,
+  acceptPartial,
+  rejectAll,
+  claimAfterAccept,
+}
+
+String customerDeliveryResponseModeApiValue(CustomerDeliveryResponseMode mode) {
+  switch (mode) {
+    case CustomerDeliveryResponseMode.acceptAll:
+      return 'accept_all';
+    case CustomerDeliveryResponseMode.acceptPartial:
+      return 'accept_partial';
+    case CustomerDeliveryResponseMode.rejectAll:
+      return 'reject_all';
+    case CustomerDeliveryResponseMode.claimAfterAccept:
+      return 'claim_after_accept';
+  }
+}
+
 enum SupplierStatusKind {
   pending,
   submitted,
@@ -495,11 +515,15 @@ class CustomerDeliveryDetail {
     required this.record,
     required this.canApprove,
     required this.canReject,
+    required this.canPartiallyAccept,
+    required this.canReportClaim,
   });
 
   final DispatchRecord record;
   final bool canApprove;
   final bool canReject;
+  final bool canPartiallyAccept;
+  final bool canReportClaim;
 
   factory CustomerDeliveryDetail.fromJson(Map<String, dynamic> json) {
     return CustomerDeliveryDetail(
@@ -508,6 +532,8 @@ class CustomerDeliveryDetail {
       ),
       canApprove: json['can_approve'] as bool? ?? false,
       canReject: json['can_reject'] as bool? ?? false,
+      canPartiallyAccept: json['can_partially_accept'] as bool? ?? false,
+      canReportClaim: json['can_report_claim'] as bool? ?? false,
     );
   }
 }
