@@ -6,28 +6,48 @@ class AppRetryState extends StatelessWidget {
   const AppRetryState({
     super.key,
     required this.onRetry,
-    this.padding = const EdgeInsets.fromLTRB(20, 170, 20, 24),
+    this.padding,
   });
 
   final Future<void> Function() onRetry;
-  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry? padding;
+
+  static double retryIconSizeFor(Size screenSize) {
+    return (screenSize.shortestSide * 0.29).clamp(104.0, 132.0).toDouble();
+  }
+
+  static double contentWidthFor(Size screenSize) {
+    return (screenSize.width * 0.72).clamp(260.0, 320.0).toDouble();
+  }
+
+  static double topInsetFor(Size screenSize) {
+    return (screenSize.height * 0.2).clamp(140.0, 190.0).toDouble();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final mediaQuery = MediaQuery.maybeOf(context);
+    final screenSize = mediaQuery?.size ?? const Size(390, 844);
+    final retryIconSize = retryIconSizeFor(screenSize);
+    final contentWidth = contentWidthFor(screenSize);
+    final resolvedPadding =
+        padding ?? EdgeInsets.fromLTRB(20, topInsetFor(screenSize), 20, 24);
+
     return Padding(
-      padding: padding,
-      child: Center(
+      padding: resolvedPadding,
+      child: Align(
+        alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 280),
+          constraints: BoxConstraints(maxWidth: contentWidth),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               SvgPicture.asset(
                 'assets/icons/server-disconnected.svg',
-                width: 112,
-                height: 112,
+                width: retryIconSize,
+                height: retryIconSize,
                 colorFilter: ColorFilter.mode(
                   scheme.onSurfaceVariant,
                   BlendMode.srcIn,
