@@ -1,5 +1,7 @@
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/widgets/app_loading_indicator.dart';
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 const AnimationStyle kM3PickerSheetAnimation = AnimationStyle(
@@ -66,8 +68,7 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final media = MediaQuery.of(context);
-    final visibleCount =
-        widget.items.where((item) => _matches(item)).length;
+    final visibleCount = widget.items.where((item) => _matches(item)).length;
     final keyboardInset = media.viewInsets.bottom;
     final l10n = context.l10n;
 
@@ -213,15 +214,16 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
                                                     bottomLeft: Radius.circular(
                                                       isLast ? 24 : 0,
                                                     ),
-                                                    bottomRight: Radius.circular(
+                                                    bottomRight:
+                                                        Radius.circular(
                                                       isLast ? 24 : 0,
                                                     ),
                                                   ),
                                                   onTap: () =>
                                                       widget.onSelected(item),
                                                   child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
+                                                    padding: const EdgeInsets
+                                                        .symmetric(
                                                       horizontal: 18,
                                                       vertical: 16,
                                                     ),
@@ -231,9 +233,9 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
                                                               .start,
                                                       children: [
                                                         Text(
-                                                          widget.itemTitle(item),
-                                                          style: theme
-                                                              .textTheme
+                                                          widget
+                                                              .itemTitle(item),
+                                                          style: theme.textTheme
                                                               .titleLarge
                                                               ?.copyWith(
                                                             fontWeight:
@@ -279,6 +281,287 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
                           ),
                         ),
                 ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class M3AsyncPickerSheet<T> extends StatefulWidget {
+  const M3AsyncPickerSheet({
+    super.key,
+    required this.title,
+    required this.hintText,
+    required this.loadItems,
+    required this.itemTitle,
+    required this.itemSubtitle,
+    required this.onSelected,
+    this.supportingText,
+  });
+
+  final String title;
+  final String hintText;
+  final Future<List<T>> Function(String query) loadItems;
+  final String Function(T item) itemTitle;
+  final String Function(T item) itemSubtitle;
+  final ValueChanged<T> onSelected;
+  final String? supportingText;
+
+  @override
+  State<M3AsyncPickerSheet<T>> createState() => _M3AsyncPickerSheetState<T>();
+}
+
+class _M3AsyncPickerSheetState<T> extends State<M3AsyncPickerSheet<T>> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounce;
+  String _query = '';
+  bool _loading = true;
+  Object? _error;
+  List<T> _items = <T>[];
+  int _requestVersion = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _reload() async {
+    final requestVersion = ++_requestVersion;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    try {
+      final items = await widget.loadItems(_query.trim());
+      if (!mounted || requestVersion != _requestVersion) {
+        return;
+      }
+      setState(() {
+        _items = items;
+      });
+    } catch (error) {
+      if (!mounted || requestVersion != _requestVersion) {
+        return;
+      }
+      setState(() {
+        _error = error;
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _loading = false;
+        });
+      }
+    }
+  }
+
+  void _scheduleReload(String nextQuery) {
+    _debounce?.cancel();
+    _query = nextQuery;
+    _debounce = Timer(const Duration(milliseconds: 220), _reload);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    final media = MediaQuery.of(context);
+    final keyboardInset = media.viewInsets.bottom;
+    final l10n = context.l10n;
+
+    Widget body;
+    if (_loading) {
+      body = const Center(child: AppLoadingIndicator());
+    } else if (_error != null) {
+      body = Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                l10n.serverDisconnectedRetry,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+              FilledButton.tonal(
+                onPressed: _reload,
+                child: Text(l10n.retry),
+              ),
+            ],
+          ),
+        ),
+      );
+    } else if (_items.isEmpty) {
+      body = Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 24),
+          child: Text(
+            l10n.noRecordsYet,
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+      );
+    } else {
+      body = Material(
+        color: scheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(24),
+        child: ListView.separated(
+          shrinkWrap: true,
+          itemCount: _items.length,
+          separatorBuilder: (context, index) => Divider(
+            height: 1,
+            thickness: 1,
+            indent: 18,
+            endIndent: 18,
+            color: scheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+          itemBuilder: (context, index) {
+            final item = _items[index];
+            final subtitle = widget.itemSubtitle(item).trim();
+            final isFirst = index == 0;
+            final isLast = index == _items.length - 1;
+
+            return SizedBox(
+              width: double.infinity,
+              child: InkWell(
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(isFirst ? 24 : 0),
+                  topRight: Radius.circular(isFirst ? 24 : 0),
+                  bottomLeft: Radius.circular(isLast ? 24 : 0),
+                  bottomRight: Radius.circular(isLast ? 24 : 0),
+                ),
+                onTap: () => widget.onSelected(item),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 16,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.itemTitle(item),
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      if (subtitle.isNotEmpty) ...[
+                        const SizedBox(height: 6),
+                        Text(
+                          subtitle,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      );
+    }
+
+    return AnimatedPadding(
+      duration: AppMotion.medium,
+      curve: AppMotion.standardDecelerate,
+      padding: EdgeInsets.only(bottom: keyboardInset),
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Container(
+          constraints: BoxConstraints(
+            maxHeight: media.size.height * 0.66,
+          ),
+          decoration: BoxDecoration(
+            color: scheme.surfaceContainerLow,
+            borderRadius: const BorderRadius.vertical(
+              top: Radius.circular(32),
+            ),
+            border: Border.all(
+              color: scheme.outlineVariant.withValues(alpha: 0.7),
+            ),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Container(
+                    width: 36,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: scheme.outlineVariant,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.title,
+                        style: theme.textTheme.titleLarge,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close_rounded),
+                    ),
+                  ],
+                ),
+                if ((widget.supportingText ?? '').trim().isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    widget.supportingText!,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 14),
+                SearchBar(
+                  controller: _searchController,
+                  hintText: widget.hintText,
+                  leading: const Icon(Icons.search_rounded),
+                  elevation: const WidgetStatePropertyAll<double>(0),
+                  backgroundColor: WidgetStatePropertyAll<Color>(
+                    scheme.surfaceContainerHighest,
+                  ),
+                  side: WidgetStatePropertyAll<BorderSide>(
+                    BorderSide(
+                      color: scheme.outlineVariant.withValues(alpha: 0.72),
+                    ),
+                  ),
+                  shape: WidgetStatePropertyAll<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(22),
+                    ),
+                  ),
+                  onChanged: _scheduleReload,
+                ),
+                const SizedBox(height: 14),
+                Flexible(child: body),
               ],
             ),
           ),

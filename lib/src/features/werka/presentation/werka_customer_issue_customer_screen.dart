@@ -3,14 +3,10 @@ import '../../../core/api/mobile_api.dart';
 import '../../../core/localization/app_localizations.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/notifications/werka_runtime_store.dart';
-import '../../../core/search/search_normalizer.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../core/widgets/app_loading_indicator.dart';
-import '../../../core/widgets/app_retry_state.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/m3_picker_sheet.dart';
 import 'widgets/werka_dock.dart';
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -29,23 +25,29 @@ class WerkaCustomerIssueCustomerScreen extends StatefulWidget {
 
 class _WerkaCustomerIssueCustomerScreenState
     extends State<WerkaCustomerIssueCustomerScreen> {
-  late Future<List<CustomerDirectoryEntry>> _customersFuture;
-  Future<List<CustomerItemOption>>? _itemOptionsFuture;
   final TextEditingController _qtyController = TextEditingController(text: '1');
 
   CustomerDirectoryEntry? _selectedCustomer;
   SupplierItem? _selectedItem;
-  List<SupplierItem> _customerItems = const <SupplierItem>[];
-  bool _loadingItems = false;
   bool _submitting = false;
 
   @override
   void initState() {
     super.initState();
-    _customersFuture = MobileApi.instance.werkaCustomers();
-    _itemOptionsFuture = MobileApi.instance.werkaCustomerItemOptions();
     if (widget.prefill != null) {
-      _applyPrefill(widget.prefill!);
+      final prefill = widget.prefill!;
+      _selectedCustomer = CustomerDirectoryEntry(
+        ref: prefill.customerRef,
+        name: prefill.customerName,
+        phone: '',
+      );
+      _selectedItem = SupplierItem(
+        code: prefill.itemCode,
+        name: prefill.itemName,
+        uom: prefill.uom,
+        warehouse: '',
+      );
+      _qtyController.text = _formatQty(prefill.qty);
     }
   }
 
@@ -53,117 +55,6 @@ class _WerkaCustomerIssueCustomerScreenState
   void dispose() {
     _qtyController.dispose();
     super.dispose();
-  }
-
-  Future<void> _reloadCustomers() async {
-    MobileApi.instance.clearWerkaCustomerIssueLookups();
-    final customersFuture = MobileApi.instance.werkaCustomers();
-    final itemOptionsFuture = MobileApi.instance.werkaCustomerItemOptions();
-    setState(() {
-      _customersFuture = customersFuture;
-      _itemOptionsFuture = itemOptionsFuture;
-    });
-    await customersFuture;
-  }
-
-  Future<void> _loadItemsForCustomer(
-    CustomerDirectoryEntry customer, {
-    String? preferredItemCode,
-  }) async {
-    setState(() {
-      _selectedCustomer = customer;
-      _selectedItem = null;
-      _customerItems = const <SupplierItem>[];
-      _loadingItems = true;
-    });
-    try {
-      final items = await MobileApi.instance.werkaCustomerItems(
-        customerRef: customer.ref,
-      );
-      if (!mounted) {
-        return;
-      }
-      setState(() {
-        _customerItems = items;
-        if (preferredItemCode != null && preferredItemCode.trim().isNotEmpty) {
-          _selectedItem = items.cast<SupplierItem?>().firstWhere(
-                    (item) => item?.code == preferredItemCode,
-                    orElse: () => null,
-                  ) ??
-              SupplierItem(
-                code: preferredItemCode,
-                name: items
-                        .cast<SupplierItem?>()
-                        .firstWhere(
-                          (item) => item?.code == preferredItemCode,
-                          orElse: () => null,
-                        )
-                        ?.name ??
-                    '',
-                uom: items
-                        .cast<SupplierItem?>()
-                        .firstWhere(
-                          (item) => item?.code == preferredItemCode,
-                          orElse: () => null,
-                        )
-                        ?.uom ??
-                    '',
-                warehouse: items
-                        .cast<SupplierItem?>()
-                        .firstWhere(
-                          (item) => item?.code == preferredItemCode,
-                          orElse: () => null,
-                        )
-                        ?.warehouse ??
-                    '',
-              );
-        }
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _loadingItems = false);
-      }
-    }
-  }
-
-  Future<void> _applyPrefill(WerkaCustomerIssuePrefillArgs prefill) async {
-    setState(() {
-      _selectedCustomer = CustomerDirectoryEntry(
-        ref: prefill.customerRef,
-        name: prefill.customerName,
-        phone: '',
-      );
-      _selectedItem = null;
-      _customerItems = const <SupplierItem>[];
-      _loadingItems = true;
-      _qtyController.text = _formatQty(prefill.qty);
-    });
-    try {
-      final items = await MobileApi.instance.werkaCustomerItems(
-        customerRef: prefill.customerRef,
-      );
-      if (!mounted) {
-        return;
-      }
-      final selected = items.cast<SupplierItem?>().firstWhere(
-                (item) => item?.code == prefill.itemCode,
-                orElse: () => null,
-              ) ??
-          SupplierItem(
-            code: prefill.itemCode,
-            name: prefill.itemName,
-            uom: prefill.uom,
-            warehouse: '',
-          );
-      setState(() {
-        _customerItems = items;
-        _selectedItem = selected;
-      });
-    } finally {
-      if (mounted) {
-        setState(() => _loadingItems = false);
-      }
-    }
   }
 
   String _formatQty(double qty) {
@@ -176,11 +67,24 @@ class _WerkaCustomerIssueCustomerScreenState
         .replaceFirst(RegExp(r'\.$'), '');
   }
 
+  CustomerDirectoryEntry _customerFromOption(CustomerItemOption option) {
+    return CustomerDirectoryEntry(
+      ref: option.customerRef,
+      name: option.customerName,
+      phone: option.customerPhone,
+    );
+  }
+
+  SupplierItem _itemFromOption(CustomerItemOption option) {
+    return SupplierItem(
+      code: option.itemCode,
+      name: option.itemName,
+      uom: option.uom,
+      warehouse: option.warehouse,
+    );
+  }
+
   Future<void> _pickCustomer() async {
-    final customers = await _customersFuture;
-    if (!mounted) {
-      return;
-    }
     final picked = await showModalBottomSheet<CustomerDirectoryEntry>(
       context: context,
       useSafeArea: true,
@@ -188,19 +92,15 @@ class _WerkaCustomerIssueCustomerScreenState
       backgroundColor: Colors.transparent,
       sheetAnimationStyle: kM3PickerSheetAnimation,
       builder: (context) {
-        return M3PickerSheet<CustomerDirectoryEntry>(
+        return M3AsyncPickerSheet<CustomerDirectoryEntry>(
           title: context.l10n.selectCustomer,
           hintText: context.l10n.searchCustomer,
-          items: customers,
+          loadItems: (query) => MobileApi.instance.werkaCustomers(
+            query: query,
+            limit: MobileApi.werkaPickerLimit,
+          ),
           itemTitle: (item) => item.name,
-          itemSubtitle: (_) => '',
-          matchesQuery: (item, query) {
-            return searchMatches(query, [
-              item.name,
-              item.phone,
-              item.ref,
-            ]);
-          },
+          itemSubtitle: (item) => item.phone,
           onSelected: (item) => Navigator.of(context).pop(item),
         );
       },
@@ -208,33 +108,18 @@ class _WerkaCustomerIssueCustomerScreenState
     if (picked == null || !mounted) {
       return;
     }
-    await _loadItemsForCustomer(picked);
+    setState(() {
+      _selectedCustomer = picked;
+      _selectedItem = null;
+    });
   }
 
   Future<void> _pickItem() async {
-    if (_loadingItems) {
+    if (_submitting) {
       return;
     }
-    final l10n = context.l10n;
-    final future =
-        _itemOptionsFuture ??= MobileApi.instance.werkaCustomerItemOptions();
-    List<CustomerItemOption> options;
-    try {
-      options = await future;
-    } catch (error) {
-      _itemOptionsFuture = null;
-      if (!mounted) {
-        return;
-      }
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Mol ro‘yxati yuklanmadi: $error')),
-      );
-      return;
-    }
-    if (!mounted) {
-      return;
-    }
-    if (_selectedCustomer != null && _customerItems.isNotEmpty) {
+
+    if (_selectedCustomer != null) {
       final picked = await showModalBottomSheet<SupplierItem>(
         context: context,
         useSafeArea: true,
@@ -242,19 +127,17 @@ class _WerkaCustomerIssueCustomerScreenState
         backgroundColor: Colors.transparent,
         sheetAnimationStyle: kM3PickerSheetAnimation,
         builder: (context) {
-          return M3PickerSheet<SupplierItem>(
-            title: l10n.selectItem,
+          return M3AsyncPickerSheet<SupplierItem>(
+            title: context.l10n.selectItem,
             supportingText: _selectedCustomer!.name,
-            hintText: l10n.searchItem,
-            items: _customerItems,
+            hintText: context.l10n.searchItem,
+            loadItems: (query) => MobileApi.instance.werkaCustomerItems(
+              customerRef: _selectedCustomer!.ref,
+              query: query,
+              limit: MobileApi.werkaPickerLimit,
+            ),
             itemTitle: (item) => item.name,
-            itemSubtitle: (_) => '',
-            matchesQuery: (item, query) {
-              return searchMatches(query, [
-                item.name,
-                item.code,
-              ]);
-            },
+            itemSubtitle: (item) => item.code,
             onSelected: (item) => Navigator.of(context).pop(item),
           );
         },
@@ -265,12 +148,7 @@ class _WerkaCustomerIssueCustomerScreenState
       setState(() => _selectedItem = picked);
       return;
     }
-    if (options.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Biriktirilgan mol topilmadi')),
-      );
-      return;
-    }
+
     final picked = await showModalBottomSheet<CustomerItemOption>(
       context: context,
       useSafeArea: true,
@@ -278,20 +156,15 @@ class _WerkaCustomerIssueCustomerScreenState
       backgroundColor: Colors.transparent,
       sheetAnimationStyle: kM3PickerSheetAnimation,
       builder: (context) {
-        return M3PickerSheet<CustomerItemOption>(
-          title: l10n.selectItem,
-          hintText: l10n.searchItem,
-          items: options,
+        return M3AsyncPickerSheet<CustomerItemOption>(
+          title: context.l10n.selectItem,
+          hintText: context.l10n.searchItem,
+          loadItems: (query) => MobileApi.instance.werkaCustomerItemOptions(
+            query: query,
+            limit: MobileApi.werkaPickerLimit,
+          ),
           itemTitle: (item) => item.itemName,
-          itemSubtitle: (item) => item.customerName,
-          matchesQuery: (item, query) {
-            return searchMatches(query, [
-              item.itemName,
-              item.itemCode,
-              item.customerName,
-              item.customerPhone,
-            ]);
-          },
+          itemSubtitle: (item) => '${item.customerName} • ${item.itemCode}',
           onSelected: (item) => Navigator.of(context).pop(item),
         );
       },
@@ -299,14 +172,10 @@ class _WerkaCustomerIssueCustomerScreenState
     if (!mounted || picked == null) {
       return;
     }
-    await _loadItemsForCustomer(
-      CustomerDirectoryEntry(
-        ref: picked.customerRef,
-        name: picked.customerName,
-        phone: picked.customerPhone,
-      ),
-      preferredItemCode: picked.itemCode,
-    );
+    setState(() {
+      _selectedCustomer = _customerFromOption(picked);
+      _selectedItem = _itemFromOption(picked);
+    });
   }
 
   Future<void> _submit() async {
@@ -441,132 +310,104 @@ class _WerkaCustomerIssueCustomerScreenState
     final l10n = context.l10n;
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
-    final canPickItem = !_loadingItems;
-    final canSubmit = _selectedCustomer != null &&
-        _selectedItem != null &&
-        !_submitting &&
-        !_loadingItems;
+    final canSubmit =
+        _selectedCustomer != null && _selectedItem != null && !_submitting;
 
     return Scaffold(
       backgroundColor: AppTheme.shellStart(context),
       body: SafeArea(
-        child: FutureBuilder<List<CustomerDirectoryEntry>>(
-          future: _customersFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const Center(child: AppLoadingIndicator());
-            }
-            if (snapshot.hasError) {
-              return ListView(
-                padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-                children: [
-                  _WerkaCustomerIssueHeader(theme: theme),
-                  const SizedBox(height: 20),
-                  AppRetryState(onRetry: _reloadCustomers),
-                ],
-              );
-            }
-
-            return ListView(
-              padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
-              children: [
-                _WerkaCustomerIssueHeader(theme: theme),
-                const SizedBox(height: 20),
-                Card.filled(
-                  margin: EdgeInsets.zero,
-                  color: scheme.surfaceContainerLow,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28),
-                    side: BorderSide(
-                      color: scheme.outlineVariant.withValues(alpha: 0.7),
-                    ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(18),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.customerIssueTitle,
-                          style: theme.textTheme.headlineMedium,
-                        ),
-                        const SizedBox(height: 18),
-                        Text(l10n.itemLabel, style: theme.textTheme.bodySmall),
-                        const SizedBox(height: 6),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: canPickItem ? _pickItem : null,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                _loadingItems
-                                    ? l10n.loading
-                                    : _selectedItem?.name ?? l10n.selectItem,
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 14),
-                        Text(l10n.customerLabel,
-                            style: theme.textTheme.bodySmall),
-                        const SizedBox(height: 6),
-                        SizedBox(
-                          width: double.infinity,
-                          child: OutlinedButton(
-                            onPressed: _pickCustomer,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: Text(
-                                _selectedCustomer?.name ?? l10n.selectCustomer,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (_selectedCustomer != null &&
-                            _selectedItem == null) ...[
-                          const SizedBox(height: 14),
-                          if (_selectedCustomer!.phone.trim().isNotEmpty)
-                            Text(
-                              _selectedCustomer!.phone,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: scheme.onSurfaceVariant,
-                              ),
-                            ),
-                        ],
-                        if (_selectedItem != null) ...[
-                          const SizedBox(height: 14),
-                          Text(l10n.amountLabel,
-                              style: theme.textTheme.bodySmall),
-                          const SizedBox(height: 6),
-                          TextField(
-                            controller: _qtyController,
-                            keyboardType: const TextInputType.numberWithOptions(
-                              decimal: true,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: '0',
-                              suffixText: _selectedItem!.uom,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 18),
-                        SizedBox(
-                          width: double.infinity,
-                          child: FilledButton(
-                            onPressed: canSubmit ? _submit : null,
-                            child: Text(
-                              _submitting ? l10n.pinSaving : l10n.confirmTitle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 18, 20, 24),
+          children: [
+            _WerkaCustomerIssueHeader(theme: theme),
+            const SizedBox(height: 20),
+            Card.filled(
+              margin: EdgeInsets.zero,
+              color: scheme.surfaceContainerLow,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(28),
+                side: BorderSide(
+                  color: scheme.outlineVariant.withValues(alpha: 0.7),
                 ),
-              ],
-            );
-          },
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.customerIssueTitle,
+                      style: theme.textTheme.headlineMedium,
+                    ),
+                    const SizedBox(height: 18),
+                    Text(l10n.itemLabel, style: theme.textTheme.bodySmall),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: _submitting ? null : _pickItem,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(_selectedItem?.name ?? l10n.selectItem),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(l10n.customerLabel, style: theme.textTheme.bodySmall),
+                    const SizedBox(height: 6),
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: _submitting ? null : _pickCustomer,
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            _selectedCustomer?.name ?? l10n.selectCustomer,
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (_selectedCustomer != null &&
+                        _selectedItem == null &&
+                        _selectedCustomer!.phone.trim().isNotEmpty) ...[
+                      const SizedBox(height: 14),
+                      Text(
+                        _selectedCustomer!.phone,
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                    if (_selectedItem != null) ...[
+                      const SizedBox(height: 14),
+                      Text(l10n.amountLabel, style: theme.textTheme.bodySmall),
+                      const SizedBox(height: 6),
+                      TextField(
+                        controller: _qtyController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        decoration: InputDecoration(
+                          hintText: '0',
+                          suffixText: _selectedItem!.uom,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton(
+                        onPressed: canSubmit ? _submit : null,
+                        child: Text(
+                          _submitting ? l10n.pinSaving : l10n.confirmTitle,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
       ),
       bottomNavigationBar: const SafeArea(

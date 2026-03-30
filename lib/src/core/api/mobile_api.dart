@@ -45,6 +45,7 @@ class MobileApi {
   static final MobileApi instance = MobileApi._();
   static const String _lastCodeKey = 'last_login_code';
   static const String _lastPhoneKey = 'last_login_phone';
+  static const int werkaPickerLimit = 50;
   Future<List<CustomerDirectoryEntry>>? _werkaCustomersFuture;
   Future<List<CustomerItemOption>>? _werkaCustomerItemOptionsFuture;
 
@@ -118,8 +119,8 @@ class MobileApi {
   // Prime the customer issue lookups before the picker opens so the first
   // "select item" tap doesn't have to wait for a cold network request.
   void primeWerkaCustomerIssueLookups() {
-    werkaCustomers();
-    werkaCustomerItemOptions();
+    werkaCustomers(limit: werkaPickerLimit);
+    werkaCustomerItemOptions(limit: werkaPickerLimit);
   }
 
   void clearSessionCaches() {
