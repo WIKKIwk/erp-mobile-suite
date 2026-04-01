@@ -2,12 +2,10 @@ name: Build Mobile Artifacts
 
 on:
   push:
-    branches:
-      - main
   workflow_dispatch:
     inputs:
       publish_release:
-        description: "Create or update a GitHub release with the built APK"
+        description: "Create or update a GitHub release with the built APK and IPA"
         required: false
         default: false
         type: boolean
@@ -19,11 +17,39 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: build-mobile-artifacts-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MOBILE_API_BASE_URL: https://core.wspace.sbs
+
 jobs:
-  build-ios-ipa:
-    runs-on: macos-latest
-    env:
-      MOBILE_API_BASE_URL: https://core.wspace.sbs
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test
+
+  build-android-apk:
+    needs: verify
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
@@ -45,6 +71,43 @@ jobs:
         run: |
           printf '%s' "${ANDROID_GOOGLE_SERVICES_JSON}" > android/app/google-services.json
 
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: |
+          flutter build apk --release --dart-define=MOBILE_API_BASE_URL="${MOBILE_API_BASE_URL}"
+          cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/accord.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: accord-apk
+          path: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/flutter-apk/accord.apk
+          if-no-files-found: error
+
+  build-ios-ipa:
+    needs: verify
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Write GoogleService-Info.plist when available
         env:
           IOS_GOOGLE_SERVICE_INFO_PLIST: ${{ secrets.IOS_GOOGLE_SERVICE_INFO_PLIST }}
@@ -64,12 +127,6 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze
-        run: flutter analyze
-
-      - name: Test
-        run: flutter test
-
       - name: Build iOS app without codesign
         run: flutter build ios --release --no-codesign --dart-define=MOBILE_API_BASE_URL="${MOBILE_API_BASE_URL}"
 
@@ -87,11 +144,32 @@ jobs:
           path: build/ios/ipa/accord-ios-unsigned.ipa
           if-no-files-found: error
 
+  publish-release:
+    if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish_release == 'true' && github.event.inputs.release_tag != '' }}
+    needs:
+      - build-android-apk
+      - build-ios-ipa
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: accord-apk
+          path: artifacts/apk
+
+      - name: Download IPA artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: accord-ios-ipa
+          path: artifacts/ipa
+
       - name: Publish GitHub release
-        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.publish_release == 'true' && github.event.inputs.release_tag != '' }}
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.release_tag }}
           name: ${{ github.event.inputs.release_tag }}
           files: |
-            build/ios/ipa/accord-ios-unsigned.ipa
+            artifacts/apk/app-release.apk
+            artifacts/apk/accord.apk
+            artifacts/ipa/accord-ios-unsigned.ipa
