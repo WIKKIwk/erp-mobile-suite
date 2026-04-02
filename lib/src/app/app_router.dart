@@ -35,6 +35,7 @@ import '../features/supplier/presentation/supplier_recent_screen.dart';
 import '../features/supplier/presentation/supplier_success_screen.dart';
 import '../features/werka/presentation/werka_detail_screen.dart';
 import '../features/werka/presentation/werka_home_screen.dart';
+import '../features/werka/presentation/werka_batch_dispatch_screen.dart';
 import '../features/werka/presentation/werka_create_hub_screen.dart';
 import '../features/werka/presentation/werka_customer_issue_customer_screen.dart';
 import '../features/werka/presentation/werka_customer_delivery_detail_screen.dart';
@@ -65,6 +66,7 @@ class AppRoutes {
   static const String notificationDetail = '/notification-detail';
   static const String werkaHome = '/werka-home';
   static const String werkaCreateHub = '/werka-create-hub';
+  static const String werkaBatchDispatch = '/werka-batch-dispatch';
   static const String werkaCustomerIssueCustomer =
       '/werka-customer-issue-customer';
   static const String werkaUnannouncedSupplier = '/werka-unannounced-supplier';
@@ -132,6 +134,7 @@ class AppRouter {
     AppRoutes.werkaStatusDetail,
     AppRoutes.werkaDetail,
     AppRoutes.werkaCustomerDeliveryDetail,
+    AppRoutes.werkaBatchDispatch,
     AppRoutes.werkaCustomerIssueCustomer,
     AppRoutes.werkaUnannouncedSupplier,
     AppRoutes.adminSettings,
@@ -209,6 +212,8 @@ class AppRouter {
         return _buildRoute(settings, const WerkaHomeScreen());
       case AppRoutes.werkaCreateHub:
         return _buildRoute(settings, const WerkaCreateHubScreen());
+      case AppRoutes.werkaBatchDispatch:
+        return _buildRoute(settings, const WerkaBatchDispatchScreen());
       case AppRoutes.werkaCustomerIssueCustomer:
         final WerkaCustomerIssuePrefillArgs? args =
             settings.arguments is WerkaCustomerIssuePrefillArgs

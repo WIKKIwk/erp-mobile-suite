@@ -1,5 +1,6 @@
 import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
+import '../../../core/app_preview.dart';
 import '../../../core/network/network_required_dialog.dart';
 import '../../../core/notifications/push_messaging_service.dart';
 import '../../../core/security/security_controller.dart';
@@ -63,7 +64,10 @@ class _LoginScreenState extends State<LoginScreen> {
               : profile.role == UserRole.customer
                   ? AppRoutes.customerHome
                   : AppRoutes.adminHome;
-      Navigator.of(context).pushNamedAndRemoveUntil(route, (route) => false);
+      Navigator.of(context).pushNamedAndRemoveUntil(
+        AppPreview.initialRouteOverride ?? route,
+        (route) => false,
+      );
     }).catchError((error) {
       if (!context.mounted) {
         return;

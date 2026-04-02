@@ -154,6 +154,39 @@ class AppLocalizations {
         'Flow for creating a shipment to a customer',
         'Поток создания отправки для покупателя',
       );
+  String get batchDispatchTitle => _t(
+        'Ko‘p mahsulot chiqarish',
+        'Multi-item dispatch',
+        'Массовая отправка товаров',
+      );
+  String get batchDispatchDescription => _t(
+        'Bir oqimda bir nechta jo‘natma tayyorlang',
+        'Prepare multiple shipments in one flow',
+        'Подготовьте несколько отправок в одном потоке',
+      );
+  String get nextItemAction => _t('Keyingi', 'Next', 'Далее');
+  String get addAnotherAction => _t('Yana', 'Add another', 'Добавить еще');
+  String get batchReviewTitle => _t(
+        'Ro‘yxatni tekshirish',
+        'Review list',
+        'Проверка списка',
+      );
+  String get batchReviewUnlockHint => _t(
+        'Tasdiqlash uchun ro‘yxatni oxirigacha ko‘ring',
+        'Review the full list to unlock confirm',
+        'Просмотрите список до конца, чтобы разблокировать подтверждение',
+      );
+  String get batchDraftAdded => _t(
+        'Ro‘yxatga qo‘shildi',
+        'Added to the list',
+        'Добавлено в список',
+      );
+  String get batchNeedAtLeastTwoItems => _t(
+        'Kamida 2 ta mahsulot kerak.',
+        'At least 2 items are required.',
+        'Нужно минимум 2 товара.',
+      );
+  String get batchSubmitResultTitle => _t('Natija', 'Result', 'Результат');
   String get notificationsTitle =>
       _t('Bildirishnomalar', 'Notifications', 'Уведомления');
   String get noNotifications => _t('Hali bildirishnomalar yo‘q.',
@@ -261,6 +294,26 @@ class AppLocalizations {
       '${qty.toStringAsFixed(0)} $uom $receivedFromSupplier';
   String acceptedQtyLabel(num qty, String uom) =>
       '$acceptedFromQtyPrefix: ${qty.toStringAsFixed(0)} $uom';
+  String batchDraftCountLabel(int count) => _t(
+        'Ro‘yxatda $count ta mahsulot',
+        '$count items in the list',
+        'В списке $count товаров',
+      );
+  String batchCustomerCountLabel(int count) => _t(
+        '$count ta haridor',
+        '$count customers',
+        '$count покупателей',
+      );
+  String batchCreatedCountLabel(int count) => _t(
+        '$count ta jo‘natma yaratildi',
+        '$count shipments created',
+        'Создано $count отправок',
+      );
+  String batchFailedCountLabel(int count) => _t(
+        '$count ta jo‘natma xato bo‘ldi',
+        '$count shipments failed',
+        '$count отправок завершились ошибкой',
+      );
   String customerShipmentPendingNote() => isUzbek
       ? 'Bu jo‘natma omborchi tomonidan haridorga yuborilgan. Qaytarish yoki tasdiqlash haridor tomonidan qilinadi.'
       : isRussian

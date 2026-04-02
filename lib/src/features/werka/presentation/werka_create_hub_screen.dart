@@ -69,10 +69,7 @@ class WerkaCreateHubScreen extends StatelessWidget {
                   ),
                   const Divider(height: 1, thickness: 1),
                   InkWell(
-                    borderRadius: const BorderRadius.only(
-                      bottomLeft: Radius.circular(28),
-                      bottomRight: Radius.circular(28),
-                    ),
+                    borderRadius: BorderRadius.zero,
                     onTap: () => Navigator.of(context).pushNamed(
                       AppRoutes.werkaCustomerIssueCustomer,
                     ),
@@ -93,6 +90,41 @@ class WerkaCreateHubScreen extends StatelessWidget {
                             const SizedBox(height: 6),
                             Text(
                               l10n.customerIssueDescription,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: scheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1, thickness: 1),
+                  InkWell(
+                    borderRadius: const BorderRadius.only(
+                      bottomLeft: Radius.circular(28),
+                      bottomRight: Radius.circular(28),
+                    ),
+                    onTap: () => Navigator.of(context).pushNamed(
+                      AppRoutes.werkaBatchDispatch,
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 20,
+                      ),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.batchDispatchTitle,
+                              style: theme.textTheme.titleLarge,
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              l10n.batchDispatchDescription,
                               style: theme.textTheme.bodySmall?.copyWith(
                                 color: scheme.onSurfaceVariant,
                               ),

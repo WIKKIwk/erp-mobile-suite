@@ -66,7 +66,10 @@ class ErpnextStockMobileApp extends StatelessWidget {
             overscroll: false,
           ),
           onGenerateRoute: AppRouter.onGenerateRoute,
-          initialRoute: AppRoutes.login,
+          initialRoute: AppPreview.startDirectPreviewRoute &&
+                  AppPreview.initialRouteOverride != null
+              ? AppPreview.initialRouteOverride!
+              : AppRoutes.login,
         );
       },
     );

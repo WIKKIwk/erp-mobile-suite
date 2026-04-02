@@ -1,4 +1,5 @@
 import '../../../core/api/mobile_api.dart';
+import '../../../core/app_preview.dart';
 import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
@@ -26,6 +27,19 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
   }
 
   Future<void> _bootstrap() async {
+    if (!AppSession.instance.isLoggedIn) {
+      if (AppPreview.hasPreviewLoginCredentials) {
+        try {
+          await MobileApi.instance
+              .login(
+                phone: AppPreview.previewPhone,
+                code: AppPreview.previewCode,
+              )
+              .timeout(const Duration(seconds: 6));
+        } catch (_) {}
+      }
+    }
+
     if (!AppSession.instance.isLoggedIn) {
       if (!mounted) {
         return;
@@ -57,7 +71,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
 
     _navigated = true;
     Navigator.of(context).pushNamedAndRemoveUntil(
-      AppSession.instance.homeRoute,
+      AppPreview.initialRouteOverride ?? AppSession.instance.homeRoute,
       (route) => false,
     );
   }
