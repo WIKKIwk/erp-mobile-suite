@@ -308,10 +308,12 @@ final class NativeTabBarController: UITabBarController, UITabBarControllerDelega
 
 private final class NativeTabPlaceholderViewController: UIViewController {
   private(set) var itemId: String
+  private let stableTabBarItem = UITabBarItem()
 
   init(item: NativeDockItem) {
     itemId = item.id
     super.init(nibName: nil, bundle: nil)
+    tabBarItem = stableTabBarItem
     update(with: item)
   }
 
@@ -331,18 +333,19 @@ private final class NativeTabPlaceholderViewController: UIViewController {
       pointSize: item.primary ? 19 : 17,
       weight: item.primary ? .bold : .semibold
     )
-    tabBarItem = UITabBarItem(
-      title: nil,
-      image: UIImage(systemName: item.symbol, withConfiguration: imageConfig),
-      selectedImage: UIImage(
-        systemName: item.selectedSymbol ?? item.symbol,
-        withConfiguration: imageConfig
-      )
+    stableTabBarItem.title = nil
+    stableTabBarItem.image = UIImage(systemName: item.symbol, withConfiguration: imageConfig)
+    stableTabBarItem.selectedImage = UIImage(
+      systemName: item.selectedSymbol ?? item.symbol,
+      withConfiguration: imageConfig
     )
-    tabBarItem.badgeValue = item.showBadge ? " " : nil
+    stableTabBarItem.badgeValue = item.showBadge ? " " : nil
     if item.primary {
-      tabBarItem.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 100)
-      tabBarItem.imageInsets = UIEdgeInsets(top: -1, left: 0, bottom: 1, right: 0)
+      stableTabBarItem.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 100)
+      stableTabBarItem.imageInsets = UIEdgeInsets(top: -1, left: 0, bottom: 1, right: 0)
+    } else {
+      stableTabBarItem.titlePositionAdjustment = .zero
+      stableTabBarItem.imageInsets = .zero
     }
   }
 }
