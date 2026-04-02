@@ -2,6 +2,7 @@ import '../../../core/api/mobile_api.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/m3_confirm_dialog.dart';
+import '../../../core/widgets/native_back_button.dart';
 import '../../shared/models/app_models.dart';
 import 'dart:async';
 
@@ -326,6 +327,7 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final showFlutterBackButton = !useNativeBackButton(context);
     final AdminCustomerDetail detail = _detail ??
         AdminCustomerDetail(
           ref: widget.customerRef,
@@ -345,15 +347,12 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
           children: [
             Row(
               children: [
-                SizedBox(
-                  height: 52,
-                  width: 52,
-                  child: IconButton.filledTonal(
-                  onPressed: () => Navigator.of(context).maybePop(),
-                    icon: const Icon(Icons.arrow_back_rounded, size: 28),
+                if (showFlutterBackButton) ...[
+                  NativeBackButtonSlot(
+                    onPressed: () => Navigator.of(context).maybePop(),
                   ),
-                ),
-                const SizedBox(width: 14),
+                  const SizedBox(width: 14),
+                ],
                 Expanded(
                   child: Text(
                     'Customer',

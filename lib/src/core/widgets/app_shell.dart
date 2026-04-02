@@ -1,5 +1,6 @@
 import '../theme/app_motion.dart';
 import '../theme/app_theme.dart';
+import '../native_back_button_bridge.dart';
 import 'app_loading_indicator.dart';
 import 'package:flutter/material.dart';
 
@@ -30,6 +31,8 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final shouldHideLeading =
+        leading != null && NativeBackButtonBridge.shouldUseNativeBackButton(context);
 
     return Scaffold(
       extendBody: true,
@@ -48,13 +51,13 @@ class AppShell extends StatelessWidget {
         ),
         child: SafeArea(
           bottom: false,
-          child: _buildAnimatedContent(theme),
+          child: _buildAnimatedContent(theme, shouldHideLeading),
         ),
       ),
     );
   }
 
-  Widget _buildAnimatedContent(ThemeData theme) {
+  Widget _buildAnimatedContent(ThemeData theme, bool shouldHideLeading) {
     final content = Column(
       children: [
         Padding(
@@ -62,7 +65,7 @@ class AppShell extends StatelessWidget {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (leading != null) ...[
+              if (!shouldHideLeading && leading != null) ...[
                 leading!,
                 const SizedBox(width: 14),
               ],

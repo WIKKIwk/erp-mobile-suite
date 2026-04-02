@@ -3,6 +3,7 @@ import '../../../core/api/mobile_api.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/notifications/werka_runtime_store.dart';
 import '../../../core/widgets/m3_confirm_dialog.dart';
+import '../../../core/widgets/native_back_button.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/werka_dock.dart';
@@ -162,6 +163,7 @@ class _WerkaDetailScreenState extends State<WerkaDetailScreen> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final scheme = Theme.of(context).colorScheme;
+    final showFlutterBackButton = !useNativeBackButton(context);
     final detailRows = <({String label, String value})>[
       (label: 'Supplier', value: widget.record.supplierName),
       (
@@ -184,15 +186,12 @@ class _WerkaDetailScreenState extends State<WerkaDetailScreen> {
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
               child: Row(
                 children: [
-                  SizedBox(
-                    height: 52,
-                    width: 52,
-                    child: IconButton.filledTonal(
+                  if (showFlutterBackButton) ...[
+                    NativeBackButtonSlot(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.arrow_back_rounded, size: 28),
                     ),
-                  ),
-                  const SizedBox(width: 14),
+                    const SizedBox(width: 14),
+                  ],
                   Expanded(
                     child: Text(
                       'Qabul qilish',

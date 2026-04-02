@@ -5,6 +5,7 @@ import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/motion_widgets.dart';
+import '../../../core/widgets/native_back_button.dart';
 import '../../shared/models/app_models.dart';
 import '../state/customer_store.dart';
 import 'widgets/customer_dock.dart';
@@ -61,6 +62,7 @@ class _CustomerStatusDetailScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final showFlutterBackButton = !useNativeBackButton(context);
     return Scaffold(
       extendBody: true,
       backgroundColor: AppTheme.shellStart(context),
@@ -72,15 +74,12 @@ class _CustomerStatusDetailScreenState
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
               child: Row(
                 children: [
-                  SizedBox(
-                    height: 52,
-                    width: 52,
-                    child: IconButton.filledTonal(
+                  if (showFlutterBackButton) ...[
+                    NativeBackButtonSlot(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.arrow_back_rounded, size: 28),
                     ),
-                  ),
-                  const SizedBox(width: 14),
+                    const SizedBox(width: 14),
+                  ],
                   Expanded(
                     child: Text(
                       _title,

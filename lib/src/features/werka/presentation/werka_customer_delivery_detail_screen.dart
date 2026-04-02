@@ -1,6 +1,7 @@
 import '../../../core/localization/app_localizations.dart';
 import '../../../app/app_router.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/native_back_button.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/werka_dock.dart';
 import 'package:flutter/material.dart';
@@ -67,6 +68,7 @@ class WerkaCustomerDeliveryDetailScreen extends StatelessWidget {
       (label: l10n.statusLabel, value: _statusLabel(l10n)),
       (label: l10n.dateLabel, value: record.createdLabel),
     ];
+    final showFlutterBackButton = !useNativeBackButton(context);
     return Scaffold(
       extendBody: true,
       backgroundColor: AppTheme.shellStart(context),
@@ -78,15 +80,12 @@ class WerkaCustomerDeliveryDetailScreen extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
               child: Row(
                 children: [
-                  SizedBox(
-                    height: 52,
-                    width: 52,
-                    child: IconButton.filledTonal(
+                  if (showFlutterBackButton) ...[
+                    NativeBackButtonSlot(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.arrow_back_rounded, size: 28),
                     ),
-                  ),
-                  const SizedBox(width: 14),
+                    const SizedBox(width: 14),
+                  ],
                   Expanded(
                     child: Text(
                       l10n.customerShipmentTitle,

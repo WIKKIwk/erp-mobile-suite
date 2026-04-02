@@ -5,6 +5,7 @@ import '../../../core/session/app_session.dart';
 import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_shell.dart';
 import '../../../core/widgets/app_retry_state.dart';
+import '../../../core/widgets/native_back_button.dart';
 import '../../supplier/presentation/widgets/supplier_dock.dart';
 import '../../supplier/state/supplier_store.dart';
 import '../../werka/presentation/widgets/werka_dock.dart';
@@ -626,13 +627,8 @@ class _NotificationBackButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 52,
-      width: 52,
-      child: IconButton.filledTonal(
-        onPressed: () => Navigator.of(context).maybePop(),
-        icon: const Icon(Icons.arrow_back_rounded, size: 28),
-      ),
+    return NativeBackButtonSlot(
+      onPressed: () => Navigator.of(context).maybePop(),
     );
   }
 }

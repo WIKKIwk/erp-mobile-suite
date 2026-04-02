@@ -4,6 +4,7 @@ import '../../../core/localization/app_localizations.dart';
 import '../../../core/notifications/refresh_hub.dart';
 import '../../../core/notifications/werka_runtime_store.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/native_back_button.dart';
 import '../../shared/models/app_models.dart';
 import 'widgets/m3_picker_sheet.dart';
 import 'widgets/werka_dock.dart';
@@ -378,17 +379,15 @@ class _WerkaUnannouncedHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showFlutterBackButton = !useNativeBackButton(context);
     return Row(
       children: [
-        SizedBox(
-          height: 52,
-          width: 52,
-          child: IconButton.filledTonal(
+        if (showFlutterBackButton) ...[
+          NativeBackButtonSlot(
             onPressed: () => Navigator.of(context).maybePop(),
-            icon: const Icon(Icons.arrow_back_rounded, size: 28),
           ),
-        ),
-        const SizedBox(width: 14),
+          const SizedBox(width: 14),
+        ],
         Expanded(
           child: Text(
             context.l10n.unannouncedTitle,

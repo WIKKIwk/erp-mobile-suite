@@ -2,6 +2,7 @@ import '../../../core/api/mobile_api.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_retry_state.dart';
+import '../../../core/widgets/native_back_button.dart';
 import '../../shared/models/app_models.dart';
 import 'dart:async';
 
@@ -294,17 +295,15 @@ class _AdminWerkaHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final showFlutterBackButton = !useNativeBackButton(context);
     return Row(
       children: [
-        SizedBox(
-          height: 52,
-          width: 52,
-          child: IconButton.filledTonal(
+        if (showFlutterBackButton) ...[
+          NativeBackButtonSlot(
             onPressed: () => Navigator.of(context).maybePop(),
-            icon: const Icon(Icons.arrow_back_rounded, size: 28),
           ),
-        ),
-        const SizedBox(width: 14),
+          const SizedBox(width: 14),
+        ],
         Expanded(
           child: Text(
             'Werka',
