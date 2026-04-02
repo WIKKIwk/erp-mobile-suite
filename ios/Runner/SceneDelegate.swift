@@ -59,6 +59,19 @@ final class NativeBackNavigationController: UINavigationController {
     _ = backBridge
     navigationBar.prefersLargeTitles = false
     navigationBar.tintColor = .label
+    let appearance = UINavigationBarAppearance()
+    appearance.configureWithTransparentBackground()
+    appearance.backgroundColor = .clear
+    appearance.shadowColor = .clear
+    appearance.titleTextAttributes = [
+      .foregroundColor: UIColor.label,
+    ]
+    appearance.largeTitleTextAttributes = [
+      .foregroundColor: UIColor.label,
+    ]
+    navigationBar.standardAppearance = appearance
+    navigationBar.scrollEdgeAppearance = appearance
+    navigationBar.compactAppearance = appearance
     topViewController?.navigationItem.leftBarButtonItem = makeBackBarButtonItem()
     setNavigationBarHidden(true, animated: false)
     configureDockController()
