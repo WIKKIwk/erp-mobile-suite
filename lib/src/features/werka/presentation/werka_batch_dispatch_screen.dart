@@ -310,7 +310,6 @@ class _WerkaBatchDispatchScreenState extends State<WerkaBatchDispatchScreen> {
   }
 
   void _prepareNextLine() {
-    _selectedCustomer = null;
     _selectedItem = null;
     _qtyController.clear();
   }
