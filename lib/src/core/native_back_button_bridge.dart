@@ -32,7 +32,10 @@ class NativeBackButtonBridge extends NavigatorObserver {
       return false;
     }
     final navigator = Navigator.maybeOf(context);
-    final visible = navigator?.canPop() ?? false;
+    final route = ModalRoute.of(context);
+    final canPop = navigator?.canPop() ?? false;
+    final isCurrent = route?.isCurrent ?? true;
+    final visible = canPop && !isCurrent;
     instance._syncVisibleFromBuild(visible);
     return visible;
   }
@@ -54,11 +57,15 @@ class NativeBackButtonBridge extends NavigatorObserver {
       return false;
     }
     final navigator = Navigator.maybeOf(context);
-    final visible = navigator?.canPop() ?? false;
+    final route = ModalRoute.of(context);
+    final canPop = navigator?.canPop() ?? false;
+    final isCurrent = route?.isCurrent ?? true;
+    final visible = canPop && !isCurrent;
     final useNative = visible || allowWithoutBackButton;
     instance._syncVisibleFromBuild(visible);
     instance._syncNavigationBarVisibleFromBuild(useNative);
-    instance._syncThemeFromBuild(Theme.of(context).brightness == Brightness.dark);
+    instance
+        ._syncThemeFromBuild(Theme.of(context).brightness == Brightness.dark);
     instance._syncTitleFromBuild(useNative ? title : null);
     return useNative;
   }
@@ -70,7 +77,8 @@ class NativeBackButtonBridge extends NavigatorObserver {
   }
 
   @override
-  void didStartUserGesture(Route<dynamic> route, Route<dynamic>? previousRoute) {
+  void didStartUserGesture(
+      Route<dynamic> route, Route<dynamic>? previousRoute) {
     super.didStartUserGesture(route, previousRoute);
     if (!_initialized) {
       return;
