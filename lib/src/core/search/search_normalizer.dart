@@ -40,6 +40,176 @@ bool searchMatches(String query, Iterable<String> values) {
   return false;
 }
 
+int compareSearchRelevance({
+  required String query,
+  required String leftPrimary,
+  Iterable<String> leftSecondary = const <String>[],
+  required String rightPrimary,
+  Iterable<String> rightSecondary = const <String>[],
+}) {
+  final leftScore = _scoreSearchRelevance(
+    query,
+    primary: leftPrimary,
+    secondary: leftSecondary,
+  );
+  final rightScore = _scoreSearchRelevance(
+    query,
+    primary: rightPrimary,
+    secondary: rightSecondary,
+  );
+  return rightScore.compareTo(leftScore);
+}
+
+int _scoreSearchRelevance(
+  String query, {
+  required String primary,
+  Iterable<String> secondary = const <String>[],
+}) {
+  final normalizedQuery = normalizeForSearch(query);
+  final compactQuery = _compactForSearch(query);
+  if (normalizedQuery.isEmpty || compactQuery.isEmpty) {
+    return 0;
+  }
+
+  var best =
+      _scoreField(normalizedQuery, compactQuery, primary, isPrimary: true);
+  for (final value in secondary) {
+    final score = _scoreField(
+      normalizedQuery,
+      compactQuery,
+      value,
+      isPrimary: false,
+    );
+    if (score > best) {
+      best = score;
+    }
+  }
+  return best;
+}
+
+int _scoreField(
+  String normalizedQuery,
+  String compactQuery,
+  String value, {
+  required bool isPrimary,
+}) {
+  final normalizedValue = normalizeForSearch(value);
+  final compactValue = _compactForSearch(value);
+  if (normalizedValue.isEmpty || compactValue.isEmpty) {
+    return 0;
+  }
+
+  final weight = isPrimary ? 1000 : 0;
+  if (compactValue == compactQuery) {
+    return weight + 9000;
+  }
+  if (normalizedValue == normalizedQuery) {
+    return weight + 8800;
+  }
+  if (compactValue.startsWith(compactQuery)) {
+    return weight + 8200;
+  }
+  if (_startsWithFuzzy(compactValue, compactQuery, maxDistance: 1)) {
+    return weight + 7900;
+  }
+
+  final tokens = normalizedValue
+      .split(RegExp(r'[^a-z0-9]+'))
+      .where((token) => token.isNotEmpty)
+      .toList(growable: false);
+  if (tokens
+      .any((token) => token == compactQuery || token == normalizedQuery)) {
+    return weight + 7600;
+  }
+  if (tokens.any((token) => token.startsWith(compactQuery))) {
+    return weight + 7300;
+  }
+  if (tokens.any(
+    (token) =>
+        token.length >= compactQuery.length &&
+        _boundedLevenshtein(
+              token.substring(0, compactQuery.length),
+              compactQuery,
+              maxDistance: 1,
+            ) !=
+            null,
+  )) {
+    return weight + 7000;
+  }
+  if (compactValue.contains(compactQuery)) {
+    return weight + 6200;
+  }
+  if (normalizedValue.contains(normalizedQuery)) {
+    return weight + 5800;
+  }
+  if (_containsFuzzy(compactValue, compactQuery, maxDistance: 1)) {
+    return weight + 5400;
+  }
+  return 0;
+}
+
+bool _startsWithFuzzy(String compactValue, String compactQuery,
+    {required int maxDistance}) {
+  if (compactValue.length < compactQuery.length) {
+    return false;
+  }
+  final prefix = compactValue.substring(0, compactQuery.length);
+  return _boundedLevenshtein(prefix, compactQuery, maxDistance: maxDistance) !=
+      null;
+}
+
+bool _containsFuzzy(String compactValue, String compactQuery,
+    {required int maxDistance}) {
+  if (compactQuery.isEmpty || compactValue.length < compactQuery.length) {
+    return false;
+  }
+  for (var start = 0;
+      start <= compactValue.length - compactQuery.length;
+      start++) {
+    final slice = compactValue.substring(start, start + compactQuery.length);
+    if (_boundedLevenshtein(slice, compactQuery, maxDistance: maxDistance) !=
+        null) {
+      return true;
+    }
+  }
+  return false;
+}
+
+int? _boundedLevenshtein(String left, String right,
+    {required int maxDistance}) {
+  if ((left.length - right.length).abs() > maxDistance) {
+    return null;
+  }
+
+  var previous = List<int>.generate(right.length + 1, (index) => index);
+  for (var i = 0; i < left.length; i++) {
+    final current = List<int>.filled(right.length + 1, 0);
+    current[0] = i + 1;
+    var rowMin = current[0];
+    for (var j = 0; j < right.length; j++) {
+      final cost = left[i] == right[j] ? 0 : 1;
+      current[j + 1] = [
+        current[j] + 1,
+        previous[j + 1] + 1,
+        previous[j] + cost,
+      ].reduce((a, b) => a < b ? a : b);
+      if (current[j + 1] < rowMin) {
+        rowMin = current[j + 1];
+      }
+    }
+    if (rowMin > maxDistance) {
+      return null;
+    }
+    previous = current;
+  }
+  final distance = previous.last;
+  return distance <= maxDistance ? distance : null;
+}
+
+String _compactForSearch(String input) => normalizeForSearch(
+      input,
+    ).replaceAll(RegExp(r'[^a-z0-9]+'), '');
+
 String _mapRune(String char) {
   switch (char) {
     case 'а':

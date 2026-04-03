@@ -1,5 +1,6 @@
 import '../../../../core/theme/app_motion.dart';
 import '../../../../core/localization/app_localizations.dart';
+import '../../../../core/search/search_normalizer.dart';
 import '../../../../core/widgets/app_loading_indicator.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -54,13 +55,29 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
     return widget.matchesQuery(item, _query);
   }
 
-  bool _hasVisibleItemAfter(int index) {
-    for (int next = index + 1; next < widget.items.length; next++) {
-      if (_matches(widget.items[next])) {
-        return true;
-      }
+  List<T> _visibleItems() {
+    final visible = widget.items.where((item) => _matches(item)).toList();
+    if (_query.trim().isEmpty || visible.length < 2) {
+      return visible;
     }
-    return false;
+    final indexByItem = <T, int>{
+      for (var index = 0; index < widget.items.length; index++)
+        widget.items[index]: index,
+    };
+    visible.sort((left, right) {
+      final relevance = compareSearchRelevance(
+        query: _query,
+        leftPrimary: widget.itemTitle(left),
+        leftSecondary: [widget.itemSubtitle(left)],
+        rightPrimary: widget.itemTitle(right),
+        rightSecondary: [widget.itemSubtitle(right)],
+      );
+      if (relevance != 0) {
+        return relevance;
+      }
+      return (indexByItem[left] ?? 0).compareTo(indexByItem[right] ?? 0);
+    });
+    return visible;
   }
 
   @override
@@ -68,7 +85,8 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final media = MediaQuery.of(context);
-    final visibleCount = widget.items.where((item) => _matches(item)).length;
+    final visibleItems = _visibleItems();
+    final visibleCount = visibleItems.length;
     final keyboardInset = media.viewInsets.bottom;
     final l10n = context.l10n;
 
@@ -173,17 +191,12 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
                           borderRadius: BorderRadius.circular(24),
                           child: ListView.builder(
                             shrinkWrap: true,
-                            itemCount: widget.items.length,
+                            itemCount: visibleItems.length,
                             itemBuilder: (context, index) {
-                              final item = widget.items[index];
+                              final item = visibleItems[index];
                               final subtitle = widget.itemSubtitle(item).trim();
-                              final visible = _matches(item);
-                              final isFirst = visible &&
-                                  !widget.items
-                                      .take(index)
-                                      .any((entry) => _matches(entry));
-                              final isLast =
-                                  visible && !_hasVisibleItemAfter(index);
+                              final isFirst = index == 0;
+                              final isLast = index == visibleItems.length - 1;
 
                               return ClipRect(
                                 child: AnimatedSize(
@@ -193,87 +206,78 @@ class _M3PickerSheetState<T> extends State<M3PickerSheet<T>> {
                                   child: AnimatedOpacity(
                                     duration: AppMotion.medium,
                                     curve: AppMotion.standardDecelerate,
-                                    opacity: visible ? 1 : 0,
-                                    child: visible
-                                        ? Column(
-                                            mainAxisSize: MainAxisSize.min,
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.stretch,
-                                            children: [
-                                              SizedBox(
-                                                width: double.infinity,
-                                                child: InkWell(
-                                                  borderRadius:
-                                                      BorderRadius.only(
-                                                    topLeft: Radius.circular(
-                                                      isFirst ? 24 : 0,
-                                                    ),
-                                                    topRight: Radius.circular(
-                                                      isFirst ? 24 : 0,
-                                                    ),
-                                                    bottomLeft: Radius.circular(
-                                                      isLast ? 24 : 0,
-                                                    ),
-                                                    bottomRight:
-                                                        Radius.circular(
-                                                      isLast ? 24 : 0,
-                                                    ),
-                                                  ),
-                                                  onTap: () =>
-                                                      widget.onSelected(item),
-                                                  child: Padding(
-                                                    padding: const EdgeInsets
-                                                        .symmetric(
-                                                      horizontal: 18,
-                                                      vertical: 16,
-                                                    ),
-                                                    child: Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment
-                                                              .start,
-                                                      children: [
-                                                        Text(
-                                                          widget
-                                                              .itemTitle(item),
-                                                          style: theme.textTheme
-                                                              .titleLarge
-                                                              ?.copyWith(
-                                                            fontWeight:
-                                                                FontWeight.w700,
-                                                          ),
-                                                        ),
-                                                        if (subtitle
-                                                            .isNotEmpty) ...[
-                                                          const SizedBox(
-                                                              height: 6),
-                                                          Text(
-                                                            subtitle,
-                                                            style: theme
-                                                                .textTheme
-                                                                .bodySmall
-                                                                ?.copyWith(
-                                                              color: scheme
-                                                                  .onSurfaceVariant,
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ),
+                                    opacity: 1,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        SizedBox(
+                                          width: double.infinity,
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(
+                                                isFirst ? 24 : 0,
                                               ),
-                                              if (!isLast)
-                                                Divider(
-                                                  height: 1,
-                                                  thickness: 1,
-                                                  indent: 18,
-                                                  endIndent: 18,
-                                                  color: scheme.outlineVariant
-                                                      .withValues(alpha: 0.5),
-                                                ),
-                                            ],
-                                          )
-                                        : const SizedBox.shrink(),
+                                              topRight: Radius.circular(
+                                                isFirst ? 24 : 0,
+                                              ),
+                                              bottomLeft: Radius.circular(
+                                                isLast ? 24 : 0,
+                                              ),
+                                              bottomRight: Radius.circular(
+                                                isLast ? 24 : 0,
+                                              ),
+                                            ),
+                                            onTap: () =>
+                                                widget.onSelected(item),
+                                            child: Padding(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                horizontal: 18,
+                                                vertical: 16,
+                                              ),
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    widget.itemTitle(item),
+                                                    style: theme
+                                                        .textTheme.titleLarge
+                                                        ?.copyWith(
+                                                      fontWeight:
+                                                          FontWeight.w700,
+                                                    ),
+                                                  ),
+                                                  if (subtitle.isNotEmpty) ...[
+                                                    const SizedBox(height: 6),
+                                                    Text(
+                                                      subtitle,
+                                                      style: theme
+                                                          .textTheme.bodySmall
+                                                          ?.copyWith(
+                                                        color: scheme
+                                                            .onSurfaceVariant,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        if (!isLast)
+                                          Divider(
+                                            height: 1,
+                                            thickness: 1,
+                                            indent: 18,
+                                            endIndent: 18,
+                                            color: scheme.outlineVariant
+                                                .withValues(alpha: 0.5),
+                                          ),
+                                      ],
+                                    ),
                                   ),
                                 ),
                               );
@@ -407,6 +411,27 @@ class _M3AsyncPickerSheetState<T> extends State<M3AsyncPickerSheet<T>> {
     });
   }
 
+  List<T> _sortedItems() {
+    if (_query.trim().isEmpty || _items.length < 2) {
+      return _items;
+    }
+    final indexed = _items.indexed.toList(growable: false);
+    indexed.sort((left, right) {
+      final relevance = compareSearchRelevance(
+        query: _query,
+        leftPrimary: widget.itemTitle(left.$2),
+        leftSecondary: [widget.itemSubtitle(left.$2)],
+        rightPrimary: widget.itemTitle(right.$2),
+        rightSecondary: [widget.itemSubtitle(right.$2)],
+      );
+      if (relevance != 0) {
+        return relevance;
+      }
+      return left.$1.compareTo(right.$1);
+    });
+    return indexed.map((entry) => entry.$2).toList(growable: false);
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -453,13 +478,14 @@ class _M3AsyncPickerSheetState<T> extends State<M3AsyncPickerSheet<T>> {
         ),
       );
     } else {
+      final sortedItems = _sortedItems();
       body = Material(
         color: scheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(24),
         child: ListView.separated(
           controller: _scrollController,
           shrinkWrap: true,
-          itemCount: _items.length + (_loadingMore ? 1 : 0),
+          itemCount: sortedItems.length + (_loadingMore ? 1 : 0),
           separatorBuilder: (context, index) => Divider(
             height: 1,
             thickness: 1,
@@ -468,16 +494,16 @@ class _M3AsyncPickerSheetState<T> extends State<M3AsyncPickerSheet<T>> {
             color: scheme.outlineVariant.withValues(alpha: 0.5),
           ),
           itemBuilder: (context, index) {
-            if (index >= _items.length) {
+            if (index >= sortedItems.length) {
               return const Padding(
                 padding: EdgeInsets.symmetric(vertical: 18),
                 child: Center(child: AppLoadingIndicator()),
               );
             }
-            final item = _items[index];
+            final item = sortedItems[index];
             final subtitle = widget.itemSubtitle(item).trim();
             final isFirst = index == 0;
-            final isLast = index == _items.length - 1;
+            final isLast = index == sortedItems.length - 1;
 
             return SizedBox(
               width: double.infinity,
