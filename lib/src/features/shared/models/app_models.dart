@@ -195,6 +195,89 @@ class WerkaCustomerIssueRecord {
   }
 }
 
+class WerkaCustomerIssueBatchLineRequest {
+  const WerkaCustomerIssueBatchLineRequest({
+    required this.customerRef,
+    required this.itemCode,
+    required this.qty,
+  });
+
+  final String customerRef;
+  final String itemCode;
+  final double qty;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'customer_ref': customerRef,
+      'item_code': itemCode,
+      'qty': qty,
+    };
+  }
+}
+
+class WerkaCustomerIssueBatchLineResult {
+  const WerkaCustomerIssueBatchLineResult({
+    required this.lineIndex,
+    this.record,
+    this.error = '',
+    this.errorCode = '',
+  });
+
+  final int lineIndex;
+  final WerkaCustomerIssueRecord? record;
+  final String error;
+  final String errorCode;
+
+  factory WerkaCustomerIssueBatchLineResult.fromJson(
+    Map<String, dynamic> json,
+  ) {
+    return WerkaCustomerIssueBatchLineResult(
+      lineIndex: (json['line_index'] as num?)?.toInt() ?? 0,
+      record: json['record'] is Map<String, dynamic>
+          ? WerkaCustomerIssueRecord.fromJson(
+              json['record'] as Map<String, dynamic>,
+            )
+          : null,
+      error: json['error'] as String? ?? '',
+      errorCode: json['error_code'] as String? ?? '',
+    );
+  }
+}
+
+class WerkaCustomerIssueBatchResult {
+  const WerkaCustomerIssueBatchResult({
+    required this.clientBatchID,
+    required this.created,
+    required this.failed,
+  });
+
+  final String clientBatchID;
+  final List<WerkaCustomerIssueBatchLineResult> created;
+  final List<WerkaCustomerIssueBatchLineResult> failed;
+
+  factory WerkaCustomerIssueBatchResult.fromJson(Map<String, dynamic> json) {
+    final createdJson = json['created'] as List<dynamic>? ?? const [];
+    final failedJson = json['failed'] as List<dynamic>? ?? const [];
+    return WerkaCustomerIssueBatchResult(
+      clientBatchID: json['client_batch_id'] as String? ?? '',
+      created: createdJson
+          .map(
+            (item) => WerkaCustomerIssueBatchLineResult.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+      failed: failedJson
+          .map(
+            (item) => WerkaCustomerIssueBatchLineResult.fromJson(
+              item as Map<String, dynamic>,
+            ),
+          )
+          .toList(),
+    );
+  }
+}
+
 class SupplierHomeSummary {
   const SupplierHomeSummary({
     required this.pendingCount,

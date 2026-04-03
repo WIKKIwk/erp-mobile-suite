@@ -7,6 +7,7 @@ import '../../../core/search/search_normalizer.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/native_back_button.dart';
 import '../../shared/models/app_models.dart';
+import 'dart:math';
 import 'widgets/m3_picker_sheet.dart';
 import 'widgets/werka_dock.dart';
 import 'package:flutter/material.dart';
@@ -624,23 +625,36 @@ class _WerkaBatchDispatchReviewScreenState
     }
 
     setState(() => _submitting = true);
-    final failed = <_WerkaBatchDraftLine>[];
-    var createdCount = 0;
+    final batchID =
+        'batch-${DateTime.now().millisecondsSinceEpoch}-${Random().nextInt(1 << 20)}';
+    final result = await MobileApi.instance.createWerkaCustomerIssueBatch(
+      clientBatchID: batchID,
+      lines: _lines
+          .map(
+            (line) => WerkaCustomerIssueBatchLineRequest(
+              customerRef: line.customer.ref,
+              itemCode: line.item.code,
+              qty: line.qty,
+            ),
+          )
+          .toList(),
+    );
 
-    for (final line in _lines) {
-      try {
-        final created = await MobileApi.instance.createWerkaCustomerIssue(
-          customerRef: line.customer.ref,
-          itemCode: line.item.code,
-          qty: line.qty,
-        );
-        createdCount++;
-        WerkaRuntimeStore.instance.recordCreatedPending(
-          _recordFromIssue(created),
-        );
-      } catch (_) {
-        failed.add(line);
+    final failedIndices = result.failed.map((item) => item.lineIndex).toSet();
+    final failed = <_WerkaBatchDraftLine>[
+      for (var i = 0; i < _lines.length; i++)
+        if (failedIndices.contains(i)) _lines[i],
+    ];
+    final createdCount = result.created.length;
+
+    for (final created in result.created) {
+      final record = created.record;
+      if (record == null) {
+        continue;
       }
+      WerkaRuntimeStore.instance.recordCreatedPending(
+        _recordFromIssue(record),
+      );
     }
 
     RefreshHub.instance.emit('werka');

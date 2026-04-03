@@ -246,6 +246,29 @@ extension MobileApiWerka on MobileApi {
     );
   }
 
+  Future<WerkaCustomerIssueBatchResult> createWerkaCustomerIssueBatch({
+    required String clientBatchID,
+    required List<WerkaCustomerIssueBatchLineRequest> lines,
+  }) async {
+    final response = await _sendAuthorized(
+      () => http.post(
+        Uri.parse('$baseUrl/v1/mobile/werka/customer-issue/batch-create'),
+        headers: _headers(requireToken())
+          ..['Content-Type'] = 'application/json',
+        body: jsonEncode({
+          'client_batch_id': clientBatchID,
+          'lines': lines.map((item) => item.toJson()).toList(),
+        }),
+      ),
+    );
+    if (response.statusCode != 200) {
+      throw Exception('Werka customer issue batch create failed');
+    }
+    return WerkaCustomerIssueBatchResult.fromJson(
+      jsonDecode(response.body) as Map<String, dynamic>,
+    );
+  }
+
   Future<WerkaHomeSummary> werkaSummary() async {
     final http.Response response = await _sendAuthorized(
       () => http.get(
