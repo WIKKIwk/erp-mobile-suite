@@ -18,12 +18,15 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
   SharedPreferences? _prefs;
   bool _loaded = false;
   bool _locked = false;
+  bool _privacyShieldVisible = false;
   bool _wasBackgrounded = false;
   bool _authInProgress = false;
   bool _suspendResumeLock = false;
 
   bool get loaded => _loaded;
   bool get locked => _loaded && _locked && hasPinForCurrentUser;
+  bool get privacyShieldVisible =>
+      _loaded && _privacyShieldVisible && hasPinForCurrentUser;
   bool get hasPinForCurrentUser =>
       _hasPinForProfile(AppSession.instance.profile);
   bool get biometricEnabledForCurrentUser =>
@@ -40,12 +43,14 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
   Future<void> unlockAfterLogin() async {
     _prefs ??= await SharedPreferences.getInstance();
     _locked = false;
+    _privacyShieldVisible = false;
     notifyListeners();
   }
 
   Future<void> clearForLogout() async {
     _prefs ??= await SharedPreferences.getInstance();
     _locked = false;
+    _privacyShieldVisible = false;
     _wasBackgrounded = false;
     _suspendResumeLock = false;
     _authInProgress = false;
@@ -63,6 +68,7 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
     }
     await _prefs!.setString(_pinKey(profile), _hash(pin));
     _locked = false;
+    _privacyShieldVisible = false;
     notifyListeners();
   }
 
@@ -75,6 +81,7 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
     await _prefs!.remove(_pinKey(profile));
     await _prefs!.remove(_biometricKey(profile));
     _locked = false;
+    _privacyShieldVisible = false;
     notifyListeners();
   }
 
@@ -89,6 +96,7 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
       return false;
     }
     _locked = false;
+    _privacyShieldVisible = false;
     notifyListeners();
     return true;
   }
@@ -136,6 +144,7 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
     );
     if (ok) {
       _locked = false;
+      _privacyShieldVisible = false;
       notifyListeners();
     }
     return ok;
@@ -152,6 +161,10 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
     if (state == AppLifecycleState.inactive ||
         state == AppLifecycleState.paused ||
         state == AppLifecycleState.hidden) {
+      if (hasPinForCurrentUser && !_privacyShieldVisible) {
+        _privacyShieldVisible = true;
+        notifyListeners();
+      }
       _wasBackgrounded = true;
       return;
     }
@@ -159,13 +172,25 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
       if (_suspendResumeLock) {
         _suspendResumeLock = false;
         _wasBackgrounded = false;
+        if (_privacyShieldVisible) {
+          _privacyShieldVisible = false;
+          notifyListeners();
+        }
         return;
       }
+      var changed = false;
       if (_wasBackgrounded && hasPinForCurrentUser) {
         _locked = true;
-        notifyListeners();
+        changed = true;
+      }
+      if (_privacyShieldVisible) {
+        _privacyShieldVisible = false;
+        changed = true;
       }
       _wasBackgrounded = false;
+      if (changed) {
+        notifyListeners();
+      }
     }
   }
 
@@ -205,8 +230,10 @@ class SecurityController extends ChangeNotifier with WidgetsBindingObserver {
     try {
       final ok = await _localAuth.authenticate(
         localizedReason: reason,
-        biometricOnly: true,
-        persistAcrossBackgrounding: true,
+        options: const AuthenticationOptions(
+          biometricOnly: true,
+          stickyAuth: true,
+        ),
       );
       if (ok) {
         _suspendResumeLock = true;

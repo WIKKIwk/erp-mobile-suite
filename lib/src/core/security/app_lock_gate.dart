@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'device_permissions_bootstrap.dart';
 import '../localization/app_localizations.dart';
 import '../localization/locale_controller.dart';
@@ -35,6 +37,8 @@ class _AppLockGateState extends State<AppLockGate> {
       ]),
       builder: (context, _) {
         final locked = SecurityController.instance.locked;
+        final privacyShieldVisible =
+            SecurityController.instance.privacyShieldVisible && !locked;
 
         return Stack(
           children: [
@@ -42,6 +46,23 @@ class _AppLockGateState extends State<AppLockGate> {
               child: IgnorePointer(
                 ignoring: locked,
                 child: widget.child,
+              ),
+            ),
+            Positioned.fill(
+              child: IgnorePointer(
+                ignoring: !privacyShieldVisible,
+                child: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 180),
+                  reverseDuration: const Duration(milliseconds: 120),
+                  child: privacyShieldVisible
+                      ? const KeyedSubtree(
+                          key: ValueKey<String>('privacy-shield'),
+                          child: _PrivacyShieldOverlay(),
+                        )
+                      : const SizedBox.shrink(
+                          key: ValueKey<String>('privacy-shield-empty'),
+                        ),
+                ),
               ),
             ),
             Positioned.fill(
@@ -78,6 +99,83 @@ class _AppLockGateState extends State<AppLockGate> {
           ],
         );
       },
+    );
+  }
+}
+
+class _PrivacyShieldOverlay extends StatelessWidget {
+  const _PrivacyShieldOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return RepaintBoundary(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 24, sigmaY: 24),
+            child: ColoredBox(
+              color: scheme.surface.withValues(alpha: 0.30),
+            ),
+          ),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.18),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(18, 12, 18, 18),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(30),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 30, sigmaY: 30),
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color:
+                        scheme.surfaceContainerHighest.withValues(alpha: 0.30),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.08),
+                    ),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  child: Stack(
+                    children: [
+                      Positioned(
+                        top: 14,
+                        left: 0,
+                        right: 0,
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: scheme.primary.withValues(alpha: 0.88),
+                              borderRadius: BorderRadius.circular(999),
+                            ),
+                            child: Text(
+                              'Accord',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .labelMedium
+                                  ?.copyWith(
+                                    color: scheme.onPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
