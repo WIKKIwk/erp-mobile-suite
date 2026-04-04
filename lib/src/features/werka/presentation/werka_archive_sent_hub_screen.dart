@@ -296,7 +296,6 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
     return RefreshIndicator(
       onRefresh: _loadCurrent,
       child: ListView(
-        physics: const NeverScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(4, 0, 4, 110),
         children: [
           _SentArchiveExpandableCard(
