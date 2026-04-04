@@ -446,24 +446,31 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
       child: Align(
         alignment: Alignment.topCenter,
         heightFactor: _dailyCalendarHeightFactor(context),
-            child: CalendarDatePicker(
-              initialDate: _selectedDate,
-              firstDate: DateTime(DateTime.now().year - 5),
-              lastDate: DateTime(DateTime.now().year + 1, 12, 31),
-              currentDate: DateTime.now(),
-              onDisplayedMonthChanged: (value) async {
-                final nextMonth = DateTime(value.year, value.month, 1);
-                if (nextMonth == _displayMonth) return;
-                setState(() => _displayMonth = nextMonth);
-                await _loadDaily();
-              },
-              onDateChanged: (value) {
-                final date = DateUtils.dateOnly(value);
-                setState(() => _selectedDate = date);
-                _openList(period: WerkaArchivePeriod.daily, from: date, to: date);
-              },
-            ),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onVerticalDragStart: (_) {},
+          onVerticalDragUpdate: (_) {},
+          onVerticalDragEnd: (_) {},
+          onVerticalDragCancel: () {},
+          child: CalendarDatePicker(
+            initialDate: _selectedDate,
+            firstDate: DateTime(DateTime.now().year - 5),
+            lastDate: DateTime(DateTime.now().year + 1, 12, 31),
+            currentDate: DateTime.now(),
+            onDisplayedMonthChanged: (value) async {
+              final nextMonth = DateTime(value.year, value.month, 1);
+              if (nextMonth == _displayMonth) return;
+              setState(() => _displayMonth = nextMonth);
+              await _loadDaily();
+            },
+            onDateChanged: (value) {
+              final date = DateUtils.dateOnly(value);
+              setState(() => _selectedDate = date);
+              _openList(period: WerkaArchivePeriod.daily, from: date, to: date);
+            },
           ),
+        ),
+      ),
     );
   }
 }
