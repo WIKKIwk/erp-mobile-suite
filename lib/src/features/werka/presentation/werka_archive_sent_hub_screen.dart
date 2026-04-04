@@ -43,6 +43,32 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
   Set<int> _activeMonths = <int>{};
   Set<int> _activeYears = <int>{};
 
+  void _toggleSection(WerkaArchivePeriod period) {
+    setState(() {
+      final isOpen = switch (period) {
+        WerkaArchivePeriod.daily => _dailyOpen,
+        WerkaArchivePeriod.monthly => _monthlyOpen,
+        WerkaArchivePeriod.yearly => _yearlyOpen,
+        WerkaArchivePeriod.custom => false,
+      };
+      _dailyOpen = false;
+      _monthlyOpen = false;
+      _yearlyOpen = false;
+      if (!isOpen) {
+        switch (period) {
+          case WerkaArchivePeriod.daily:
+            _dailyOpen = true;
+          case WerkaArchivePeriod.monthly:
+            _monthlyOpen = true;
+          case WerkaArchivePeriod.yearly:
+            _yearlyOpen = true;
+          case WerkaArchivePeriod.custom:
+            break;
+        }
+      }
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -254,53 +280,75 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
     }
 
     final l10n = context.l10n;
+    final sections = <_SentSectionData>[
+      _SentSectionData(
+        period: WerkaArchivePeriod.daily,
+        title: l10n.archiveDailyTitle,
+        value: _selectedDateLabel(context),
+        actionLabel: l10n.archiveSelectDateAction,
+        open: _dailyOpen,
+        onToggle: () => _toggleSection(WerkaArchivePeriod.daily),
+        child: CalendarDatePicker(
+          initialDate: _selectedDate,
+          firstDate: DateTime(DateTime.now().year - 5),
+          lastDate: DateTime(DateTime.now().year + 1, 12, 31),
+          currentDate: DateTime.now(),
+          onDisplayedMonthChanged: (value) async {
+            final nextMonth = DateTime(value.year, value.month, 1);
+            if (nextMonth == _displayMonth) return;
+            setState(() => _displayMonth = nextMonth);
+            await _loadDaily();
+          },
+          onDateChanged: (value) {
+            final date = DateUtils.dateOnly(value);
+            setState(() => _selectedDate = date);
+            _openList(period: WerkaArchivePeriod.daily, from: date, to: date);
+          },
+        ),
+      ),
+      _SentSectionData(
+        period: WerkaArchivePeriod.monthly,
+        title: l10n.archiveMonthlyTitle,
+        value: _selectedMonthLabel(context),
+        actionLabel: l10n.archiveSelectMonthAction,
+        open: _monthlyOpen,
+        onToggle: () => _toggleSection(WerkaArchivePeriod.monthly),
+        child: _buildMonthlyPanel(context),
+      ),
+      _SentSectionData(
+        period: WerkaArchivePeriod.yearly,
+        title: l10n.archiveYearlyTitle,
+        value: _selectedYearLabel(),
+        actionLabel: l10n.archiveSelectDateAction,
+        open: _yearlyOpen,
+        onToggle: () => _toggleSection(WerkaArchivePeriod.yearly),
+        child: _buildYearlyPanel(context),
+      ),
+    ];
+    final openSections = sections.where((section) => section.open).toList();
+    final closedSections = sections.where((section) => !section.open).toList();
+
     return RefreshIndicator(
       onRefresh: _loadCurrent,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(4, 0, 4, 110),
         children: [
-          _SentArchiveExpandableCard(
-            title: l10n.archiveDailyTitle,
-            value: _selectedDateLabel(context),
-            actionLabel: l10n.archiveSelectDateAction,
-            open: _dailyOpen,
-            onToggle: () => setState(() => _dailyOpen = !_dailyOpen),
-            child: CalendarDatePicker(
-              initialDate: _selectedDate,
-              firstDate: DateTime(DateTime.now().year - 5),
-              lastDate: DateTime(DateTime.now().year + 1, 12, 31),
-              currentDate: DateTime.now(),
-              onDisplayedMonthChanged: (value) async {
-                final nextMonth = DateTime(value.year, value.month, 1);
-                if (nextMonth == _displayMonth) return;
-                setState(() => _displayMonth = nextMonth);
-                await _loadDaily();
-              },
-              onDateChanged: (value) {
-                final date = DateUtils.dateOnly(value);
-                setState(() => _selectedDate = date);
-                _openList(period: WerkaArchivePeriod.daily, from: date, to: date);
-              },
+          if (openSections.isEmpty)
+            _SentArchiveCollapsedGroup(sections: sections)
+          else ...[
+            _SentArchiveExpandableCard(
+              title: openSections.first.title,
+              value: openSections.first.value,
+              actionLabel: openSections.first.actionLabel,
+              open: true,
+              onToggle: openSections.first.onToggle,
+              child: openSections.first.child,
             ),
-          ),
-          const SizedBox(height: 14),
-          _SentArchiveExpandableCard(
-            title: l10n.archiveMonthlyTitle,
-            value: _selectedMonthLabel(context),
-            actionLabel: l10n.archiveSelectMonthAction,
-            open: _monthlyOpen,
-            onToggle: () => setState(() => _monthlyOpen = !_monthlyOpen),
-            child: _buildMonthlyPanel(context),
-          ),
-          const SizedBox(height: 14),
-          _SentArchiveExpandableCard(
-            title: l10n.archiveYearlyTitle,
-            value: _selectedYearLabel(),
-            actionLabel: l10n.archiveSelectDateAction,
-            open: _yearlyOpen,
-            onToggle: () => setState(() => _yearlyOpen = !_yearlyOpen),
-            child: _buildYearlyPanel(context),
-          ),
+            if (closedSections.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              _SentArchiveCollapsedGroup(sections: closedSections),
+            ],
+          ],
         ],
       ),
     );
@@ -543,6 +591,125 @@ class _AnimatedSentCalendarReveal extends StatelessWidget {
             opacity: open ? 1 : 0,
             child: child,
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SentSectionData {
+  const _SentSectionData({
+    required this.period,
+    required this.title,
+    required this.value,
+    required this.actionLabel,
+    required this.open,
+    required this.onToggle,
+    required this.child,
+  });
+
+  final WerkaArchivePeriod period;
+  final String title;
+  final String value;
+  final String actionLabel;
+  final bool open;
+  final VoidCallback onToggle;
+  final Widget child;
+}
+
+class _SentArchiveCollapsedGroup extends StatelessWidget {
+  const _SentArchiveCollapsedGroup({
+    required this.sections,
+  });
+
+  final List<_SentSectionData> sections;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Card.filled(
+      margin: EdgeInsets.zero,
+      color: scheme.surfaceContainerLow,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: Column(
+        children: [
+          for (int index = 0; index < sections.length; index++) ...[
+            _SentArchiveCollapsedRow(
+              title: sections[index].title,
+              value: sections[index].value,
+              onTap: sections[index].onToggle,
+              isFirst: index == 0,
+              isLast: index == sections.length - 1,
+            ),
+            if (index != sections.length - 1)
+              Divider(
+                height: 1,
+                thickness: 1,
+                indent: 18,
+                endIndent: 18,
+                color: theme.dividerColor.withValues(alpha: 0.55),
+              ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _SentArchiveCollapsedRow extends StatelessWidget {
+  const _SentArchiveCollapsedRow({
+    required this.title,
+    required this.value,
+    required this.onTap,
+    required this.isFirst,
+    required this.isLast,
+  });
+
+  final String title;
+  final String value;
+  final VoidCallback onTap;
+  final bool isFirst;
+  final bool isLast;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          18,
+          isFirst ? 18 : 16,
+          18,
+          isLast ? 18 : 16,
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.labelLarge?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    value,
+                    style: theme.textTheme.titleMedium,
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.chevron_right_rounded),
+          ],
         ),
       ),
     );
