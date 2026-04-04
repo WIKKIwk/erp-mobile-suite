@@ -241,14 +241,21 @@ class AppRouter {
       case AppRoutes.werkaArchive:
         return _buildRoute(settings, const WerkaArchiveScreen());
       case AppRoutes.werkaArchivePeriods:
-        final WerkaArchiveKind kind = settings.arguments as WerkaArchiveKind;
+        final WerkaArchiveKind kind = settings.arguments is WerkaArchiveKind
+            ? settings.arguments as WerkaArchiveKind
+            : WerkaArchiveKind.sent;
         return _buildRoute(
           settings,
           WerkaArchivePeriodScreen(kind: kind),
         );
       case AppRoutes.werkaArchiveList:
         final WerkaArchiveListArgs args =
-            settings.arguments as WerkaArchiveListArgs;
+            settings.arguments is WerkaArchiveListArgs
+                ? settings.arguments as WerkaArchiveListArgs
+                : const WerkaArchiveListArgs(
+                    kind: WerkaArchiveKind.sent,
+                    period: WerkaArchivePeriod.daily,
+                  );
         return _buildRoute(
           settings,
           WerkaArchiveListScreen(args: args),
