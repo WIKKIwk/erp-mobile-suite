@@ -4,6 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'theme_controller.dart';
 
 class AppTheme {
+  static const double headerActionSize = 44;
+  static const double headerActionIconSize = 22;
+
   static ThemeData dark([AppThemeVariant variant = AppThemeVariant.earthy]) {
     final colorScheme = switch (variant) {
       AppThemeVariant.classic => _classicDarkScheme(),
@@ -712,6 +715,17 @@ class AppTheme {
 
   static Color primaryButtonForeground(BuildContext context) =>
       Theme.of(context).colorScheme.onPrimary;
+
+  static TextStyle pageTitleStyle(BuildContext context) {
+    final theme = Theme.of(context);
+    return (theme.textTheme.headlineMedium ?? const TextStyle()).copyWith(
+      fontSize: 24,
+      height: 1.16,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.35,
+      color: theme.colorScheme.onSurface,
+    );
+  }
 
   static PageTransitionsTheme _pageTransitionsTheme() {
     const builder = _FadeOnlyPageTransitionsBuilder();

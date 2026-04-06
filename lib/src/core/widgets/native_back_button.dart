@@ -1,4 +1,6 @@
 import '../native_back_button_bridge.dart';
+import '../theme/app_theme.dart';
+import 'shared_header_title.dart';
 import 'package:flutter/material.dart';
 
 bool useNativeBackButton(BuildContext context) {
@@ -25,19 +27,20 @@ class NativeNavigationTitleHeader extends StatelessWidget {
     if (!showFlutterBackButton) {
       return const SizedBox(height: 8);
     }
-    final theme = Theme.of(context);
     return Padding(
       padding: padding,
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          NativeBackButtonSlot(
-            onPressed: () => Navigator.of(context).maybePop(),
+          HeaderLeadingTransition(
+            child: NativeBackButtonSlot(
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              title,
-              style: theme.textTheme.headlineMedium,
+            child: SharedHeaderTitle(
+              title: title,
             ),
           ),
         ],
@@ -50,7 +53,7 @@ class NativeBackButtonSlot extends StatelessWidget {
   const NativeBackButtonSlot({
     super.key,
     required this.onPressed,
-    this.iconSize = 28,
+    this.iconSize = AppTheme.headerActionIconSize,
   });
 
   final VoidCallback onPressed;
@@ -63,10 +66,13 @@ class NativeBackButtonSlot extends StatelessWidget {
     }
 
     return SizedBox(
-      height: 52,
-      width: 52,
+      height: AppTheme.headerActionSize,
+      width: AppTheme.headerActionSize,
       child: IconButton.filledTonal(
         onPressed: onPressed,
+        style: IconButton.styleFrom(
+          padding: EdgeInsets.zero,
+        ),
         icon: Icon(Icons.arrow_back_rounded, size: iconSize),
       ),
     );

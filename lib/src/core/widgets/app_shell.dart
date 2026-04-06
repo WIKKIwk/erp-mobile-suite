@@ -3,6 +3,7 @@ import '../theme/app_theme.dart';
 import '../native_back_button_bridge.dart';
 import '../native_dock_bridge.dart';
 import 'app_loading_indicator.dart';
+import 'shared_header_title.dart';
 import 'package:flutter/material.dart';
 
 class AppShell extends StatelessWidget {
@@ -66,13 +67,19 @@ class AppShell extends StatelessWidget {
         ),
         child: SafeArea(
           bottom: false,
-          child: _buildAnimatedContent(theme, shouldHideLeading, useNativeTitle),
+          child: _buildAnimatedContent(
+            context,
+            theme,
+            shouldHideLeading,
+            useNativeTitle,
+          ),
         ),
       ),
     );
   }
 
   Widget _buildAnimatedContent(
+    BuildContext context,
     ThemeData theme,
     bool shouldHideLeading,
     bool useNativeTitle,
@@ -85,7 +92,9 @@ class AppShell extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (!shouldHideLeading && leading != null) ...[
-                leading!,
+                HeaderLeadingTransition(
+                  child: leading!,
+                ),
                 const SizedBox(width: 14),
               ],
               if (!useNativeTitle)
@@ -93,9 +102,8 @@ class AppShell extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        title,
-                        style: theme.textTheme.headlineMedium,
+                      SharedHeaderTitle(
+                        title: title,
                       ),
                       if (subtitle.trim().isNotEmpty) ...[
                         const SizedBox(height: 6),
@@ -183,8 +191,8 @@ class _AppShellIconActionState extends State<AppShellIconAction> {
           child: AnimatedContainer(
             duration: AppMotion.fast,
             curve: AppMotion.smooth,
-            height: 52,
-            width: 52,
+            height: AppTheme.headerActionSize,
+            width: AppTheme.headerActionSize,
             decoration: BoxDecoration(
               color: scheme.secondaryContainer.withValues(alpha: 0.82),
               shape: BoxShape.circle,
@@ -198,6 +206,7 @@ class _AppShellIconActionState extends State<AppShellIconAction> {
               child: widget.iconWidget ??
                   Icon(
                     widget.icon,
+                    size: AppTheme.headerActionIconSize,
                     color: scheme.onSecondaryContainer,
                   ),
             ),
