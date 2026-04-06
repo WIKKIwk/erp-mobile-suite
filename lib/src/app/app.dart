@@ -8,6 +8,7 @@ import '../core/network/network_requirement_runtime.dart';
 import '../core/notifications/notification_runtime.dart';
 import '../core/security/app_lock_gate.dart';
 import '../core/theme/theme_controller.dart';
+import '../core/widgets/flutter_dock_overlay.dart';
 import 'app_router.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,9 @@ class ErpnextStockMobileApp extends StatelessWidget {
             return Localizations.override(
               context: context,
               locale: LocaleController.instance.locale,
-              child: wrapped,
+              child: FlutterDockOverlayHost(
+                child: wrapped,
+              ),
             );
           },
           theme: AppTheme.light(ThemeController.instance.variant),
