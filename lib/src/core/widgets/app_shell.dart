@@ -124,7 +124,7 @@ class AppShell extends StatelessWidget {
               if (actions != null) ...[
                 const SizedBox(width: 12),
                 Transform.translate(
-                  offset: const Offset(0, -2),
+                  offset: const Offset(0, -10),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
