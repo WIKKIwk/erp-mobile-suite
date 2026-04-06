@@ -33,12 +33,10 @@ class WerkaDock extends StatelessWidget {
               AppSession.instance.profile,
             ) &&
             activeTab != WerkaDockTab.notifications;
-        return SharedDockHero(
-          tag: 'werka',
-          child: ActionDock(
-            compact: compact,
-            tightToEdges: tightToEdges,
-            leading: [
+        return ActionDock(
+          compact: compact,
+          tightToEdges: tightToEdges,
+          leading: [
               DockButton(
                 nativeId: 'werka_home',
                 nativeSymbol: 'house',
@@ -80,8 +78,8 @@ class WerkaDock extends StatelessWidget {
                   );
                 },
               ),
-            ],
-            center: DockButton(
+          ],
+          center: DockButton(
               nativeId: 'werka_create',
               nativeSymbol: 'plus',
               nativeSelectedSymbol: 'plus',
@@ -93,8 +91,8 @@ class WerkaDock extends StatelessWidget {
               onTap: () {
                 Navigator.of(context).pushNamed(AppRoutes.werkaCreateHub);
               },
-            ),
-            trailing: [
+          ),
+          trailing: [
               DockButton(
                 nativeId: 'werka_archive',
                 nativeSymbol: 'archivebox',
@@ -138,8 +136,7 @@ class WerkaDock extends StatelessWidget {
                   );
                 },
               ),
-            ],
-          ),
+          ],
         );
       },
     );
