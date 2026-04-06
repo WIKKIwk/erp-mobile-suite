@@ -135,24 +135,23 @@ class _ArchiveModuleRow extends StatelessWidget {
       child: InkWell(
         customBorder: shape,
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-          child: Row(
-            children: [
-              Icon(icon, size: 24),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  title,
-                  style: theme.textTheme.titleMedium,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 84),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 18),
+            child: Row(
+              children: [
+                Icon(icon, size: 28),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: theme.textTheme.titleLarge,
+                  ),
                 ),
-              ),
-              const SizedBox(width: 6),
-              const Icon(
-                Icons.chevron_right_rounded,
-                size: 22,
-              ),
-            ],
+                const Icon(Icons.chevron_right_rounded),
+              ],
+            ),
           ),
         ),
       ),
