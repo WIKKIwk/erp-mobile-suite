@@ -207,17 +207,24 @@ class _WerkaArchiveYearlyCalendarScreenState
                     ],
                   ),
                   const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 10,
-                    runSpacing: 10,
-                    children: [
-                      for (final year in years)
-                        _YearCell(
-                          year: year,
-                          active: _activeYears.contains(year),
-                          onTap: () => _openYear(year),
-                        ),
-                    ],
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      const spacing = 10.0;
+                      final cellWidth = (constraints.maxWidth - (spacing * 2)) / 3;
+                      return Wrap(
+                        spacing: spacing,
+                        runSpacing: spacing,
+                        children: [
+                          for (final year in years)
+                            _YearCell(
+                              width: cellWidth,
+                              year: year,
+                              active: _activeYears.contains(year),
+                              onTap: () => _openYear(year),
+                            ),
+                        ],
+                      );
+                    },
                   ),
                   if (_activeYears.isEmpty) ...[
                     const SizedBox(height: 14),
@@ -240,11 +247,13 @@ class _WerkaArchiveYearlyCalendarScreenState
 
 class _YearCell extends StatelessWidget {
   const _YearCell({
+    required this.width,
     required this.year,
     required this.active,
     required this.onTap,
   });
 
+  final double width;
   final int year;
   final bool active;
   final VoidCallback onTap;
@@ -254,7 +263,7 @@ class _YearCell extends StatelessWidget {
     final scheme = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
     return SizedBox(
-      width: 100,
+      width: width,
       child: Material(
         color: active
             ? scheme.primaryContainer
