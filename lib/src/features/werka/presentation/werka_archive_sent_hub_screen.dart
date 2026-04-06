@@ -1,6 +1,7 @@
 import '../../../app/app_router.dart';
 import '../../../core/api/mobile_api.dart';
 import '../../../core/localization/app_localizations.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_loading_indicator.dart';
 import '../../../core/widgets/app_retry_state.dart';
 import '../../../core/widgets/app_shell.dart';
@@ -536,7 +537,9 @@ class _SentArchiveExpandableCard extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               value,
-                              style: theme.textTheme.headlineSmall,
+                              style: AppTheme.archiveSelectionValueStyle(
+                                context,
+                              ),
                             ),
                           ],
                         ),

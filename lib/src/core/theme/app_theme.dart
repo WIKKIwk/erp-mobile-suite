@@ -727,6 +727,17 @@ class AppTheme {
     );
   }
 
+  static TextStyle archiveSelectionValueStyle(BuildContext context) {
+    final theme = Theme.of(context);
+    return (theme.textTheme.titleLarge ?? const TextStyle()).copyWith(
+      fontSize: 18,
+      height: 1.2,
+      fontWeight: FontWeight.w500,
+      letterSpacing: -0.2,
+      color: theme.colorScheme.onSurface,
+    );
+  }
+
   static PageTransitionsTheme _pageTransitionsTheme() {
     const builder = _FadeOnlyPageTransitionsBuilder();
     return const PageTransitionsTheme(
