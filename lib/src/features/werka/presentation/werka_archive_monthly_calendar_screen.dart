@@ -188,7 +188,10 @@ class _WerkaArchiveMonthlyCalendarScreenState
                           setState(() => _displayYear--);
                           _loadYear();
                         },
-                        icon: const Icon(Icons.chevron_left_rounded),
+                        icon: Icon(
+                          Icons.chevron_left_rounded,
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                       Expanded(
                         child: Text(
@@ -202,7 +205,10 @@ class _WerkaArchiveMonthlyCalendarScreenState
                           setState(() => _displayYear++);
                           _loadYear();
                         },
-                        icon: const Icon(Icons.chevron_right_rounded),
+                        icon: Icon(
+                          Icons.chevron_right_rounded,
+                          color: scheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   ),

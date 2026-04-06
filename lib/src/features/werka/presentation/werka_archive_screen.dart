@@ -127,6 +127,7 @@ class _ArchiveModuleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final shape = RoundedRectangleBorder(
       borderRadius: BorderRadius.only(
         topLeft: Radius.circular(isFirst ? 28 : 0),
@@ -151,7 +152,11 @@ class _ArchiveModuleRow extends StatelessWidget {
                   SizedBox(
                     width: 24,
                     child: Center(
-                      child: Icon(icon, size: 22),
+                      child: Icon(
+                        icon,
+                        size: 22,
+                        color: scheme.onSurfaceVariant,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -162,9 +167,10 @@ class _ArchiveModuleRow extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 6),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
                     size: 22,
+                    color: scheme.onSurfaceVariant,
                   ),
                 ],
               ),

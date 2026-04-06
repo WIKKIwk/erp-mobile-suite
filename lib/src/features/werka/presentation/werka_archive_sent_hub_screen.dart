@@ -333,18 +333,22 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
 
   Widget _buildMonthlyPanel(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final localizations = MaterialLocalizations.of(context);
     return Column(
       children: [
-        Row(
-          children: [
-            IconButton(
-              onPressed: () async {
-                setState(() => _displayYear--);
-                await _loadMonthly();
-              },
-              icon: const Icon(Icons.chevron_left_rounded),
-            ),
+                  Row(
+                    children: [
+                      IconButton(
+                        onPressed: () async {
+                          setState(() => _displayYear--);
+                          await _loadMonthly();
+                        },
+                        icon: Icon(
+                          Icons.chevron_left_rounded,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
             Expanded(
               child: Text(
                 '$_displayYear',
@@ -352,13 +356,16 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
                 style: theme.textTheme.titleLarge,
               ),
             ),
-            IconButton(
-              onPressed: () async {
-                setState(() => _displayYear++);
-                await _loadMonthly();
-              },
-              icon: const Icon(Icons.chevron_right_rounded),
-            ),
+                      IconButton(
+                        onPressed: () async {
+                          setState(() => _displayYear++);
+                          await _loadMonthly();
+                        },
+                        icon: Icon(
+                          Icons.chevron_right_rounded,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                      ),
           ],
         ),
         const SizedBox(height: 12),
@@ -391,6 +398,7 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
 
   Widget _buildYearlyPanel(BuildContext context) {
     final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final years = [for (int year = _startYear; year <= _startYear + 11; year++) year];
     return Column(
       children: [
@@ -401,7 +409,10 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
                 setState(() => _startYear -= 12);
                 await _loadYearly();
               },
-              icon: const Icon(Icons.chevron_left_rounded),
+              icon: Icon(
+                Icons.chevron_left_rounded,
+                color: scheme.onSurfaceVariant,
+              ),
             ),
             Expanded(
               child: Text(
@@ -415,7 +426,10 @@ class _WerkaArchiveSentHubScreenState extends State<WerkaArchiveSentHubScreen> {
                 setState(() => _startYear += 12);
                 await _loadYearly();
               },
-              icon: const Icon(Icons.chevron_right_rounded),
+              icon: Icon(
+                Icons.chevron_right_rounded,
+                color: scheme.onSurfaceVariant,
+              ),
             ),
           ],
         ),
