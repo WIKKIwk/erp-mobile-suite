@@ -237,31 +237,37 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                             onTap: () => _pickTheme(context, currentVariant),
                           ),
                         ),
-                        const SizedBox(height: 34),
+                        const SizedBox(height: 46),
                         SmoothAppear(
                           delay: const Duration(milliseconds: 190),
                           offset: const Offset(0, 10),
                           child: Align(
                             alignment: Alignment.centerRight,
-                            child: FilledButton(
-                              onPressed: widget.onGetStarted,
-                              style: FilledButton.styleFrom(
-                                minimumSize: const Size(0, 54),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 28,
-                                  vertical: 15,
+                            child: AnimatedSize(
+                              duration: const Duration(milliseconds: 260),
+                              curve: Curves.easeOutCubic,
+                              alignment: Alignment.centerRight,
+                              child: FilledButton(
+                                onPressed: widget.onGetStarted,
+                                style: FilledButton.styleFrom(
+                                  minimumSize: const Size(0, 54),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 28,
+                                    vertical: 15,
+                                  ),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  visualDensity: VisualDensity.compact,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(999),
+                                  ),
                                 ),
-                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                visualDensity: VisualDensity.compact,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                              ),
-                              child: _buildAnimatedText(
-                                displayL10n.getStarted,
-                                style: theme.textTheme.labelMedium?.copyWith(
-                                  color: scheme.onPrimary,
-                                  fontWeight: FontWeight.w700,
+                                child: _buildAnimatedText(
+                                  displayL10n.getStarted,
+                                  style: theme.textTheme.labelMedium?.copyWith(
+                                    color: scheme.onPrimary,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                                 ),
                               ),
                             ),
