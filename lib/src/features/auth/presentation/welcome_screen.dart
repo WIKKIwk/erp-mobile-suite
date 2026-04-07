@@ -47,6 +47,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   Timer? _headlineTimer;
   int _headlineIndex = 0;
   String _headlinePhase = 'idle';
+  bool _lockToSelectedLocale = false;
 
   @override
   void initState() {
@@ -62,12 +63,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   }
 
   void _scheduleHeadlineCycle() {
+    if (_lockToSelectedLocale) {
+      _headlineTimer?.cancel();
+      return;
+    }
     _headlineTimer?.cancel();
     _headlineTimer = Timer(const Duration(seconds: 5), _startHeadlineExit);
   }
 
   void _startHeadlineExit() {
-    if (!mounted || _headlinePhase != 'idle') {
+    if (!mounted || _headlinePhase != 'idle' || _lockToSelectedLocale) {
       return;
     }
     setState(() {
@@ -105,7 +110,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       setState(() {
         _headlinePhase = 'idle';
       });
-      _scheduleHeadlineCycle();
+      if (!_lockToSelectedLocale) {
+        _scheduleHeadlineCycle();
+      }
     }
   }
 
@@ -114,7 +121,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final mediaQuery = MediaQuery.of(context);
-    final Locale displayLocale = _headlineLocales[_headlineIndex];
+    final Locale displayLocale = _lockToSelectedLocale
+        ? LocaleController.instance.locale
+        : _headlineLocales[_headlineIndex];
     final AppLocalizations displayL10n = AppLocalizations(displayLocale);
     final double headlineFontSize = 46;
     final double headlineLineHeight = 1.02 * headlineFontSize;
@@ -391,7 +400,24 @@ class _WelcomeScreenState extends State<WelcomeScreen>
     if (picked == null) {
       return;
     }
+    _lockHeadlineToLocale(picked);
     await LocaleController.instance.setLocale(picked);
+  }
+
+  void _lockHeadlineToLocale(Locale locale) {
+    _headlineTimer?.cancel();
+    _headlineController.stop();
+    _headlineController.value = 0;
+    setState(() {
+      _lockToSelectedLocale = true;
+      _headlinePhase = 'idle';
+      _headlineIndex = _headlineLocales.indexWhere(
+        (item) => item.languageCode == locale.languageCode,
+      );
+      if (_headlineIndex < 0) {
+        _headlineIndex = 0;
+      }
+    });
   }
 
   Future<void> _pickTheme(
