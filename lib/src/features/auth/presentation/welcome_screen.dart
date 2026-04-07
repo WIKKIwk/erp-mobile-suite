@@ -123,6 +123,8 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         theme.textTheme.labelMedium?.copyWith(
       color: scheme.onPrimary,
       fontWeight: FontWeight.w700,
+      fontSize: 18,
+      letterSpacing: -0.2,
     );
     final double primaryButtonWidth = _measurePrimaryButtonWidth(
       context,
