@@ -129,16 +129,17 @@ class _WelcomeScreenState extends State<WelcomeScreen>
       builder: (context, _) {
         final currentLocale = LocaleController.instance.locale;
         final currentVariant = ThemeController.instance.variant;
+        final Color authBackgroundColor = scheme.surface;
 
         return Scaffold(
           backgroundColor: widget.useSharedBackground
               ? Colors.transparent
-              : const Color(0xFF000000),
+              : authBackgroundColor,
           body: DecoratedBox(
             decoration: BoxDecoration(
               color: widget.useSharedBackground
                   ? Colors.transparent
-                  : const Color(0xFF000000),
+                  : authBackgroundColor,
             ),
             child: Stack(
               children: [
@@ -148,6 +149,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                       child: AuthAmbientOutlineBackground(
                         outlineColor: scheme.outlineVariant,
                         accentColor: scheme.primary,
+                        backgroundColor: authBackgroundColor,
                       ),
                     ),
                   ),
@@ -480,10 +482,12 @@ class AuthAmbientOutlineBackground extends StatefulWidget {
     super.key,
     required this.outlineColor,
     required this.accentColor,
+    required this.backgroundColor,
   });
 
   final Color outlineColor;
   final Color accentColor;
+  final Color backgroundColor;
 
   @override
   State<AuthAmbientOutlineBackground> createState() =>
@@ -819,6 +823,7 @@ class _AmbientOutlineBackgroundState extends State<AuthAmbientOutlineBackground>
             cookieCenter: _cookie.position,
             outlineColor: widget.outlineColor,
             accentColor: widget.accentColor,
+            backgroundColor: widget.backgroundColor,
           ),
         );
       },
@@ -834,6 +839,7 @@ class _AmbientOutlinePainter extends CustomPainter {
     required this.cookieCenter,
     required this.outlineColor,
     required this.accentColor,
+    required this.backgroundColor,
   });
 
   final double phase;
@@ -842,6 +848,7 @@ class _AmbientOutlinePainter extends CustomPainter {
   final Offset cookieCenter;
   final Color outlineColor;
   final Color accentColor;
+  final Color backgroundColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -861,7 +868,7 @@ class _AmbientOutlinePainter extends CustomPainter {
       ..strokeWidth = 5.2 + (impact * 1.9)
       ..strokeCap = StrokeCap.round
       ..strokeJoin = StrokeJoin.round
-      ..color = const Color(0xFF000000).withValues(alpha: 0.96);
+      ..color = backgroundColor.withValues(alpha: 0.96);
 
     final Path ovalPath = _buildOfficialOvalPath(
       center: ovalCenter,
@@ -945,7 +952,8 @@ class _AmbientOutlinePainter extends CustomPainter {
         oldDelegate.ovalCenter != ovalCenter ||
         oldDelegate.cookieCenter != cookieCenter ||
         oldDelegate.outlineColor != outlineColor ||
-        oldDelegate.accentColor != accentColor;
+        oldDelegate.accentColor != accentColor ||
+        oldDelegate.backgroundColor != backgroundColor;
   }
 }
 

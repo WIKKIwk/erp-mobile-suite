@@ -89,6 +89,7 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
   Widget build(BuildContext context) {
     if (_showWelcome || _showLogin) {
       final scheme = Theme.of(context).colorScheme;
+      final Color authBackgroundColor = scheme.surface;
       final Widget currentScreen = _showWelcome
           ? WelcomeScreen(
               key: const ValueKey<String>('welcome-screen'),
@@ -120,13 +121,14 @@ class _AppEntryScreenState extends State<AppEntryScreen> {
         fit: StackFit.expand,
         children: [
           DecoratedBox(
-            decoration: const BoxDecoration(
-              color: Color(0xFF000000),
+            decoration: BoxDecoration(
+              color: authBackgroundColor,
             ),
             child: IgnorePointer(
               child: AuthAmbientOutlineBackground(
                 outlineColor: scheme.outlineVariant,
                 accentColor: scheme.primary,
+                backgroundColor: authBackgroundColor,
               ),
             ),
           ),
