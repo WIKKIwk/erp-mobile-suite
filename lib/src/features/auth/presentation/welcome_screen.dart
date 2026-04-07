@@ -52,6 +52,16 @@ class _WelcomeScreenState extends State<WelcomeScreen>
   @override
   void initState() {
     super.initState();
+    if (LocaleController.instance.hasExplicitSelection) {
+      _lockToSelectedLocale = true;
+      _headlineIndex = _headlineLocales.indexWhere(
+        (item) =>
+            item.languageCode == LocaleController.instance.locale.languageCode,
+      );
+      if (_headlineIndex < 0) {
+        _headlineIndex = 0;
+      }
+    }
     _scheduleHeadlineCycle();
   }
 
@@ -222,7 +232,9 @@ class _WelcomeScreenState extends State<WelcomeScreen>
                               ),
                             ),
                             value: _buildSoftAnimatedText(
-                              _localeLabel(displayL10n, currentLocale),
+                              LocaleController.instance.hasExplicitSelection
+                                  ? _localeLabel(displayL10n, currentLocale)
+                                  : displayL10n.languageUnselected,
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 fontSize: 16,
                                 color: scheme.onSurface.withValues(alpha: 0.72),
@@ -377,19 +389,22 @@ class _WelcomeScreenState extends State<WelcomeScreen>
             children: [
               _SelectionOption(
                 title: l10n.uzbek,
-                active: currentLocale.languageCode == 'uz',
+                active: LocaleController.instance.hasExplicitSelection &&
+                    currentLocale.languageCode == 'uz',
                 onTap: () => Navigator.of(context).pop(const Locale('uz')),
               ),
               const SizedBox(height: 10),
               _SelectionOption(
                 title: l10n.english,
-                active: currentLocale.languageCode == 'en',
+                active: LocaleController.instance.hasExplicitSelection &&
+                    currentLocale.languageCode == 'en',
                 onTap: () => Navigator.of(context).pop(const Locale('en')),
               ),
               const SizedBox(height: 10),
               _SelectionOption(
                 title: l10n.russian,
-                active: currentLocale.languageCode == 'ru',
+                active: LocaleController.instance.hasExplicitSelection &&
+                    currentLocale.languageCode == 'ru',
                 onTap: () => Navigator.of(context).pop(const Locale('ru')),
               ),
             ],

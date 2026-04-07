@@ -101,6 +101,8 @@ class AppLocalizations {
         'Выключено',
       );
   String get languageTitle => _t('Til', 'Language', 'Язык');
+  String get languageUnselected =>
+      _t('Tanlanmagan', 'Unselected', 'Не выбрано');
   String get languageBody => _t('Ilova tilini tanlang',
       'Choose the app language', 'Выберите язык приложения');
   String get themeTitle => _t('Tema', 'Theme', 'Тема');
