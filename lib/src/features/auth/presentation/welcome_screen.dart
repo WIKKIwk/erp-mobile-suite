@@ -306,6 +306,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         return _SelectionSheet(
           title: l10n.languageTitle,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _SelectionOption(
                 title: l10n.uzbek,
@@ -349,6 +350,7 @@ class _WelcomeScreenState extends State<WelcomeScreen>
         return _SelectionSheet(
           title: l10n.themeTitle,
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               _SelectionOption(
                 title: l10n.themeClassicLabel,
