@@ -35,6 +35,8 @@ class _LoginScreenState extends State<LoginScreen> {
   String? errorText;
   bool loading = false;
   double _backSwipeOffset = 0;
+  int? _backSwipePointer;
+  Offset? _backSwipeStartGlobal;
   bool _trackingBackSwipe = false;
   bool _backSwipeTriggered = false;
 
@@ -56,21 +58,36 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() {});
   }
 
-  void _handleBackSwipeStart(DragStartDetails details) {
+  void _handleBackSwipePointerDown(PointerDownEvent event) {
     if (widget.onBack == null) {
       return;
     }
-    _trackingBackSwipe = true;
+    _backSwipePointer ??= event.pointer;
+    _backSwipeStartGlobal ??= event.position;
+    _trackingBackSwipe = false;
     _backSwipeTriggered = false;
   }
 
-  void _handleBackSwipeUpdate(DragUpdateDetails details) {
-    if (!_trackingBackSwipe || widget.onBack == null) {
+  void _handleBackSwipePointerMove(PointerMoveEvent event) {
+    if (widget.onBack == null || _backSwipePointer != event.pointer) {
       return;
     }
 
-    final double nextOffset =
-        (_backSwipeOffset + (details.primaryDelta ?? 0)).clamp(0.0, 180.0);
+    final Offset start = _backSwipeStartGlobal ?? event.position;
+    final Offset delta = event.position - start;
+
+    if (!_trackingBackSwipe) {
+      if (delta.dx <= 10) {
+        return;
+      }
+      if (delta.dx > (delta.dy.abs() * 1.15)) {
+        _trackingBackSwipe = true;
+      } else {
+        return;
+      }
+    }
+
+    final double nextOffset = delta.dx.clamp(0.0, 220.0);
     if (nextOffset != _backSwipeOffset) {
       setState(() {
         _backSwipeOffset = nextOffset;
@@ -83,17 +100,20 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _handleBackSwipeEnd([DragEndDetails? details]) {
-    if (!_trackingBackSwipe) {
+  void _handleBackSwipePointerEnd([int? pointer]) {
+    if (pointer != null && _backSwipePointer != pointer) {
       return;
     }
+    _backSwipePointer = null;
+    _backSwipeStartGlobal = null;
+    final bool shouldResetOffset = !_backSwipeTriggered;
     _trackingBackSwipe = false;
-    if (_backSwipeTriggered) {
-      return;
+    _backSwipeTriggered = false;
+    if (shouldResetOffset) {
+      setState(() {
+        _backSwipeOffset = 0;
+      });
     }
-    setState(() {
-      _backSwipeOffset = 0;
-    });
   }
 
   @override
@@ -292,12 +312,13 @@ class _LoginScreenState extends State<LoginScreen> {
         return Theme(
           key: ValueKey<String>('login-${ThemeController.instance.variant}'),
           data: darkTheme,
-          child: GestureDetector(
+          child: Listener(
             behavior: HitTestBehavior.translucent,
-            onHorizontalDragStart: _handleBackSwipeStart,
-            onHorizontalDragUpdate: _handleBackSwipeUpdate,
-            onHorizontalDragCancel: _handleBackSwipeEnd,
-            onHorizontalDragEnd: _handleBackSwipeEnd,
+            onPointerDown: _handleBackSwipePointerDown,
+            onPointerMove: _handleBackSwipePointerMove,
+            onPointerUp: (event) => _handleBackSwipePointerEnd(event.pointer),
+            onPointerCancel: (event) =>
+                _handleBackSwipePointerEnd(event.pointer),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 220),
               curve: Curves.easeOutCubic,
