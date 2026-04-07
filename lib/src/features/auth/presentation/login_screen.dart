@@ -60,10 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
     if (widget.onBack == null) {
       return;
     }
-    final double activationZone = (MediaQuery.of(context).size.width * 0.28)
-        .clamp(72.0, 132.0)
-        .toDouble();
-    _trackingBackSwipe = details.globalPosition.dx <= activationZone;
+    _trackingBackSwipe = true;
     _backSwipeTriggered = false;
   }
 
