@@ -299,7 +299,7 @@ class _CyclingWelcomeHeadlineState extends State<_CyclingWelcomeHeadline>
     ..addStatusListener(_handleAnimationStatus);
   Timer? _timer;
   int _index = 0;
-  _HeadlineMotionPhase _phase = _HeadlineMotionPhase.idle;
+  String _phase = 'idle';
 
   @override
   void initState() {
@@ -313,11 +313,11 @@ class _CyclingWelcomeHeadlineState extends State<_CyclingWelcomeHeadline>
   }
 
   void _startExit() {
-    if (!mounted || _phase != _HeadlineMotionPhase.idle) {
+    if (!mounted || _phase != 'idle') {
       return;
     }
     setState(() {
-      _phase = _HeadlineMotionPhase.exiting;
+      _phase = 'exiting';
     });
     _controller.duration = const Duration(milliseconds: 300);
     _controller.forward(from: 0);
@@ -328,13 +328,13 @@ class _CyclingWelcomeHeadlineState extends State<_CyclingWelcomeHeadline>
       return;
     }
 
-    if (_phase == _HeadlineMotionPhase.exiting) {
+    if (_phase == 'exiting') {
       setState(() {
         _index = (_index + 1) % _headlineLocales.length;
-        _phase = _HeadlineMotionPhase.entering;
+        _phase = 'entering';
       });
       Future<void>.delayed(const Duration(milliseconds: 70), () {
-        if (!mounted || _phase != _HeadlineMotionPhase.entering) {
+        if (!mounted || _phase != 'entering') {
           return;
         }
         _controller.duration = const Duration(milliseconds: 420);
@@ -343,9 +343,9 @@ class _CyclingWelcomeHeadlineState extends State<_CyclingWelcomeHeadline>
       return;
     }
 
-    if (_phase == _HeadlineMotionPhase.entering) {
+    if (_phase == 'entering') {
       setState(() {
-        _phase = _HeadlineMotionPhase.idle;
+        _phase = 'idle';
       });
       _scheduleNextCycle();
     }
@@ -377,7 +377,7 @@ class _CyclingWelcomeHeadlineState extends State<_CyclingWelcomeHeadline>
             child: Text(
               headline,
               key: ValueKey<String>(
-                '${locale.languageCode}-${_headlinePhaseKey(_phase)}',
+                '${locale.languageCode}-$_phase',
               ),
               maxLines: 3,
               softWrap: true,
@@ -397,16 +397,16 @@ class _HeadlineMotionText extends StatelessWidget {
     required this.child,
   });
 
-  final _HeadlineMotionPhase phase;
+  final String phase;
   final double progress;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final double t = Curves.easeOutCubic.transform(progress);
-    final bool isExiting = phase == _HeadlineMotionPhase.exiting;
-    final bool isEntering = phase == _HeadlineMotionPhase.entering;
-    final double opacity = phase == _HeadlineMotionPhase.idle
+    final bool isExiting = phase == 'exiting';
+    final bool isEntering = phase == 'entering';
+    final double opacity = phase == 'idle'
         ? 1
         : isExiting
             ? 1 - t
@@ -416,7 +416,7 @@ class _HeadlineMotionText extends StatelessWidget {
         : isEntering
             ? -24 * (1 - t)
             : 0;
-    final double sigma = phase == _HeadlineMotionPhase.idle
+    final double sigma = phase == 'idle'
         ? 0.01
         : isExiting
             ? 2.8 * t
@@ -435,23 +435,6 @@ class _HeadlineMotionText extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-enum _HeadlineMotionPhase {
-  idle,
-  exiting,
-  entering,
-}
-
-String _headlinePhaseKey(_HeadlineMotionPhase phase) {
-  switch (phase) {
-    case _HeadlineMotionPhase.idle:
-      return 'idle';
-    case _HeadlineMotionPhase.exiting:
-      return 'exiting';
-    case _HeadlineMotionPhase.entering:
-      return 'entering';
   }
 }
 
