@@ -50,6 +50,16 @@ jobs:
         run: |
           printf '%s' "${ANDROID_GOOGLE_SERVICES_JSON}" > android/app/google-services.json
 
+      - name: Validate Gemini AI secret
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: |
+          if [ -z "${GEMINI_API_KEY}" ]; then
+            echo "Missing secret: GEMINI_API_KEY" >&2
+            echo "Add your Gemini API key as a repository secret so Werka AI image search works in built apps." >&2
+            exit 1
+          fi
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
@@ -66,8 +76,17 @@ jobs:
         run: flutter pub get
 
       - name: Build APK
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_VISION_MODEL: ${{ vars.GEMINI_VISION_MODEL }}
         run: |
-          flutter build apk --release --dart-define=MOBILE_API_BASE_URL="${MOBILE_API_BASE_URL}"
+          if [ -z "${GEMINI_VISION_MODEL}" ]; then
+            GEMINI_VISION_MODEL="gemini-flash-lite-latest"
+          fi
+          flutter build apk --release \
+            --dart-define=MOBILE_API_BASE_URL="${MOBILE_API_BASE_URL}" \
+            --dart-define=GEMINI_API_KEY="${GEMINI_API_KEY}" \
+            --dart-define=GEMINI_VISION_MODEL="${GEMINI_VISION_MODEL}"
           cp build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/accord.apk
 
       - name: Upload APK artifact
